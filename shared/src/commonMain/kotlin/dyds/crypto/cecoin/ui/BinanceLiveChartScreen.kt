@@ -11,7 +11,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -19,10 +18,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import dyds.crypto.cecoin.binance.createBinanceStreamClient
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -30,23 +27,14 @@ import kotlinx.coroutines.isActive
 @Composable
 fun BinanceLiveChartScreen(
     modifier: Modifier = Modifier,
+    client: dyds.crypto.cecoin.binance.BinanceStreamClient? = null,
 ) {
-    val inspectionMode = LocalInspectionMode.current
-
     var symbol by remember { mutableStateOf("BTCUSDT") }
     var running by remember { mutableStateOf(true) }
     var status by remember { mutableStateOf("Idle") }
 
     val prices = remember { mutableStateListOf<Double>() }
     val maxPoints = 200
-
-    val client = remember(inspectionMode) {
-        if (inspectionMode) null else createBinanceStreamClient()
-    }
-
-    DisposableEffect(client) {
-        onDispose { client?.close() }
-    }
 
     LaunchedEffect(running, symbol, client) {
         if (client == null) {

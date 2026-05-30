@@ -11,13 +11,14 @@ import dyds.crypto.cecoin.ui.BinanceLiveChartScreen
 
 @Composable
 @Preview
-fun App() {
+fun App(client: dyds.crypto.cecoin.binance.BinanceStreamClient? = null) {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             BinanceLiveChartScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .safeContentPadding(),
+                client = client,
             )
         }
     }
