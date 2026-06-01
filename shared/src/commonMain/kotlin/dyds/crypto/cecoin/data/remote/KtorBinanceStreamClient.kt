@@ -1,4 +1,4 @@
-package dyds.crypto.cecoin.binance
+package dyds.crypto.cecoin.data.remote
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.webSocket
@@ -40,3 +40,4 @@ class KtorBinanceStreamClient(
         http.close()
     }
 }
+
