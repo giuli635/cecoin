@@ -1,6 +1,7 @@
 package dyds.crypto.cecoin.data.remote
 
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
@@ -10,16 +11,17 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-class KtorBinanceStreamClient(
-    private val http: HttpClient,
-    private val baseUrl: String = "wss://stream.binance.com:9443",
-) : BinanceStreamClient {
+private const val BASE_URL = "wss://stream.binance.com:9443"
 
+class BinanceCoinPriceSource: CoinPriceSource {
+    private val http = HttpClient {
+        install(WebSockets)
+    }
     private val json = Json { ignoreUnknownKeys = true }
 
     override fun tradePrices(symbol: String): Flow<Double> = flow {
         val stream = "${symbol.trim().lowercase()}@trade"
-        val url = "$baseUrl/ws/$stream"
+        val url = "$BASE_URL/ws/$stream"
 
         http.webSocket(urlString = url) {
             for (frame in incoming) {

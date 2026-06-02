@@ -12,7 +12,6 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutinesSwing)
 
-    implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.websockets)
 
     implementation(libs.compose.uiToolingPreview)

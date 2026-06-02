@@ -3,7 +3,7 @@ package dyds.crypto.cecoin.domain.repository
 import dyds.crypto.cecoin.domain.model.TradePrice
 import kotlinx.coroutines.flow.Flow
 
-interface TradePriceRepository {
+interface CecoinRepository {
     fun observeTradePrices(symbol: String): Flow<TradePrice>
 }
 

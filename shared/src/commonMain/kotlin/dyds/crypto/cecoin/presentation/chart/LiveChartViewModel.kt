@@ -1,0 +1,65 @@
+package dyds.crypto.cecoin.presentation.chart
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
+import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.Fallible
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.flow.runningReduce
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
+
+class LiveChartViewModel(
+    private val observeTradePricesUseCase: ObserveTradePricesUseCase,
+    val symbol: String,
+    private val maxPoints: Int = 200,
+    private val retryDelayMillis: Long = 1_000L,
+) : ViewModel() {
+    private val _uiState = MutableSharedFlow<ChartState>(replay = 1)
+    val uiState: Flow<ChartState> = _uiState.asSharedFlow()
+
+    private var priceJob: Job? = null
+
+    fun loadPrices() {
+        priceJob?.cancel()
+        priceJob = viewModelScope.launch {
+            observeTradePricesUseCase(symbol)
+                .retryWhen { cause, _ ->
+                    if (cause is CancellationException) return@retryWhen false
+
+                    _uiState.emit(
+                        Fallible.Failed(
+                            AppError.GenericError(cause, "Error observing trade prices")
+                        )
+                    )
+
+                    delay(retryDelayMillis.milliseconds)
+                    true
+                }
+                .scan(emptyList<Double>()) { prices, tradePrice ->
+                    (prices + tradePrice.price).takeLast(maxPoints)
+                }
+                .drop(1)
+                .collect { prices ->
+                    _uiState.emit(
+                        Fallible.Success(
+                            PricePoints(prices)
+                        )
+                    )
+                }
+        }
+    }
+}

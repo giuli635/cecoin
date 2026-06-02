@@ -1,4 +1,4 @@
-package dyds.crypto.cecoin.ui
+package dyds.crypto.cecoin.presentation.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import dyds.crypto.cecoin.presentation.CoinSearchViewModel
 
 @Composable
 fun CoinSearchScreen(
