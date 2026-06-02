@@ -6,31 +6,24 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import dyds.crypto.cecoin.presentation.ComposableRenderer
 import dyds.crypto.cecoin.presentation.Renderer
+import dyds.crypto.cecoin.presentation.composableRenderer
 import dyds.crypto.cecoin.utils.Loadable
 
-
-class LoadableComposable<T>(
-    private val inner: Renderer<T>,
-    private val onCancel: () -> Unit
-) : Renderer<Loadable<T>> {
-    @Composable
-    override fun render(value: Loadable<T>, modifier: Modifier) = when (value) {
-        is Loadable.Loading -> { LoadingIndicator(modifier) }
-        is Loadable.Loaded  -> inner.render(value.value, modifier)
-    }
-
-    @Composable
-    private fun LoadingIndicator(modifier: Modifier) {
-        CancellableComposable(
-            inner = ComposableRenderer {
-                Box(
-                    it.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) { CircularProgressIndicator() }
-            },
-            onCancel = onCancel
-        ).render(Unit, modifier)
+@Composable
+fun <T> LoadableComposable(inner: Renderer<T>, onCancel: () -> Unit): Renderer<Loadable<T>> =
+    { value, modifier -> when (value) {
+        is Loadable.Loading -> {
+            CancellableComposable(
+                inner = composableRenderer {
+                    Box(
+                        Modifier,
+                        contentAlignment = Alignment.Center
+                    ) { CircularProgressIndicator() }
+                },
+                onCancel = onCancel
+            )(Unit, modifier.fillMaxSize())
+        }
+        is Loadable.Loaded -> inner(value.value, modifier)
     }
 }

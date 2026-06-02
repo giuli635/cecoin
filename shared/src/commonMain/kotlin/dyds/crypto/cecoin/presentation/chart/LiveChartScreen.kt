@@ -42,16 +42,16 @@ fun ChartScreen(
     OneTimeLoadableComposable(
         inner = LiveChartScreen(viewModel.symbol, onBack, onRetry = viewModel::loadPrices),
         onCancel = onBack
-    ).render(state, modifier)
+    )(state, modifier)
 }
 
-class LiveChartScreen(
-    val symbol: String,
-    val onBack: () -> Unit,
-    val onRetry: () -> Unit = {},
-): Renderer<Flow<ChartState>> {
-    @Composable
-    override fun render(value: Flow<ChartState>, modifier: Modifier) {
+@Composable
+fun LiveChartScreen(
+    symbol: String,
+    onBack: () -> Unit,
+    onRetry: () -> Unit = {},
+): Renderer<Flow<ChartState>> =
+    { value, modifier ->
         val state by value.collectAsState(initial = Fallible.Success(PricePoints()))
 
         Column(
@@ -80,7 +80,6 @@ class LiveChartScreen(
                 inner = PriceChart(),
                 onCancel = onBack,
                 onRetry = onRetry
-            ).render(state, modifier)
+            )(state, modifier)
         }
     }
-}

@@ -12,25 +12,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.presentation.Renderer
 
-class CancellableComposable<T>(
-    val inner: Renderer<T>,
-    val onCancel: () -> Unit
-) : Renderer<T> {
-
-    @Composable
-    override fun render(value: T, modifier: Modifier) {
+@Composable
+fun <T> CancellableComposable(inner: Renderer<T>, onCancel: () -> Unit): Renderer<T> =
+    { value, modifier ->
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            inner.render(value, modifier)
+            inner(value, Modifier)
 
-            Spacer(modifier = modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedButton(onClick = onCancel) {
                 Text(text = "Cancel")
             }
         }
     }
-}

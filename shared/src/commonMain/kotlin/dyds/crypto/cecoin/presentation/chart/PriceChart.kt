@@ -17,10 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.presentation.Renderer
 
-class PriceChart: Renderer<PricePoints> {
-
-    @Composable
-    override fun render(value: PricePoints, modifier: Modifier) {
+@Composable
+fun PriceChart(): Renderer<PricePoints> =
+    { value, modifier ->
         val lineColor: Color = MaterialTheme.colorScheme.primary
         val prices = value.prices
 
@@ -69,4 +68,3 @@ class PriceChart: Renderer<PricePoints> {
             )
         }
     }
-}
