@@ -9,7 +9,8 @@ import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.flow.Flow
 
 class OneTimeLoadableComposable<T>(
-    private val inner: Renderer<T>
+    private val inner: Renderer<T>,
+    private val onCancel: () -> Unit
 ): Renderer<Flow<Loadable<T>>> {
     @Composable
     override fun render(
@@ -18,6 +19,6 @@ class OneTimeLoadableComposable<T>(
     ) {
         val state by value.collectAsState(initial = Loadable.Loading)
 
-        LoadableComposable(inner).render(state, modifier)
+        LoadableComposable(inner, onCancel).render(state, modifier)
     }
 }

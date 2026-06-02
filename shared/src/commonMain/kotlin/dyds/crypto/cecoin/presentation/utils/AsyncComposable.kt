@@ -10,8 +10,8 @@ import dyds.crypto.cecoin.utils.Loadable
 
 typealias AsyncResult<T> = Loadable<Fallible<T>>
 
-class AsyncComposable<T>(inner: Renderer<T>, onRetry: () -> Unit) : Renderer<AsyncResult<T>> {
-    private val composable = LoadableComposable(FallibleComposable(inner, onRetry))
+class AsyncComposable<T>(inner: Renderer<T>, onCancel: () -> Unit, onRetry: () -> Unit) : Renderer<AsyncResult<T>> {
+    private val composable = LoadableComposable(FallibleComposable(inner, onCancel, onRetry), onCancel)
 
     @Composable
     override fun render(value: AsyncResult<T>, modifier: Modifier) {

@@ -40,7 +40,8 @@ fun ChartScreen(
     }
 
     OneTimeLoadableComposable(
-        inner = LiveChartScreen(viewModel.symbol, onBack, onRetry = viewModel::loadPrices)
+        inner = LiveChartScreen(viewModel.symbol, onBack, onRetry = viewModel::loadPrices),
+        onCancel = onBack
     ).render(state, modifier)
 }
 
@@ -77,6 +78,7 @@ class LiveChartScreen(
 
             FallibleComposable(
                 inner = PriceChart(),
+                onCancel = onBack,
                 onRetry = onRetry
             ).render(state, modifier)
         }
