@@ -11,7 +11,11 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-private const val BASE_URL = "wss://stream.binance.com:9443"
+private val BASE_URLS = listOf(
+    "wss://stream.binance.com:9443",
+    "wss://stream.binance.com:443",
+    "wss://data-stream.binance.vision",
+)
 
 class BinanceCoinPriceSource: CoinPriceSource {
     private val http = HttpClient {
@@ -21,15 +25,25 @@ class BinanceCoinPriceSource: CoinPriceSource {
 
     override fun tradePrices(symbol: String): Flow<Double> = flow {
         val stream = "${symbol.trim().lowercase()}@trade"
-        val url = "$BASE_URL/ws/$stream"
+        var lastError: Throwable? = null
 
-        http.webSocket(urlString = url) {
-            for (frame in incoming) {
-                val text = (frame as? Frame.Text)?.readText() ?: continue
-                val price = parseTradePrice(text) ?: continue
-                emit(price)
+        for (baseUrl in BASE_URLS) {
+            val url = "$baseUrl/ws/$stream"
+            try {
+                http.webSocket(urlString = url) {
+                    for (frame in incoming) {
+                        val text = (frame as? Frame.Text)?.readText() ?: continue
+                        val price = parseTradePrice(text) ?: continue
+                        emit(price)
+                    }
+                }
+                return@flow
+            } catch (throwable: Throwable) {
+                lastError = throwable
             }
         }
+
+        throw lastError ?: IllegalStateException("No se pudo abrir el WebSocket de Binance")
     }
 
     private fun parseTradePrice(message: String): Double? =
@@ -42,4 +56,3 @@ class BinanceCoinPriceSource: CoinPriceSource {
         http.close()
     }
 }
-
