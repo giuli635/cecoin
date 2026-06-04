@@ -5,8 +5,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dyds.crypto.cecoin.data.remote.binance.BinanceCoinListDataSource
 import dyds.crypto.cecoin.data.remote.binance.BinanceCoinPriceSource
 import dyds.crypto.cecoin.data.remote.binance.BinanceOrderBookSource
+import dyds.crypto.cecoin.data.remote.binance.proxy.BinanceCoinListDataSourceProxy
 import dyds.crypto.cecoin.data.remote.binance.proxy.BinanceOrderBookSourceProxy
 import dyds.crypto.cecoin.data.remote.binance.proxy.BinancePriceSourceProxy
+import dyds.crypto.cecoin.data.remote.broker.CoinListDataSourceBroker
 import dyds.crypto.cecoin.data.remote.broker.CoinOrderBookSourceBroker
 import dyds.crypto.cecoin.data.remote.broker.CoinPriceSourceBroker
 import dyds.crypto.cecoin.data.remote.coincap.CoinCapOrderBookSource
@@ -28,13 +30,15 @@ object CecoinDependencyInjector {
 
     private val binancePriceProxy = BinancePriceSourceProxy(binancePriceSource)
     private val binanceOrderBookProxy = BinanceOrderBookSourceProxy(binanceOrderBookSource)
+    private val binanceCoinListProxy = BinanceCoinListDataSourceProxy(binanceCoinListDataSource)
     private val coinCapPriceProxy = CoinCapPriceSourceProxy(coinCapPriceSource)
     private val coinCapOrderBookProxy = CoinCapOrderBookSourceProxy(coinCapOrderBookSource)
 
     private val priceBroker = CoinPriceSourceBroker(binancePriceProxy, coinCapPriceProxy)
     private val orderBookBroker = CoinOrderBookSourceBroker(binanceOrderBookProxy, coinCapOrderBookProxy)
+    private val coinListBroker = CoinListDataSourceBroker(binanceCoinListProxy)
 
-    private val repository = CryptoRepositoryImpl(priceBroker, orderBookBroker, binanceCoinListDataSource)
+    private val repository = CryptoRepositoryImpl(priceBroker, orderBookBroker, coinListBroker)
     private val observeTradePricesUseCase = ObserveTradePricesUseCase(repository)
     private val getAvailableSymbolsUseCase = GetAvailableSymbolsUseCase(repository)
 

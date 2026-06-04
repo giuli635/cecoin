@@ -19,6 +19,7 @@ class CryptoRepositoryImpl(
 
     override suspend fun getAvailableSymbols(): List<CryptoSymbol> =
         coinListDataSource.fetchSymbols()
+            ?: throw IllegalStateException("No se pudo obtener la lista de monedas")
 
     override fun observeTradePrices(symbol: String): Flow<TradePrice> =
         coinPriceSource.tradePrices(symbol.normalizeSymbol())
