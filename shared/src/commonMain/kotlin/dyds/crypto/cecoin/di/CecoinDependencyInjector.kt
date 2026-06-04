@@ -2,18 +2,39 @@ package dyds.crypto.cecoin.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dyds.crypto.cecoin.data.remote.BinanceCoinPriceSource
 import dyds.crypto.cecoin.data.remote.BinanceCoinListDataSource
-import dyds.crypto.cecoin.data.repository.CecoinRepositoryImpl
-import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
+import dyds.crypto.cecoin.data.remote.BinanceCoinPriceSource
+import dyds.crypto.cecoin.data.remote.binance.BinanceOrderBookSource
+import dyds.crypto.cecoin.data.remote.binance.proxy.BinanceOrderBookSourceProxy
+import dyds.crypto.cecoin.data.remote.binance.proxy.BinancePriceSourceProxy
+import dyds.crypto.cecoin.data.remote.broker.CoinOrderBookSourceBroker
+import dyds.crypto.cecoin.data.remote.broker.CoinPriceSourceBroker
+import dyds.crypto.cecoin.data.remote.coincap.CoinCapOrderBookSource
+import dyds.crypto.cecoin.data.remote.coincap.CoinCapPriceSource
+import dyds.crypto.cecoin.data.remote.coincap.proxy.CoinCapOrderBookSourceProxy
+import dyds.crypto.cecoin.data.remote.coincap.proxy.CoinCapPriceSourceProxy
+import dyds.crypto.cecoin.data.repository.CryptoRepositoryImpl
 import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
+import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.presentation.chart.LiveChartViewModel
 import dyds.crypto.cecoin.presentation.search.CoinSearchViewModel
 
 object CecoinDependencyInjector {
-    private val binanceClient = BinanceCoinPriceSource()
+    private val binancePriceSource = BinanceCoinPriceSource()
+    private val binanceOrderBookSource = BinanceOrderBookSource()
+    private val coinCapPriceSource = CoinCapPriceSource()
+    private val coinCapOrderBookSource = CoinCapOrderBookSource()
     private val binanceCoinListDataSource = BinanceCoinListDataSource()
-    private val repository = CecoinRepositoryImpl(binanceClient, binanceCoinListDataSource)
+
+    private val binancePriceProxy = BinancePriceSourceProxy(binancePriceSource)
+    private val binanceOrderBookProxy = BinanceOrderBookSourceProxy(binanceOrderBookSource)
+    private val coinCapPriceProxy = CoinCapPriceSourceProxy(coinCapPriceSource)
+    private val coinCapOrderBookProxy = CoinCapOrderBookSourceProxy(coinCapOrderBookSource)
+
+    private val priceBroker = CoinPriceSourceBroker(binancePriceProxy, coinCapPriceProxy)
+    private val orderBookBroker = CoinOrderBookSourceBroker(binanceOrderBookProxy, coinCapOrderBookProxy)
+
+    private val repository = CryptoRepositoryImpl(priceBroker, orderBookBroker, binanceCoinListDataSource)
     private val observeTradePricesUseCase = ObserveTradePricesUseCase(repository)
     private val getAvailableSymbolsUseCase = GetAvailableSymbolsUseCase(repository)
 
