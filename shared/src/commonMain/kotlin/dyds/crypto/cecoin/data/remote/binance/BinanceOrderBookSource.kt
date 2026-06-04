@@ -10,6 +10,12 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.serialization.json.Json
 
+private val BASE_URLS = listOf(
+    "wss://stream.binance.com:9443",
+    "wss://stream.binance.com:443",
+    "wss://data-stream.binance.vision",
+)
+
 internal class BinanceOrderBookSource : CoinOrderBookSource {
     private val http = HttpClient {
         install(WebSockets)
@@ -18,15 +24,23 @@ internal class BinanceOrderBookSource : CoinOrderBookSource {
 
     override suspend fun fetchOrderBook(symbol: String): OrderBook? {
         val stream = "${symbol.trim().lowercase()}@depth20"
-        var remote: BinanceRemoteOrderBook? = null
-        http.webSocket(urlString = "wss://stream.binance.com:9443/ws/$stream") {
-            for (frame in incoming) {
-                val text = (frame as? Frame.Text)?.readText() ?: continue
-                remote = json.decodeFromString(text)
-                break
+        var lastError: Throwable? = null
+        for (baseUrl in BASE_URLS) {
+            try {
+                var remote: BinanceRemoteOrderBook? = null
+                http.webSocket(urlString = "$baseUrl/ws/$stream") {
+                    for (frame in incoming) {
+                        val text = (frame as? Frame.Text)?.readText() ?: continue
+                        remote = json.decodeFromString(text)
+                        break
+                    }
+                }
+                return remote?.toDomain()
+            } catch (throwable: Throwable) {
+                lastError = throwable
             }
         }
-        return remote?.toDomain()
+        return null
     }
 
     private fun BinanceRemoteOrderBook.toDomain() = OrderBook(
