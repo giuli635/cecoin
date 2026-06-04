@@ -1,5 +1,6 @@
-package dyds.crypto.cecoin.data.remote
+package dyds.crypto.cecoin.data.remote.binance
 
+import dyds.crypto.cecoin.data.remote.CoinListDataSource
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -37,7 +38,6 @@ class BinanceCoinListDataSource : CoinListDataSource {
                     val status = obj["status"]?.jsonPrimitive?.content ?: return@runCatching null
                     val quoteAsset = obj["quoteAsset"]?.jsonPrimitive?.content ?: return@runCatching null
 
-                    // Filter active trading pairs with USDT quote asset
                     if (status == "TRADING" && quoteAsset == QUOTE_ASSET_FILTER) {
                         CryptoSymbol(
                             symbol = obj["symbol"]!!.jsonPrimitive.content,
@@ -53,5 +53,3 @@ class BinanceCoinListDataSource : CoinListDataSource {
         }.getOrElse { emptyList() }
     }
 }
-
-

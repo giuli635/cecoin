@@ -27,15 +27,17 @@ internal class CoinCapOrderBookSource : CoinOrderBookSource {
     private val http = HttpClient()
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun fetchOrderBook(symbol: String): OrderBook {
+    override suspend fun fetchOrderBook(symbol: String): OrderBook? {
         val baseAsset = symbol.trim().uppercase().let { s ->
             s.removeSuffix("USDT").removeSuffix("USD").removeSuffix("BTC")
         }
         val assetId = SYMBOL_TO_ASSET_ID[baseAsset] ?: baseAsset.lowercase()
-        val response = http.get("$API_URL?baseId=$assetId&limit=20")
-        val body = response.bodyAsText()
-        val remote = json.decodeFromString<CoinCapMarketsResponse>(body)
-        return remote.toDomain()
+        return runCatching {
+            val response = http.get("$API_URL?baseId=$assetId&limit=20")
+            val body = response.bodyAsText()
+            val remote = json.decodeFromString<CoinCapMarketsResponse>(body)
+            remote.toDomain()
+        }.getOrNull()
     }
 
     private fun CoinCapMarketsResponse.toDomain(): OrderBook {

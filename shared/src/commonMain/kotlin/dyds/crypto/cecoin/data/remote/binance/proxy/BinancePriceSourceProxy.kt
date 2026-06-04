@@ -1,6 +1,6 @@
 package dyds.crypto.cecoin.data.remote.binance.proxy
 
-import dyds.crypto.cecoin.data.remote.BinanceCoinPriceSource
+import dyds.crypto.cecoin.data.remote.binance.BinanceCoinPriceSource
 import dyds.crypto.cecoin.data.remote.CoinPriceSource
 import kotlinx.coroutines.flow.Flow
 

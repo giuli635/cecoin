@@ -30,6 +30,7 @@ class CryptoRepositoryImpl(
 
     override suspend fun getOrderBook(symbol: String): OrderBook =
         coinOrderBookSource.fetchOrderBook(symbol.normalizeSymbol())
+            ?: throw IllegalStateException("No se pudo obtener el order book de ninguna fuente")
 }
 
 private fun String.normalizeSymbol(): String =

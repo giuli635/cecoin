@@ -13,7 +13,7 @@ internal class CoinOrderBookSourceBroker(
     private val coinCapProxy: CoinCapOrderBookSourceProxy,
 ) : CoinOrderBookSource {
 
-    override suspend fun fetchOrderBook(symbol: String): OrderBook = coroutineScope {
+    override suspend fun fetchOrderBook(symbol: String): OrderBook? = coroutineScope {
         val binanceDeferred = async { binanceProxy.fetchOrderBook(symbol) }
         val coinCapDeferred = async { coinCapProxy.fetchOrderBook(symbol) }
 
@@ -25,7 +25,7 @@ internal class CoinOrderBookSourceBroker(
                 mergeOrderBooks(binanceOrderBook, coinCapOrderBook)
             binanceOrderBook != null -> binanceOrderBook
             coinCapOrderBook != null -> coinCapOrderBook
-            else -> throw IllegalStateException("No se pudo obtener el order book de ninguna fuente")
+            else -> null
         }
     }
 

@@ -2,8 +2,8 @@ package dyds.crypto.cecoin.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dyds.crypto.cecoin.data.remote.BinanceCoinListDataSource
-import dyds.crypto.cecoin.data.remote.BinanceCoinPriceSource
+import dyds.crypto.cecoin.data.remote.binance.BinanceCoinListDataSource
+import dyds.crypto.cecoin.data.remote.binance.BinanceCoinPriceSource
 import dyds.crypto.cecoin.data.remote.binance.BinanceOrderBookSource
 import dyds.crypto.cecoin.data.remote.binance.proxy.BinanceOrderBookSourceProxy
 import dyds.crypto.cecoin.data.remote.binance.proxy.BinancePriceSourceProxy
