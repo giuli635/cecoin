@@ -1,7 +1,8 @@
 package dyds.crypto.cecoin.data.remote
 
 import dyds.crypto.cecoin.domain.model.OrderBook
+import kotlinx.coroutines.flow.Flow
 
 interface CoinOrderBookSource {
-    suspend fun fetchOrderBook(symbol: String): OrderBook?
+    fun observeOrderBook(symbol: String): Flow<OrderBook>
 }

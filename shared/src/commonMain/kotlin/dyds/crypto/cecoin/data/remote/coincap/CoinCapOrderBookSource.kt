@@ -1,12 +1,15 @@
 package dyds.crypto.cecoin.data.remote.coincap
 
-import dyds.crypto.cecoin.data.remote.CoinOrderBookSource
 import dyds.crypto.cecoin.domain.model.OrderBook
 import dyds.crypto.cecoin.domain.model.OrderBookEntry
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
+import kotlin.time.Duration.Companion.seconds
 
 private val SYMBOL_TO_ASSET_ID = mapOf(
     "BTC" to "bitcoin",
@@ -23,21 +26,22 @@ private val SYMBOL_TO_ASSET_ID = mapOf(
 
 private const val API_URL = "https://api.coincap.io/v2/markets"
 
-internal class CoinCapOrderBookSource : CoinOrderBookSource {
+class CoinCapOrderBookSource {
     private val http = HttpClient()
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun fetchOrderBook(symbol: String): OrderBook? {
+    fun observeOrderBook(symbol: String): Flow<OrderBook> = flow {
         val baseAsset = symbol.trim().uppercase().let { s ->
             s.removeSuffix("USDT").removeSuffix("USD").removeSuffix("BTC")
         }
         val assetId = SYMBOL_TO_ASSET_ID[baseAsset] ?: baseAsset.lowercase()
-        return runCatching {
+        while (true) {
             val response = http.get("$API_URL?baseId=$assetId&limit=20")
             val body = response.bodyAsText()
             val remote = json.decodeFromString<CoinCapMarketsResponse>(body)
-            remote.toDomain()
-        }.getOrNull()
+            emit(remote.toDomain())
+            delay(5.seconds)
+        }
     }
 
     private fun CoinCapMarketsResponse.toDomain(): OrderBook {

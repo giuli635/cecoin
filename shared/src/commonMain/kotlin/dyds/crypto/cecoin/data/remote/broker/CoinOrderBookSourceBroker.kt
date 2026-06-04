@@ -5,29 +5,35 @@ import dyds.crypto.cecoin.data.remote.binance.proxy.BinanceOrderBookSourceProxy
 import dyds.crypto.cecoin.data.remote.coincap.proxy.CoinCapOrderBookSourceProxy
 import dyds.crypto.cecoin.domain.model.OrderBook
 import dyds.crypto.cecoin.domain.model.OrderBookEntry
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 internal class CoinOrderBookSourceBroker(
     private val binanceProxy: BinanceOrderBookSourceProxy,
     private val coinCapProxy: CoinCapOrderBookSourceProxy,
 ) : CoinOrderBookSource {
 
-    override suspend fun fetchOrderBook(symbol: String): OrderBook? = coroutineScope {
-        val binanceDeferred = async { binanceProxy.fetchOrderBook(symbol) }
-        val coinCapDeferred = async { coinCapProxy.fetchOrderBook(symbol) }
-
-        val binanceOrderBook = binanceDeferred.await()
-        val coinCapOrderBook = coinCapDeferred.await()
-
+    override fun observeOrderBook(symbol: String): Flow<OrderBook> = combine(
+        binanceProxy.observeOrderBook(symbol)
+            .map<OrderBook, OrderBook?> { it }
+            .onStart { emit(null) }
+            .catch { emit(null) },
+        coinCapProxy.observeOrderBook(symbol)
+            .map<OrderBook, OrderBook?> { it }
+            .onStart { emit(null) }
+            .catch { emit(null) },
+    ) { binance, coinCap ->
         when {
-            binanceOrderBook != null && coinCapOrderBook != null ->
-                mergeOrderBooks(binanceOrderBook, coinCapOrderBook)
-            binanceOrderBook != null -> binanceOrderBook
-            coinCapOrderBook != null -> coinCapOrderBook
+            binance != null && coinCap != null -> mergeOrderBooks(binance, coinCap)
+            binance != null -> binance
+            coinCap != null -> coinCap
             else -> null
         }
-    }
+    }.filterNotNull()
 
     private fun mergeOrderBooks(first: OrderBook, second: OrderBook): OrderBook = OrderBook(
         bids = (first.bids + second.bids)

@@ -24,9 +24,8 @@ class CryptoRepositoryImpl(
     override fun observeTradePrices(symbol: String): Flow<TradePrice> =
         coinPriceSource.tradePrices(symbol.normalizeSymbol())
 
-    override suspend fun getOrderBook(symbol: String): OrderBook =
-        coinOrderBookSource.fetchOrderBook(symbol.normalizeSymbol())
-            ?: throw IllegalStateException("No se pudo obtener el order book de ninguna fuente")
+    override fun observeOrderBook(symbol: String): Flow<OrderBook> =
+        coinOrderBookSource.observeOrderBook(symbol.normalizeSymbol())
 }
 
 private fun String.normalizeSymbol(): String =

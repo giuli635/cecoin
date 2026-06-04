@@ -1,6 +1,5 @@
 package dyds.crypto.cecoin.data.remote.binance
 
-import dyds.crypto.cecoin.data.remote.CoinOrderBookSource
 import dyds.crypto.cecoin.domain.model.OrderBook
 import dyds.crypto.cecoin.domain.model.OrderBookEntry
 import io.ktor.client.HttpClient
@@ -8,6 +7,8 @@ import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
 
 private val BASE_URLS = listOf(
@@ -16,31 +17,31 @@ private val BASE_URLS = listOf(
     "wss://data-stream.binance.vision",
 )
 
-internal class BinanceOrderBookSource : CoinOrderBookSource {
+class BinanceOrderBookSource {
     private val http = HttpClient {
         install(WebSockets)
     }
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun fetchOrderBook(symbol: String): OrderBook? {
+    fun observeOrderBook(symbol: String): Flow<OrderBook> = flow {
         val stream = "${symbol.trim().lowercase()}@depth20"
         var lastError: Throwable? = null
         for (baseUrl in BASE_URLS) {
+            val url = "$baseUrl/ws/$stream"
             try {
-                var remote: BinanceRemoteOrderBook? = null
-                http.webSocket(urlString = "$baseUrl/ws/$stream") {
+                http.webSocket(urlString = url) {
                     for (frame in incoming) {
                         val text = (frame as? Frame.Text)?.readText() ?: continue
-                        remote = json.decodeFromString(text)
-                        break
+                        val remote = json.decodeFromString<BinanceRemoteOrderBook>(text)
+                        emit(remote.toDomain())
                     }
                 }
-                return remote?.toDomain()
+                return@flow
             } catch (throwable: Throwable) {
                 lastError = throwable
             }
         }
-        return null
+        throw lastError ?: IllegalStateException("No se pudo abrir el WebSocket de Binance")
     }
 
     private fun BinanceRemoteOrderBook.toDomain() = OrderBook(
