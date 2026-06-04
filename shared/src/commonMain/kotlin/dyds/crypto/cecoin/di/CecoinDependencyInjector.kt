@@ -5,9 +5,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dyds.crypto.cecoin.data.remote.binance.BinanceCoinListDataSource
 import dyds.crypto.cecoin.data.remote.binance.BinanceCoinPriceSource
 import dyds.crypto.cecoin.data.remote.binance.BinanceOrderBookSource
-import dyds.crypto.cecoin.data.remote.binance.BinancePopularCoinsSource
 import dyds.crypto.cecoin.data.remote.binance.proxy.BinanceCoinListDataSourceProxy
-import dyds.crypto.cecoin.data.remote.binance.proxy.BinancePopularCoinsSourceProxy
 import dyds.crypto.cecoin.data.remote.binance.proxy.BinanceOrderBookSourceProxy
 import dyds.crypto.cecoin.data.remote.binance.proxy.BinancePriceSourceProxy
 import dyds.crypto.cecoin.data.remote.broker.CoinListDataSourceBroker
@@ -29,18 +27,16 @@ object CecoinDependencyInjector {
     private val coinCapPriceSource = CoinCapPriceSource()
     private val coinCapOrderBookSource = CoinCapOrderBookSource()
     private val binanceCoinListDataSource = BinanceCoinListDataSource()
-    private val binancePopularCoinsSource = BinancePopularCoinsSource()
 
     private val binancePriceProxy = BinancePriceSourceProxy(binancePriceSource)
     private val binanceOrderBookProxy = BinanceOrderBookSourceProxy(binanceOrderBookSource)
     private val binanceCoinListProxy = BinanceCoinListDataSourceProxy(binanceCoinListDataSource)
-    private val binancePopularCoinsProxy = BinancePopularCoinsSourceProxy(binancePopularCoinsSource)
     private val coinCapPriceProxy = CoinCapPriceSourceProxy(coinCapPriceSource)
     private val coinCapOrderBookProxy = CoinCapOrderBookSourceProxy(coinCapOrderBookSource)
 
     private val priceBroker = CoinPriceSourceBroker(binancePriceProxy, coinCapPriceProxy)
     private val orderBookBroker = CoinOrderBookSourceBroker(binanceOrderBookProxy, coinCapOrderBookProxy)
-    private val coinListBroker = CoinListDataSourceBroker(binanceCoinListProxy, binancePopularCoinsProxy)
+    private val coinListBroker = CoinListDataSourceBroker(binanceCoinListProxy)
 
     private val repository = CryptoRepositoryImpl(priceBroker, orderBookBroker, coinListBroker)
     private val observeTradePricesUseCase = ObserveTradePricesUseCase(repository)
