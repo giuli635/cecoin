@@ -11,19 +11,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-private val SYMBOL_TO_ASSET_ID = mapOf(
-    "BTC" to "bitcoin",
-    "ETH" to "ethereum",
-    "USDT" to "tether",
-    "BNB" to "binance-coin",
-    "SOL" to "solana",
-    "XRP" to "xrp",
-    "ADA" to "cardano",
-    "DOGE" to "dogecoin",
-    "DOT" to "polkadot",
-    "MATIC" to "matic-network",
-)
-
 private const val BASE_URL = "wss://ws.coincap.io/prices"
 
 class CoinCapPriceSource {
@@ -33,10 +20,7 @@ class CoinCapPriceSource {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun tradePrices(symbol: String): Flow<Double> = flow {
-        val baseAsset = symbol.trim().uppercase().let { s ->
-            s.removeSuffix("USDT").removeSuffix("USD").removeSuffix("BTC")
-        }
-        val assetId = SYMBOL_TO_ASSET_ID[baseAsset] ?: baseAsset.lowercase()
+        val assetId = symbolToAssetId(symbol)
         val url = "$BASE_URL?assets=$assetId"
 
         http.webSocket(urlString = url) {

@@ -11,19 +11,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.seconds
 
-private val SYMBOL_TO_ASSET_ID = mapOf(
-    "BTC" to "bitcoin",
-    "ETH" to "ethereum",
-    "USDT" to "tether",
-    "BNB" to "binance-coin",
-    "SOL" to "solana",
-    "XRP" to "xrp",
-    "ADA" to "cardano",
-    "DOGE" to "dogecoin",
-    "DOT" to "polkadot",
-    "MATIC" to "matic-network",
-)
-
 private const val API_URL = "https://api.coincap.io/v2/markets"
 
 class CoinCapOrderBookSource {
@@ -31,10 +18,7 @@ class CoinCapOrderBookSource {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun observeOrderBook(symbol: String): Flow<OrderBook> = flow {
-        val baseAsset = symbol.trim().uppercase().let { s ->
-            s.removeSuffix("USDT").removeSuffix("USD").removeSuffix("BTC")
-        }
-        val assetId = SYMBOL_TO_ASSET_ID[baseAsset] ?: baseAsset.lowercase()
+        val assetId = symbolToAssetId(symbol)
         while (true) {
             val response = http.get("$API_URL?baseId=$assetId&limit=20")
             val body = response.bodyAsText()

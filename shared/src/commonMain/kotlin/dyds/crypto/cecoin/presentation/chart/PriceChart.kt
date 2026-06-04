@@ -1,5 +1,7 @@
 package dyds.crypto.cecoin.presentation.chart
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -18,12 +21,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.presentation.Renderer
 
+private const val MAX_VISIBLE_POINTS = 200
+
 @Composable
 fun PriceChart(): Renderer<PricePoints> =
     { value, modifier ->
         val lineColor: Color = MaterialTheme.colorScheme.primary
         val prices = value.prices
         val lastPrice = value.lastPrice
+
+        val animatedLastPrice by animateFloatAsState(
+            targetValue = lastPrice?.toFloat() ?: 0f,
+            animationSpec = tween(durationMillis = 150),
+            label = "lastPrice",
+        )
 
         Text(
             text = "Last: ${lastPrice?.let { (kotlin.math.round(it * 100) / 100).toString() } ?: "—"}",
@@ -38,19 +49,27 @@ fun PriceChart(): Renderer<PricePoints> =
         ) {
             if (prices.size < 2) return@Canvas
 
-            val min = prices.minOrNull() ?: return@Canvas
-            val max = prices.maxOrNull() ?: return@Canvas
+            val visibleCount = minOf(prices.size, MAX_VISIBLE_POINTS)
+            val startIndex = prices.size - visibleCount
+
+            val visiblePrices = prices.subList(startIndex, prices.size)
+
+            val min = visiblePrices.minOrNull() ?: return@Canvas
+            val max = visiblePrices.maxOrNull() ?: return@Canvas
             val range = (max - min).takeIf { it > 0.0 } ?: 1.0
 
             val padding = 12.dp.toPx()
             val w = (size.width - 2f * padding).coerceAtLeast(1f)
             val h = (size.height - 2f * padding).coerceAtLeast(1f)
+            val stepX = w / (MAX_VISIBLE_POINTS - 1).coerceAtLeast(1)
 
-            val stepX = w / (prices.size - 1)
+            fun yOf(price: Double): Float =
+                padding + (((max - price) / range) * h).toFloat()
 
-            val points = prices.mapIndexed { i, p ->
+            val points = List(visibleCount) { i ->
+                val price = visiblePrices[i]
                 val x = padding + i * stepX
-                val y = padding + (((max - p) / range) * h).toFloat()
+                val y = if (i == visibleCount - 1) yOf(animatedLastPrice.toDouble()) else yOf(price)
                 Offset(x, y)
             }
 
@@ -81,7 +100,6 @@ fun PriceChart(): Renderer<PricePoints> =
                 ),
             )
 
-            val lastPos = points.last()
-            drawCircle(color = lineColor, radius = 4.dp.toPx(), center = lastPos)
+            drawCircle(color = lineColor, radius = 4.dp.toPx(), center = points.last())
         }
     }
