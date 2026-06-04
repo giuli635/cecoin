@@ -3,6 +3,7 @@ package dyds.crypto.cecoin.data.remote.broker
 import dyds.crypto.cecoin.data.remote.CoinPriceSource
 import dyds.crypto.cecoin.data.remote.binance.proxy.BinancePriceSourceProxy
 import dyds.crypto.cecoin.data.remote.coincap.proxy.CoinCapPriceSourceProxy
+import dyds.crypto.cecoin.domain.model.TradePrice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
@@ -13,7 +14,7 @@ internal class CoinPriceSourceBroker(
     private val coinCapProxy: CoinCapPriceSourceProxy,
 ) : CoinPriceSource {
 
-    override fun tradePrices(symbol: String): Flow<Double> = flow {
+    override fun tradePrices(symbol: String): Flow<TradePrice> = flow {
         emitAll(
             binanceProxy.tradePrices(symbol)
                 .catch { emitAll(coinCapProxy.tradePrices(symbol)) }

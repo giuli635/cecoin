@@ -8,7 +8,6 @@ import dyds.crypto.cecoin.domain.model.OrderBook
 import dyds.crypto.cecoin.domain.model.TradePrice
 import dyds.crypto.cecoin.domain.repository.CecoinRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 private const val DefaultSymbol = "BTCUSDT"
 
@@ -21,12 +20,8 @@ class CryptoRepositoryImpl(
     override suspend fun getAvailableSymbols(): List<CryptoSymbol> =
         coinListDataSource.fetchSymbols()
 
-    override fun observeTradePrices(symbol: String): Flow<TradePrice> {
-        val normalizedSymbol = symbol.normalizeSymbol()
-        return coinPriceSource
-            .tradePrices(normalizedSymbol)
-            .map { price -> TradePrice(symbol = normalizedSymbol, price = price) }
-    }
+    override fun observeTradePrices(symbol: String): Flow<TradePrice> =
+        coinPriceSource.tradePrices(symbol.normalizeSymbol())
 
     override suspend fun getOrderBook(symbol: String): OrderBook =
         coinOrderBookSource.fetchOrderBook(symbol.normalizeSymbol())

@@ -1,6 +1,5 @@
 package dyds.crypto.cecoin.data.remote.binance
 
-import dyds.crypto.cecoin.data.remote.CoinPriceSource
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
@@ -18,13 +17,13 @@ private val BASE_URLS = listOf(
     "wss://data-stream.binance.vision",
 )
 
-class BinanceCoinPriceSource: CoinPriceSource {
+class BinanceCoinPriceSource {
     private val http = HttpClient {
         install(WebSockets)
     }
     private val json = Json { ignoreUnknownKeys = true }
 
-    override fun tradePrices(symbol: String): Flow<Double> = flow {
+    fun tradePrices(symbol: String): Flow<Double> = flow {
         val stream = "${symbol.trim().lowercase()}@trade"
         var lastError: Throwable? = null
 
@@ -53,7 +52,7 @@ class BinanceCoinPriceSource: CoinPriceSource {
             root["p"]?.jsonPrimitive?.content?.toDouble()
         }.getOrNull()
 
-    override fun close() {
+    fun close() {
         http.close()
     }
 }

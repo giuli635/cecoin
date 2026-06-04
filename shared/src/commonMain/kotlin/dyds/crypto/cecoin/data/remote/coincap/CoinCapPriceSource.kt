@@ -1,6 +1,5 @@
 package dyds.crypto.cecoin.data.remote.coincap
 
-import dyds.crypto.cecoin.data.remote.CoinPriceSource
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
@@ -27,13 +26,13 @@ private val SYMBOL_TO_ASSET_ID = mapOf(
 
 private const val BASE_URL = "wss://ws.coincap.io/prices"
 
-internal class CoinCapPriceSource : CoinPriceSource {
+class CoinCapPriceSource {
     private val http = HttpClient {
         install(WebSockets)
     }
     private val json = Json { ignoreUnknownKeys = true }
 
-    override fun tradePrices(symbol: String): Flow<Double> = flow {
+    fun tradePrices(symbol: String): Flow<Double> = flow {
         val baseAsset = symbol.trim().uppercase().let { s ->
             s.removeSuffix("USDT").removeSuffix("USD").removeSuffix("BTC")
         }
@@ -55,7 +54,7 @@ internal class CoinCapPriceSource : CoinPriceSource {
             root[assetId]?.jsonPrimitive?.content?.toDouble()
         }.getOrNull()
 
-    override fun close() {
+    fun close() {
         http.close()
     }
 }
