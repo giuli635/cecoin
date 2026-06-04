@@ -2,13 +2,14 @@ package dyds.crypto.cecoin.presentation.chart
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -22,9 +23,10 @@ fun PriceChart(): Renderer<PricePoints> =
     { value, modifier ->
         val lineColor: Color = MaterialTheme.colorScheme.primary
         val prices = value.prices
+        val lastPrice = value.lastPrice
 
         Text(
-            text = "Last: ${value.lastPrice?.toString() ?: "—"}",
+            text = "Last: ${lastPrice?.let { (kotlin.math.round(it * 100) / 100).toString() } ?: "—"}",
             fontWeight = FontWeight.Medium,
         )
 
@@ -46,25 +48,40 @@ fun PriceChart(): Renderer<PricePoints> =
 
             val stepX = w / (prices.size - 1)
 
-            val path = Path()
-            prices.forEachIndexed { i, p ->
+            val points = prices.mapIndexed { i, p ->
                 val x = padding + i * stepX
                 val y = padding + (((max - p) / range) * h).toFloat()
-                if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                Offset(x, y)
             }
 
+            val path = Path()
+            path.moveTo(points.first().x, points.first().y)
+            for (i in 1 until points.size) {
+                val prev = points[i - 1]
+                val curr = points[i]
+                val cpx = (prev.x + curr.x) / 2f
+                path.cubicTo(cpx, prev.y, cpx, curr.y, curr.x, curr.y)
+            }
+
+            val strokePaint = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
+            drawPath(path = path, color = lineColor, style = strokePaint)
+
+            val fillPath = Path().apply {
+                addPath(path)
+                lineTo(points.last().x, size.height - padding)
+                lineTo(points.first().x, size.height - padding)
+                close()
+            }
             drawPath(
-                path = path,
-                color = lineColor,
-                style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round),
+                path = fillPath,
+                brush = Brush.verticalGradient(
+                    colors = listOf(lineColor.copy(alpha = 0.25f), lineColor.copy(alpha = 0f)),
+                    startY = padding,
+                    endY = size.height - padding,
+                ),
             )
 
-            val lastX = padding + (prices.size - 1) * stepX
-            val lastY = padding + (((max - prices.last()) / range) * h).toFloat()
-            drawCircle(
-                color = lineColor,
-                radius = 4.dp.toPx(),
-                center = Offset(lastX, lastY),
-            )
+            val lastPos = points.last()
+            drawCircle(color = lineColor, radius = 4.dp.toPx(), center = lastPos)
         }
     }

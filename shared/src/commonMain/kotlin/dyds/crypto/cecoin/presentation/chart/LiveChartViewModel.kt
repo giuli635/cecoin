@@ -10,14 +10,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retryWhen
-import kotlinx.coroutines.flow.runningReduce
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -33,6 +30,7 @@ class LiveChartViewModel(
 
     private var priceJob: Job? = null
 
+    @OptIn(FlowPreview::class)
     fun loadPrices() {
         priceJob?.cancel()
         priceJob = viewModelScope.launch {
@@ -49,6 +47,7 @@ class LiveChartViewModel(
                     delay(retryDelayMillis.milliseconds)
                     true
                 }
+                .sample(33.milliseconds)
                 .scan(emptyList<Double>()) { prices, tradePrice ->
                     (prices + tradePrice.price).takeLast(maxPoints)
                 }
