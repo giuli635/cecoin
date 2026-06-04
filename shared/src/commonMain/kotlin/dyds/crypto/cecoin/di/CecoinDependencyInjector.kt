@@ -2,6 +2,7 @@ package dyds.crypto.cecoin.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dyds.crypto.cecoin.data.local.FavoriteLocalSource
 import dyds.crypto.cecoin.data.remote.binance.BinanceCoinListDataSource
 import dyds.crypto.cecoin.data.remote.binance.BinanceCoinPriceSource
 import dyds.crypto.cecoin.data.remote.binance.BinanceOrderBookSource
@@ -16,8 +17,12 @@ import dyds.crypto.cecoin.data.remote.coincap.CoinCapPriceSource
 import dyds.crypto.cecoin.data.remote.coincap.proxy.CoinCapOrderBookSourceProxy
 import dyds.crypto.cecoin.data.remote.coincap.proxy.CoinCapPriceSourceProxy
 import dyds.crypto.cecoin.data.repository.CryptoRepositoryImpl
+import dyds.crypto.cecoin.data.repository.FavoriteRepositoryImpl
 import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
+import dyds.crypto.cecoin.domain.usecase.IsFavoriteUseCase
+import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
+import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.chart.LiveChartViewModel
 import dyds.crypto.cecoin.presentation.search.CoinSearchViewModel
 
@@ -42,10 +47,20 @@ object CecoinDependencyInjector {
     private val observeTradePricesUseCase = ObserveTradePricesUseCase(repository)
     private val getAvailableSymbolsUseCase = GetAvailableSymbolsUseCase(repository)
 
+    private val favoriteSource = FavoriteLocalSource()
+    private val favoriteRepository = FavoriteRepositoryImpl(favoriteSource)
+    private val toggleFavoriteUseCase = ToggleFavoriteUseCase(favoriteRepository)
+    private val observeFavoritesUseCase = ObserveFavoritesUseCase(favoriteRepository)
+    private val isFavoriteUseCase = IsFavoriteUseCase(favoriteRepository)
+
     @Composable
     fun getSearchViewModel(): CoinSearchViewModel {
         return viewModel {
-            CoinSearchViewModel(getAvailableSymbolsUseCase)
+            CoinSearchViewModel(
+                getAvailableSymbolsUseCase = getAvailableSymbolsUseCase,
+                toggleFavoriteUseCase = toggleFavoriteUseCase,
+                observeFavoritesUseCase = observeFavoritesUseCase,
+            )
         }
     }
 
@@ -54,6 +69,8 @@ object CecoinDependencyInjector {
         return viewModel {
             LiveChartViewModel(
                 observeTradePricesUseCase = observeTradePricesUseCase,
+                toggleFavoriteUseCase = toggleFavoriteUseCase,
+                isFavoriteUseCase = isFavoriteUseCase,
                 symbol = symbol,
             )
         }

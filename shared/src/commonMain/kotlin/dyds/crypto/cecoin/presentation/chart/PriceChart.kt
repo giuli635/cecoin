@@ -24,7 +24,7 @@ import dyds.crypto.cecoin.presentation.Renderer
 private const val MAX_VISIBLE_POINTS = 200
 
 @Composable
-fun PriceChart(): Renderer<PricePoints> =
+fun PriceChart(chartHeight: Int = 480): Renderer<PricePoints> =
     { value, modifier ->
         val lineColor: Color = MaterialTheme.colorScheme.primary
         val prices = value.prices
@@ -44,7 +44,7 @@ fun PriceChart(): Renderer<PricePoints> =
         Canvas(
             modifier = modifier
                 .fillMaxWidth()
-                .height(240.dp)
+                .height(chartHeight.dp)
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
             if (prices.size < 2) return@Canvas

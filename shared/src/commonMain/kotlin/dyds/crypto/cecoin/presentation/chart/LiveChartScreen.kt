@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,7 +43,7 @@ fun ChartScreen(
     }
 
     buildOneTimeLoadableComposable(
-        inner = LiveChartScreen(viewModel.symbol, onBack, onRetry = viewModel::loadPrices),
+        inner = LiveChartScreen(viewModel.symbol, onBack, onRetry = viewModel::loadPrices, viewModel),
         onCancel = onBack
     )(state, modifier)
 }
@@ -50,9 +53,11 @@ fun LiveChartScreen(
     symbol: String,
     onBack: () -> Unit,
     onRetry: () -> Unit = {},
+    viewModel: LiveChartViewModel,
 ): Renderer<Flow<ChartState>> =
     { value, modifier ->
         val state by value.collectAsState(initial = Fallible.Success(PricePoints()))
+        val isFavorite by viewModel.isFavorite.collectAsState()
 
         Column(
             modifier = modifier
@@ -64,6 +69,7 @@ fun LiveChartScreen(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "Binance Live Trades - $symbol",
@@ -81,5 +87,14 @@ fun LiveChartScreen(
                 onCancel = onBack,
                 onRetry = onRetry
             )(state, modifier)
+
+            FilledTonalButton(
+                onClick = { viewModel.toggleFavorite() },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = if (isFavorite) "\u2605 Remove from Favorites" else "\u2606 Add to Favorites",
+                )
+            }
         }
     }

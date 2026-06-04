@@ -3,6 +3,8 @@ package dyds.crypto.cecoin.presentation.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
+import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
+import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
@@ -10,26 +12,35 @@ import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+enum class FilterMode { ALL, FAVORITES }
+
 data class CoinSearchUiState(
     val searchQuery: String = "",
     val selectedCoin: String? = null,
+    val filterMode: FilterMode = FilterMode.ALL,
 )
 
 class CoinSearchViewModel(
     private val getAvailableSymbolsUseCase: GetAvailableSymbolsUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val observeFavoritesUseCase: ObserveFavoritesUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CoinSearchUiState())
-    val uiState = _uiState.asStateFlow()
+    val uiState: StateFlow<CoinSearchUiState> = _uiState.asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, CoinSearchUiState())
 
     private val _asyncAvailableSymbols = MutableStateFlow<AsyncResult<List<String>>>(Loadable.Loading)
 
-    val filteredCoins = combine(_uiState, _asyncAvailableSymbols) { uiState, asyncSymbols ->
+    val favorites: StateFlow<Set<String>> = observeFavoritesUseCase()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptySet())
+
+    val filteredCoins = combine(_uiState, _asyncAvailableSymbols, favorites) { uiState, asyncSymbols, favs ->
         when (asyncSymbols) {
             is Loadable.Loading -> Loadable.Loading
             is Loadable.Loaded -> {
@@ -37,13 +48,18 @@ class CoinSearchViewModel(
                     is Fallible.Failed -> Loadable.Loaded(fallibleSymbols)
                     is Fallible.Success -> {
                         val symbols = fallibleSymbols.value
-                        if (uiState.searchQuery.isEmpty()) {
-                            Loadable.Loaded(Fallible.Success(symbols))
-                        } else {
-                            Loadable.Loaded(Fallible.Success(symbols.filter { coin ->
-                                coin.contains(uiState.searchQuery, ignoreCase = true)
-                            }))
+                        val filtered = when (uiState.filterMode) {
+                            FilterMode.ALL -> symbols
+                            FilterMode.FAVORITES -> symbols.filter { it in favs }
                         }
+                        val result = if (uiState.searchQuery.isEmpty()) {
+                            filtered
+                        } else {
+                            filtered.filter { coin ->
+                                coin.contains(uiState.searchQuery, ignoreCase = true)
+                            }
+                        }
+                        Loadable.Loaded(Fallible.Success(result))
                     }
                 }
             }
@@ -87,5 +103,15 @@ class CoinSearchViewModel(
 
     fun selectCoin(coin: String) {
         _uiState.value = _uiState.value.copy(selectedCoin = coin)
+    }
+
+    fun setFilterMode(mode: FilterMode) {
+        _uiState.value = _uiState.value.copy(filterMode = mode)
+    }
+
+    fun toggleFavorite(symbol: String) {
+        viewModelScope.launch {
+            toggleFavoriteUseCase(symbol)
+        }
     }
 }
