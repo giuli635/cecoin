@@ -7,11 +7,10 @@ import dyds.crypto.cecoin.presentation.Renderer
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.flow.Flow
 
-@Composable
-fun <T> OneTimeLoadableComposable(
-    inner: Renderer<T>,
+fun <T> buildOneTimeLoadableComposable(
     onCancel: () -> Unit,
+    inner: Renderer<T>,
 ): Renderer<Flow<Loadable<T>>> = @Composable { value, modifier ->
     val state by value.collectAsState(initial = Loadable.Loading)
-    LoadableComposable(inner, onCancel)(state, modifier)
+    buildLoadableComposable(onCancel, inner)(state, modifier)
 }

@@ -12,8 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.presentation.Renderer
 
-@Composable
-fun <T> CancellableComposable(inner: Renderer<T>, onCancel: () -> Unit): Renderer<T> =
+fun <T> buildCancellableComposable(onCancel: () -> Unit, inner: Renderer<T>): Renderer<T> =
     { value, modifier ->
         Column(
             modifier = modifier,

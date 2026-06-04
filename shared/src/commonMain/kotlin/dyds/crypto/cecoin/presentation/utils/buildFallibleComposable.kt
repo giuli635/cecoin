@@ -14,12 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.presentation.Renderer
-import dyds.crypto.cecoin.presentation.composableRenderer
+import dyds.crypto.cecoin.presentation.buildComposableRenderer
 import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
 
-@Composable
-fun <T> FallibleComposable(
+fun <T> buildFallibleComposable(
     inner: Renderer<T>,
     onCancel: () -> Unit,
     onRetry: () -> Unit
@@ -32,8 +31,8 @@ fun <T> FallibleComposable(
 
 @Composable
 private fun ErrorContent(error: AppError, modifier: Modifier, onCancel: () -> Unit, onRetry: () -> Unit) {
-    CancellableComposable(
-        inner = composableRenderer {
+    buildCancellableComposable(
+        inner = buildComposableRenderer {
             Column(
                 modifier = modifier
                     .fillMaxSize()

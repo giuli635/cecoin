@@ -18,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.presentation.Renderer
-import dyds.crypto.cecoin.presentation.utils.FallibleComposable
-import dyds.crypto.cecoin.presentation.utils.OneTimeLoadableComposable
+import dyds.crypto.cecoin.presentation.utils.buildFallibleComposable
+import dyds.crypto.cecoin.presentation.utils.buildOneTimeLoadableComposable
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.flow.Flow
@@ -39,7 +39,7 @@ fun ChartScreen(
         state.emit(Loadable.Loaded(viewModel.uiState))
     }
 
-    OneTimeLoadableComposable(
+    buildOneTimeLoadableComposable(
         inner = LiveChartScreen(viewModel.symbol, onBack, onRetry = viewModel::loadPrices),
         onCancel = onBack
     )(state, modifier)
@@ -76,7 +76,7 @@ fun LiveChartScreen(
                 }
             }
 
-            FallibleComposable(
+            buildFallibleComposable(
                 inner = PriceChart(),
                 onCancel = onBack,
                 onRetry = onRetry

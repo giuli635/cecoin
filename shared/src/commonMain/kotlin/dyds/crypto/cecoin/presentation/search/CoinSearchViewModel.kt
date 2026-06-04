@@ -3,18 +3,17 @@ package dyds.crypto.cecoin.presentation.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
+import dyds.crypto.cecoin.presentation.utils.AsyncResult
+import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.Fallible
+import dyds.crypto.cecoin.utils.Loadable
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
-sealed class SymbolLoadingState {
-    data object Loading : SymbolLoadingState()
-    data object Loaded : SymbolLoadingState()
-    data class Error(val message: String) : SymbolLoadingState()
-}
 
 data class CoinSearchUiState(
     val searchQuery: String = "",
@@ -28,41 +27,58 @@ class CoinSearchViewModel(
     val uiState = _uiState.asStateFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, CoinSearchUiState())
 
-    private val _availableSymbols = MutableStateFlow<List<String>>(emptyList())
-    private val _loadingState = MutableStateFlow<SymbolLoadingState>(SymbolLoadingState.Loading)
+    private val _asyncAvailableSymbols = MutableStateFlow<AsyncResult<List<String>>>(Loadable.Loading)
 
-    val loadingState = _loadingState.asStateFlow()
-    val availableSymbols = _availableSymbols.asStateFlow()
-
-    val filteredCoins = combine(_uiState, _availableSymbols) { state, symbols ->
-        if (state.searchQuery.isEmpty()) {
-            symbols
-        } else {
-            symbols.filter { coin ->
-                coin.contains(state.searchQuery, ignoreCase = true)
+    val filteredCoins = combine(_uiState, _asyncAvailableSymbols) { uiState, asyncSymbols ->
+        when (asyncSymbols) {
+            is Loadable.Loading -> Loadable.Loading
+            is Loadable.Loaded -> {
+                when (val fallibleSymbols = asyncSymbols.value) {
+                    is Fallible.Failed -> Loadable.Loaded(fallibleSymbols)
+                    is Fallible.Success -> {
+                        val symbols = fallibleSymbols.value
+                        if (uiState.searchQuery.isEmpty()) {
+                            Loadable.Loaded(Fallible.Success(symbols))
+                        } else {
+                            Loadable.Loaded(Fallible.Success(symbols.filter { coin ->
+                                coin.contains(uiState.searchQuery, ignoreCase = true)
+                            }))
+                        }
+                    }
+                }
             }
         }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    }.stateIn(viewModelScope, SharingStarted.Lazily, Loadable.Loading)
+
+    private var loadSymbolsJob: Job? = null
 
     init {
         loadSymbols()
     }
 
     fun loadSymbols() {
-        viewModelScope.launch {
-            _loadingState.value = SymbolLoadingState.Loading
+        loadSymbolsJob?.cancel()
+        loadSymbolsJob = viewModelScope.launch {
+            _asyncAvailableSymbols.value = Loadable.Loading
             try {
                 val symbols = getAvailableSymbolsUseCase()
                     .map { it.symbol }
                     .sorted()
-                _availableSymbols.value = symbols
-                _loadingState.value = SymbolLoadingState.Loaded
+                _asyncAvailableSymbols.value = Loadable.Loaded(Fallible.Success(symbols))
             } catch (e: Exception) {
-                _loadingState.value = SymbolLoadingState.Error(
-                    e.message ?: "Failed to load symbols"
+                _asyncAvailableSymbols.value = Loadable.Loaded(
+                    Fallible.Failed(AppError.GenericError(e, "Failed to load symbols"))
                 )
             }
         }
+    }
+
+    fun retryLoadSymbols() {
+        loadSymbols()
+    }
+
+    fun onCancelLoadSymbols() {
+        loadSymbolsJob?.cancel()
     }
 
     fun onSearchQueryChange(query: String) {
@@ -73,5 +89,3 @@ class CoinSearchViewModel(
         _uiState.value = _uiState.value.copy(selectedCoin = coin)
     }
 }
-
-
