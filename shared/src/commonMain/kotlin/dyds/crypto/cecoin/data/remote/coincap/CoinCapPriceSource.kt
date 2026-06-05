@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlin.time.TimeSource
 
 private const val BASE_URL = "wss://ws.coincap.io/prices"
 
@@ -19,7 +20,9 @@ class CoinCapPriceSource {
     }
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun tradePrices(symbol: String): Flow<Double> = flow {
+    private val startMark = TimeSource.Monotonic.markNow()
+
+    fun tradePrices(symbol: String): Flow<Pair<Double, Long>> = flow {
         val assetId = symbolToAssetId(symbol)
         val url = "$BASE_URL?assets=$assetId"
 
@@ -27,7 +30,7 @@ class CoinCapPriceSource {
             for (frame in incoming) {
                 val text = (frame as? Frame.Text)?.readText() ?: continue
                 val price = parsePrice(text, assetId) ?: continue
-                emit(price)
+                emit(Pair(price, startMark.elapsedNow().inWholeMilliseconds))
             }
         }
     }

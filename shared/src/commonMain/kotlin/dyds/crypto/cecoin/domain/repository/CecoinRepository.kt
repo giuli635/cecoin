@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface CecoinRepository {
     suspend fun getAvailableSymbols(): List<CryptoSymbol>
+    suspend fun getHistoricalPrices(symbol: String, interval: String = "1m", limit: Int = 200): List<TradePrice>
     fun observeTradePrices(symbol: String): Flow<TradePrice>
     fun observeOrderBook(symbol: String): Flow<OrderBook>
 }

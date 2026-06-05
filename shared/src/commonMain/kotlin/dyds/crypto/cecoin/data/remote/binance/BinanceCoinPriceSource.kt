@@ -23,7 +23,7 @@ class BinanceCoinPriceSource {
     }
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun tradePrices(symbol: String): Flow<Double> = flow {
+    fun tradePrices(symbol: String): Flow<Pair<Double, Long>> = flow {
         val stream = "${symbol.trim().lowercase()}@trade"
         var lastError: Throwable? = null
 
@@ -33,8 +33,8 @@ class BinanceCoinPriceSource {
                 http.webSocket(urlString = url) {
                     for (frame in incoming) {
                         val text = (frame as? Frame.Text)?.readText() ?: continue
-                        val price = parseTradePrice(text) ?: continue
-                        emit(price)
+                        val parsed = parseTrade(text) ?: continue
+                        emit(parsed)
                     }
                 }
                 return@flow
@@ -46,10 +46,12 @@ class BinanceCoinPriceSource {
         throw lastError ?: IllegalStateException("No se pudo abrir el WebSocket de Binance")
     }
 
-    private fun parseTradePrice(message: String): Double? =
+    private fun parseTrade(message: String): Pair<Double, Long>? =
         runCatching {
             val root = json.parseToJsonElement(message).jsonObject
-            root["p"]?.jsonPrimitive?.content?.toDouble()
+            val price = root["p"]?.jsonPrimitive?.content?.toDouble() ?: return@runCatching null
+            val timestamp = root["T"]?.jsonPrimitive?.content?.toLong() ?: return@runCatching null
+            Pair(price, timestamp)
         }.getOrNull()
 
     fun close() {

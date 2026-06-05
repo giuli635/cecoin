@@ -4,7 +4,6 @@ import dyds.crypto.cecoin.data.remote.CoinOrderBookSource
 import dyds.crypto.cecoin.data.remote.binance.proxy.BinanceOrderBookSourceProxy
 import dyds.crypto.cecoin.data.remote.coincap.proxy.CoinCapOrderBookSourceProxy
 import dyds.crypto.cecoin.domain.model.OrderBook
-import dyds.crypto.cecoin.domain.model.OrderBookEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
