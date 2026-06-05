@@ -1,4 +1,4 @@
-package dyds.crypto.cecoin.data.remote.binance
+package dyds.crypto.cecoin.data.remote
 
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
 import io.ktor.client.HttpClient
@@ -12,11 +12,11 @@ import kotlinx.serialization.json.jsonPrimitive
 private const val BINANCE_API_URL = "https://api.binance.com/api/v3"
 private const val QUOTE_ASSET_FILTER = "USDT"
 
-class BinanceCoinListDataSource {
+class BinanceCoinListDataSource : CoinListDataSource {
     private val http = HttpClient()
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun fetchSymbols(): List<CryptoSymbol> {
+    override suspend fun fetchSymbols(): List<CryptoSymbol> {
         return try {
             val url = "$BINANCE_API_URL/exchangeInfo"
             val responseText = http.get(url).body<String>()

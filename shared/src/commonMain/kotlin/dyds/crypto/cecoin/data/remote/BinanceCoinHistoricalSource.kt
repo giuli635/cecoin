@@ -1,13 +1,11 @@
-package dyds.crypto.cecoin.data.remote.binance
+package dyds.crypto.cecoin.data.remote
 
-import dyds.crypto.cecoin.data.remote.CoinHistoricalSource
 import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.domain.model.TradePrice
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 

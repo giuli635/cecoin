@@ -1,5 +1,7 @@
-package dyds.crypto.cecoin.data.remote.binance
+package dyds.crypto.cecoin.data.remote
 
+import dyds.crypto.cecoin.domain.model.PricePoint
+import dyds.crypto.cecoin.domain.model.TradePrice
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
@@ -17,13 +19,13 @@ private val BASE_URLS = listOf(
     "wss://data-stream.binance.vision",
 )
 
-class BinanceCoinPriceSource {
+class BinanceCoinPriceSource : CoinPriceSource {
     private val http = HttpClient {
         install(WebSockets)
     }
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun tradePrices(symbol: String): Flow<Pair<Double, Long>> = flow {
+    override fun tradePrices(symbol: String): Flow<TradePrice> = flow {
         val stream = "${symbol.trim().lowercase()}@trade"
         var lastError: Throwable? = null
 
@@ -33,8 +35,8 @@ class BinanceCoinPriceSource {
                 http.webSocket(urlString = url) {
                     for (frame in incoming) {
                         val text = (frame as? Frame.Text)?.readText() ?: continue
-                        val parsed = parseTrade(text) ?: continue
-                        emit(parsed)
+                        val trade = parseTrade(text) ?: continue
+                        emit(TradePrice(trade.symbol, PricePoint(trade.timestamp, trade.price)))
                     }
                 }
                 return@flow
@@ -46,15 +48,16 @@ class BinanceCoinPriceSource {
         throw lastError ?: IllegalStateException("No se pudo abrir el WebSocket de Binance")
     }
 
-    private fun parseTrade(message: String): Pair<Double, Long>? =
+    private fun parseTrade(message: String): TradePrice? =
         runCatching {
             val root = json.parseToJsonElement(message).jsonObject
             val price = root["p"]?.jsonPrimitive?.content?.toDouble() ?: return@runCatching null
             val timestamp = root["T"]?.jsonPrimitive?.content?.toLong() ?: return@runCatching null
-            Pair(price, timestamp)
+            val symbol = root["s"]?.jsonPrimitive?.content ?: return@runCatching null
+            TradePrice(symbol, PricePoint(timestamp, price))
         }.getOrNull()
 
-    fun close() {
+    override fun close() {
         http.close()
     }
 }
