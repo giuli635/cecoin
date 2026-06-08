@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
 import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
+import dyds.crypto.cecoin.presentation.search.util.filterBy
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
@@ -38,21 +39,10 @@ class CoinSearchViewModel(
             is Loadable.Loaded -> {
                 when (val fallibleSymbols = asyncSymbols.value) {
                     is Fallible.Failed -> Loadable.Loaded(fallibleSymbols)
-                    is Fallible.Success -> {
-                        val symbols = fallibleSymbols.value
-                        val filtered = when (uiState.filterMode) {
-                            FilterMode.ALL -> symbols
-                            FilterMode.FAVORITES -> symbols.filter { it in favs }
-                        }
-                        val result = if (uiState.searchQuery.isEmpty()) {
-                            filtered
-                        } else {
-                            filtered.filter { coin ->
-                                coin.contains(uiState.searchQuery, ignoreCase = true)
-                            }
-                        }
-                        Loadable.Loaded(Fallible.Success(result))
-                    }
+                    is Fallible.Success ->
+                        Loadable.Loaded(Fallible.Success(
+                            fallibleSymbols.value.filterBy(uiState.searchQuery, uiState.filterMode, favs)
+                        ))
                 }
             }
         }
