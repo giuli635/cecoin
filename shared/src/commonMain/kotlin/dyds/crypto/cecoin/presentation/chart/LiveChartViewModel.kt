@@ -3,12 +3,13 @@ package dyds.crypto.cecoin.presentation.chart
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.domain.model.toPricePoints
 import dyds.crypto.cecoin.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
+import dyds.crypto.cecoin.presentation.chart.util.ChartModelBuilder
+import dyds.crypto.cecoin.presentation.chart.util.VicoChartModelBuilder
 import dyds.crypto.cecoin.presentation.chart.util.foldTradePrice
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.utils.AppError
@@ -31,6 +32,7 @@ class LiveChartViewModel(
     private val observeTradePricesUseCase: ObserveTradePricesUseCase,
     val symbol: String,
     private val historicalPointLimit: Int = 200,
+    private val chartModelBuilder: ChartModelBuilder = VicoChartModelBuilder(),
 ) : ViewModel() {
     val modelProducer = CartesianChartModelProducer()
 
@@ -106,18 +108,8 @@ class LiveChartViewModel(
 
     private suspend fun pushModel() {
         if (points.isEmpty()) return
-        val last = points.last()
-        _lastPrice.value = last.price
-        val x = points.map { it.timestamp.toDouble() }
-        val y = points.map { it.price }
-        val lastX = last.timestamp.toDouble()
-        modelProducer.runTransaction {
-            lineModel {
-                series(x = x, y = y)
-                series(x = listOf(x.first(), lastX), y = listOf(last.price, last.price))
-                series(x = listOf(lastX), y = listOf(last.price))
-            }
-        }
+        _lastPrice.value = points.last().price
+        chartModelBuilder.buildModel(points, modelProducer)
     }
 
     override fun onCleared() {
