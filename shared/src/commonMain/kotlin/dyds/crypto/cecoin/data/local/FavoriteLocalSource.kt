@@ -4,8 +4,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FavoriteLocalSource {
-    private val _favorites = MutableStateFlow(loadFavoritesFromDisk())
+class FavoriteLocalSource(
+    private val storage: FavoriteStorage,
+) {
+    private val _favorites = MutableStateFlow(storage.load())
     val favorites: StateFlow<Set<String>> = _favorites.asStateFlow()
 
     fun toggle(symbol: String) {
@@ -14,6 +16,6 @@ class FavoriteLocalSource {
         } else {
             _favorites.value + symbol
         }
-        saveFavoritesToDisk(_favorites.value)
+        storage.save(_favorites.value)
     }
 }

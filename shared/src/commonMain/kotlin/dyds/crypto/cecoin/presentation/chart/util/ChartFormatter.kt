@@ -8,7 +8,7 @@ fun priceFormatter(): CartesianValueFormatter = CartesianValueFormatter.decimal(
 )
 
 fun timeFormatter(): CartesianValueFormatter = CartesianValueFormatter { _, value, _ ->
-    val ms = value.toLong()
+    val ms = value.toLong() + systemTimezoneOffsetMillis()
     val sec = ms / 1000
     val m = (sec / 60) % 60
     val h = (sec / 3600) % 24

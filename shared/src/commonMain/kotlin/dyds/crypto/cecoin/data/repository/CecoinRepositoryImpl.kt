@@ -5,7 +5,8 @@ import dyds.crypto.cecoin.data.remote.CoinListDataSource
 import dyds.crypto.cecoin.data.remote.CoinPriceSource
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.domain.model.TradePrice
-import dyds.crypto.cecoin.domain.repository.CecoinRepository
+import dyds.crypto.cecoin.domain.repository.CryptoSymbolRepository
+import dyds.crypto.cecoin.domain.repository.TradePriceRepository
 import kotlinx.coroutines.flow.Flow
 
 private const val DefaultSymbol = "BTCUSDT"
@@ -14,7 +15,7 @@ class CecoinRepositoryImpl(
     private val coinPriceSource: CoinPriceSource,
     private val coinHistoricalSource: CoinHistoricalSource,
     private val coinListDataSource: CoinListDataSource,
-) : CecoinRepository {
+) : CryptoSymbolRepository, TradePriceRepository {
 
     override suspend fun getAvailableSymbols(): List<CryptoSymbol> =
         coinListDataSource.fetchSymbols()
