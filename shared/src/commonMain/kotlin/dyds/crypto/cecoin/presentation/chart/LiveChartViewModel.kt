@@ -69,10 +69,6 @@ class LiveChartViewModel(
     fun loadPrices() {
         priceJob?.cancel()
         priceJob = viewModelScope.launch {
-            if (!reloadPending) {
-                _asyncLoadState.value = Loadable.Loading
-            }
-
             val g = _granularity.value
 
             if (reloadPending) {
@@ -80,46 +76,57 @@ class LiveChartViewModel(
                 reloadPending = false
             }
 
-            if (points.isEmpty()) {
-                runCatching {
-                    getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
-                }.onFailure {
-                    _asyncLoadState.value = Loadable.Loaded(
-                        Fallible.Failed(AppError.GenericError(it, FAILED_TO_LOAD_CHART))
-                    )
-                    return@launch
-                }.onSuccess { historical ->
-                    points.addAll(historical.toPricePoints(g.millis))
-                    pushModel()
-                    _asyncLoadState.value = Loadable.Loaded(Fallible.Success(Unit))
-                }
-            } else {
-                _asyncLoadState.value = Loadable.Loaded(Fallible.Success(Unit))
-            }
+            loadHistoricalPrices(g)
 
-            var retryCount = 0
-            _streamState.value = Loadable.Loading
-
-            observeTradePricesUseCase(symbol)
-                .retryWhen { cause, _ ->
-                    if (cause is CancellationException) return@retryWhen false
-                    retryCount++
-                    if (retryCount >= MAX_STREAM_RETRIES) {
-                        _streamState.value = Loadable.Loaded(
-                            Fallible.Failed(AppError.GenericError(cause, "Live stream failed"))
-                        )
-                        return@retryWhen false
-                    }
-                    delay(RETRY_DELAY_MS.milliseconds)
-                    true
-                }
-                .sample(SAMPLE_INTERVAL_MS.milliseconds)
-                .collect { trade ->
-                    _streamState.value = Loadable.Loaded(Fallible.Success(Unit))
-                    points.foldTradePrice(trade, g)
-                    pushModel()
-                }
+            observeLivePrices(g)
         }
+    }
+
+    private suspend fun loadHistoricalPrices(g: Granularity) {
+        if (points.isNotEmpty()) {
+            _asyncLoadState.value = Loadable.Loaded(Fallible.Success(Unit))
+            return
+        }
+
+        _asyncLoadState.value = Loadable.Loading
+
+        runCatching {
+            getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
+        }.onFailure {
+            _asyncLoadState.value = Loadable.Loaded(
+                Fallible.Failed(AppError.GenericError(it, FAILED_TO_LOAD_CHART))
+            )
+        }.onSuccess { historical ->
+            points.addAll(historical.toPricePoints(g.millis))
+            pushModel()
+            _asyncLoadState.value = Loadable.Loaded(Fallible.Success(Unit))
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    private suspend fun observeLivePrices(g: Granularity) {
+        var retryCount = 0
+        _streamState.value = Loadable.Loading
+
+        observeTradePricesUseCase(symbol)
+            .retryWhen { cause, _ ->
+                if (cause is CancellationException) return@retryWhen false
+                retryCount++
+                if (retryCount >= MAX_STREAM_RETRIES) {
+                    _streamState.value = Loadable.Loaded(
+                        Fallible.Failed(AppError.GenericError(cause, "Live stream failed"))
+                    )
+                    return@retryWhen false
+                }
+                delay(RETRY_DELAY_MS.milliseconds)
+                true
+            }
+            .sample(SAMPLE_INTERVAL_MS.milliseconds)
+            .collect { trade ->
+                _streamState.value = Loadable.Loaded(Fallible.Success(Unit))
+                points.foldTradePrice(trade, g)
+                pushModel()
+            }
     }
 
     private suspend fun pushModel() {
