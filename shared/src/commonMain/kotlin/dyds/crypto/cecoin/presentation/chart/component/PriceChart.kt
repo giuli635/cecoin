@@ -118,7 +118,7 @@ fun PriceChart(
             ),
             modelProducer,
             Modifier.fillMaxSize(),
-            scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End),
+            scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.Start),
             zoomState = rememberVicoZoomState(
                 initialZoom = initialZoom,
                 minZoom = minZoom,
