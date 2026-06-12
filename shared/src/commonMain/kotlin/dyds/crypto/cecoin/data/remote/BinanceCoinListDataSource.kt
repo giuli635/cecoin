@@ -16,6 +16,10 @@ class BinanceCoinListDataSource : CoinListDataSource {
     private val http = HttpClient()
     private val json = Json { ignoreUnknownKeys = true }
 
+    override fun close() {
+        http.close()
+    }
+
     override suspend fun fetchSymbols(): List<CryptoSymbol> {
         return try {
             val url = "$BINANCE_API_URL/exchangeInfo"

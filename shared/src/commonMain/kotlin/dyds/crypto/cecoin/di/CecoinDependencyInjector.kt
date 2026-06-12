@@ -35,6 +35,12 @@ object CecoinDependencyInjector {
     private val toggleFavoriteUseCase = ToggleFavoriteUseCase(favoriteRepository)
     private val observeFavoritesUseCase = ObserveFavoritesUseCase(favoriteRepository)
 
+    fun dispose() {
+        coinPriceSource.close()
+        coinHistoricalSource.close()
+        coinListDataSource.close()
+    }
+
     @Composable
     fun getSearchViewModel(): CoinSearchViewModel {
         return viewModel {

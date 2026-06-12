@@ -27,11 +27,15 @@ import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
+private const val DEFAULT_HISTORICAL_LIMIT = 200
+private const val RETRY_DELAY_MS = 1_000L
+private const val SAMPLE_INTERVAL_MS = 33L
+
 class LiveChartViewModel(
     private val getHistoricalPricesUseCase: GetHistoricalPricesUseCase,
     private val observeTradePricesUseCase: ObserveTradePricesUseCase,
     val symbol: String,
-    private val historicalPointLimit: Int = 200,
+    private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
     private val chartModelBuilder: ChartModelBuilder = VicoChartModelBuilder(),
 ) : ViewModel() {
     val modelProducer = CartesianChartModelProducer()
@@ -60,10 +64,6 @@ class LiveChartViewModel(
     fun loadPrices() {
         priceJob?.cancel()
         priceJob = viewModelScope.launch {
-            if (!reloadPending) {
-                _asyncLoadState.value = Loadable.Loading
-            }
-
             val g = _granularity.value
 
             if (reloadPending) {
@@ -71,39 +71,46 @@ class LiveChartViewModel(
                 reloadPending = false
             }
 
-            if (points.isEmpty()) {
-                runCatching {
-                    getHistoricalPricesUseCase(
-                        symbol = symbol,
-                        interval = g.interval,
-                        limit = historicalPointLimit,
-                    )
-                }.onFailure {
-                    _asyncLoadState.value = Loadable.Loaded(
-                        Fallible.Failed(AppError.GenericError(it, "Failed to load chart"))
-                    )
-                    return@launch
-                }.onSuccess { historical ->
-                    points.addAll(historical.toPricePoints(g.millis))
-                    pushModel()
-                    _asyncLoadState.value = Loadable.Loaded(Fallible.Success(Unit))
-                }
-            } else {
-                _asyncLoadState.value = Loadable.Loaded(Fallible.Success(Unit))
-            }
+            loadHistoricalPrices(g)
 
-            observeTradePricesUseCase(symbol)
-                .retryWhen { cause, _ ->
-                    if (cause is CancellationException) return@retryWhen false
-                    delay(1_000.milliseconds)
-                    true
-                }
-                .sample(33.milliseconds)
-                .collect { trade ->
-                    points.foldTradePrice(trade, g)
-                    pushModel()
-                }
+            observeLivePrices(g)
         }
+    }
+
+    private suspend fun loadHistoricalPrices(g: Granularity) {
+        if (points.isNotEmpty()) {
+            _asyncLoadState.value = Loadable.Loaded(Fallible.Success(Unit))
+            return
+        }
+
+        _asyncLoadState.value = Loadable.Loading
+
+        runCatching {
+            getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
+        }.onFailure {
+            _asyncLoadState.value = Loadable.Loaded(
+                Fallible.Failed(AppError.GenericError(it, "Failed to load chart"))
+            )
+        }.onSuccess { historical ->
+            points.addAll(historical.toPricePoints(g.millis))
+            pushModel()
+            _asyncLoadState.value = Loadable.Loaded(Fallible.Success(Unit))
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    private suspend fun observeLivePrices(g: Granularity) {
+        observeTradePricesUseCase(symbol)
+            .retryWhen { cause, _ ->
+                if (cause is CancellationException) return@retryWhen false
+                delay(RETRY_DELAY_MS.milliseconds)
+                true
+            }
+            .sample(SAMPLE_INTERVAL_MS.milliseconds)
+            .collect { trade ->
+                points.foldTradePrice(trade, g)
+                pushModel()
+            }
     }
 
     private suspend fun pushModel() {
