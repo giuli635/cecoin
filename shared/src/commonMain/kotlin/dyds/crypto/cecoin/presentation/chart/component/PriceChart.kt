@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +39,7 @@ import dyds.crypto.cecoin.presentation.chart.util.priceFormatter
 import dyds.crypto.cecoin.presentation.chart.util.priceStr
 import dyds.crypto.cecoin.presentation.chart.util.timeFormatter
 
+
 private val startAxisLabel = TextComponent(
     textStyle = TextStyle(
         color = Color(0xFF9E9E9E),
@@ -48,9 +50,10 @@ private val startAxisLabel = TextComponent(
     padding = Insets(2.dp, 0.dp),
 )
 
-private const val INITIAL_ZOOM_FACTOR = 0.5f
+private const val INITIAL_ZOOM_FACTOR = 0.3f
 private const val MIN_ZOOM_FACTOR = 0.1f
 private const val CHART_HEIGHT_DP = 480
+private const val SCROLL_FRACTION = 0.96f
 
 private val initialZoom = Zoom.fixed(INITIAL_ZOOM_FACTOR)
 private val minZoom = Zoom.fixed(MIN_ZOOM_FACTOR)
@@ -66,6 +69,10 @@ fun PriceChart(
             thickness = 10.dp,
             shape = CircleShape,
         )
+        val scrollState = rememberVicoScrollState()
+        LaunchedEffect(modelProducer) {
+            scrollState.scroll(Scroll.Absolute.pixels(scrollState.maxValue * SCROLL_FRACTION))
+        }
         CartesianChartHost(
             rememberCartesianChart(
                 rememberChartLayer(),
@@ -118,7 +125,7 @@ fun PriceChart(
             ),
             modelProducer,
             Modifier.fillMaxSize(),
-            scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End),
+            scrollState = scrollState,
             zoomState = rememberVicoZoomState(
                 initialZoom = initialZoom,
                 minZoom = minZoom,
