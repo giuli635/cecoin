@@ -38,7 +38,7 @@ import dyds.crypto.cecoin.presentation.chart.util.ChartColors
 import dyds.crypto.cecoin.presentation.chart.util.priceFormatter
 import dyds.crypto.cecoin.presentation.chart.util.priceStr
 import dyds.crypto.cecoin.presentation.chart.util.timeFormatter
-
+import kotlinx.coroutines.delay
 
 private val startAxisLabel = TextComponent(
     textStyle = TextStyle(
@@ -53,7 +53,7 @@ private val startAxisLabel = TextComponent(
 private const val INITIAL_ZOOM_FACTOR = 0.3f
 private const val MIN_ZOOM_FACTOR = 0.1f
 private const val CHART_HEIGHT_DP = 480
-private const val SCROLL_FRACTION = 0.96f
+private const val SCROLL_END_PADDING_PX = 30f
 
 private val initialZoom = Zoom.fixed(INITIAL_ZOOM_FACTOR)
 private val minZoom = Zoom.fixed(MIN_ZOOM_FACTOR)
@@ -71,7 +71,11 @@ fun PriceChart(
         )
         val scrollState = rememberVicoScrollState()
         LaunchedEffect(modelProducer) {
-            scrollState.scroll(Scroll.Absolute.pixels(scrollState.maxValue * SCROLL_FRACTION))
+            while (scrollState.maxValue <= 0f) {
+                delay(16)
+            }
+            scrollState.scroll(Scroll.Absolute.End)
+            scrollState.scroll(Scroll.Absolute.pixels(scrollState.maxValue - SCROLL_END_PADDING_PX))
         }
         CartesianChartHost(
             rememberCartesianChart(
