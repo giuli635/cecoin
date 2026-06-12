@@ -18,6 +18,8 @@ private val BASE_URLS = listOf(
     "wss://stream.binance.com:443",
     "wss://data-stream.binance.vision",
 )
+private const val WEBSOCKET_CONNECT_ERROR = "No se pudo abrir el WebSocket de Binance"
+private const val STREAM_SUFFIX = "@trade"
 
 class BinanceCoinPriceSource : CoinPriceSource {
     private val http = HttpClient {
@@ -26,7 +28,7 @@ class BinanceCoinPriceSource : CoinPriceSource {
     private val json = Json { ignoreUnknownKeys = true }
 
     override fun tradePrices(symbol: String): Flow<TradePrice> = flow {
-        val stream = "${symbol.trim().lowercase()}@trade"
+        val stream = "${symbol.trim().lowercase()}$STREAM_SUFFIX"
         var lastError: Throwable? = null
 
         for (baseUrl in BASE_URLS) {
@@ -45,7 +47,7 @@ class BinanceCoinPriceSource : CoinPriceSource {
             }
         }
 
-        throw lastError ?: IllegalStateException("No se pudo abrir el WebSocket de Binance")
+        throw lastError ?: IllegalStateException(WEBSOCKET_CONNECT_ERROR)
     }
 
     private fun parseTrade(message: String): TradePrice? =

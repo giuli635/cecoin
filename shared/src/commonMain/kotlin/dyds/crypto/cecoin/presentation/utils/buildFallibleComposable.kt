@@ -18,6 +18,8 @@ import dyds.crypto.cecoin.presentation.buildComposableRenderer
 import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
 
+private const val RETRY_BUTTON = "Retry"
+
 fun <T> buildFallibleComposable(
     inner: Renderer<T>,
     onCancel: () -> Unit,
@@ -46,7 +48,7 @@ private fun ErrorContent(error: AppError, modifier: Modifier, onCancel: () -> Un
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onRetry) {
-                    Text(text = "Retry")
+                    Text(text = RETRY_BUTTON)
                 }
             }
         },

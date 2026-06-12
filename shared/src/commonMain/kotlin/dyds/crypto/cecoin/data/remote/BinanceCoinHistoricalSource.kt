@@ -10,6 +10,8 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 
 private const val BINANCE_API_URL = "https://api.binance.com/api/v3"
+private const val KLINE_OPEN_TIME_INDEX = 0
+private const val KLINE_CLOSE_PRICE_INDEX = 4
 
 class BinanceCoinHistoricalSource : CoinHistoricalSource {
     private val http = HttpClient()
@@ -25,8 +27,8 @@ class BinanceCoinHistoricalSource : CoinHistoricalSource {
             TradePrice(
                 symbol,
                 PricePoint(
-                    timestamp = arr[0].jsonPrimitive.content.toLong(),
-                    price = arr[4].jsonPrimitive.content.toDouble(),
+                    timestamp = arr[KLINE_OPEN_TIME_INDEX].jsonPrimitive.content.toLong(),
+                    price = arr[KLINE_CLOSE_PRICE_INDEX].jsonPrimitive.content.toDouble(),
                 ),
             )
         }

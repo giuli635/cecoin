@@ -48,15 +48,19 @@ private val startAxisLabel = TextComponent(
     padding = Insets(2.dp, 0.dp),
 )
 
-private val initialZoom = Zoom.fixed(0.3f)
-private val minZoom = Zoom.fixed(0.1f)
+private const val INITIAL_ZOOM_FACTOR = 0.3f
+private const val MIN_ZOOM_FACTOR = 0.1f
+private const val CHART_HEIGHT_DP = 480
+
+private val initialZoom = Zoom.fixed(INITIAL_ZOOM_FACTOR)
+private val minZoom = Zoom.fixed(MIN_ZOOM_FACTOR)
 
 @Composable
 fun PriceChart(
     modelProducer: CartesianChartModelProducer,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.height(480.dp)) {
+    Box(modifier = modifier.height(CHART_HEIGHT_DP.dp)) {
         val markerIndicator = rememberLineComponent(
             fill = Fill(ChartColors.accent),
             thickness = 10.dp,

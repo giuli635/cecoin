@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+private const val FAILED_TO_LOAD_SYMBOLS = "Failed to load symbols"
+
 class CoinSearchViewModel(
     private val getAvailableSymbolsUseCase: GetAvailableSymbolsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
@@ -65,7 +67,7 @@ class CoinSearchViewModel(
                 _asyncAvailableSymbols.value = Loadable.Loaded(Fallible.Success(symbols))
             } catch (e: Exception) {
                 _asyncAvailableSymbols.value = Loadable.Loaded(
-                    Fallible.Failed(AppError.GenericError(e, "Failed to load symbols"))
+                    Fallible.Failed(AppError.GenericError(e, FAILED_TO_LOAD_SYMBOLS))
                 )
             }
         }
@@ -81,10 +83,6 @@ class CoinSearchViewModel(
 
     fun onSearchQueryChange(query: String) {
         _uiState.value = _uiState.value.copy(searchQuery = query)
-    }
-
-    fun selectCoin(coin: String) {
-        _uiState.value = _uiState.value.copy(selectedCoin = coin)
     }
 
     fun setFilterMode(mode: FilterMode) {

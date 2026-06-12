@@ -9,10 +9,15 @@ import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.pow
 
+private const val DEFAULT_Y_RANGE_GAP = 1.0
+private const val Y_PADDING_FACTOR = 0.06
+private const val X_PADDING_FACTOR = 0.05
+private const val DEFAULT_X_RANGE_MS = 60_000.0
+
 fun computeChartYRange(dataMin: Double, dataMax: Double): ChartRange {
-    if (dataMax <= dataMin) return ChartRange(dataMin - 1.0, dataMax + 1.0)
+    if (dataMax <= dataMin) return ChartRange(dataMin - DEFAULT_Y_RANGE_GAP, dataMax + DEFAULT_Y_RANGE_GAP)
     val rawRange = dataMax - dataMin
-    val padding = max(rawRange, 1.0) * 0.06
+    val padding = max(rawRange, 1.0) * Y_PADDING_FACTOR
     val paddedMin = dataMin - padding
     val paddedMax = dataMax + padding
     val step = niceStep(paddedMax - paddedMin)
@@ -24,11 +29,11 @@ fun computeChartYRange(dataMin: Double, dataMax: Double): ChartRange {
 
 fun computeChartXRange(dataMin: Double, dataMax: Double): ChartRange {
     val rawRange = dataMax - dataMin
-    if (rawRange <= 0.0) return ChartRange(dataMin, dataMax + 60_000.0)
+    if (rawRange <= 0.0) return ChartRange(dataMin, dataMax + DEFAULT_X_RANGE_MS)
     val step = niceTimeStep(rawRange)
     return ChartRange(
         min = dataMin,
-        max = ceil((dataMax + rawRange * 0.05) / step) * step,
+        max = ceil((dataMax + rawRange * X_PADDING_FACTOR) / step) * step,
     )
 }
 
@@ -46,15 +51,34 @@ fun createRangeProvider(): CartesianLayerRangeProvider = object : CartesianLayer
         computeChartXRange(minX, maxX).max
 }
 
+private const val NICE_STEP_THRESHOLD_1 = 1.5
+private const val NICE_STEP_THRESHOLD_2 = 3.0
+private const val NICE_STEP_THRESHOLD_3 = 7.0
+private const val NICE_STEP_VALUE_1 = 1.0
+private const val NICE_STEP_VALUE_2 = 2.0
+private const val NICE_STEP_VALUE_5 = 5.0
+private const val NICE_STEP_VALUE_10 = 10.0
+
+private const val SECONDS_IN_MINUTE = 60
+private const val SECONDS_IN_HOUR = 3600
+private const val SECONDS_IN_DAY = 86_400
+private const val MILLIS_IN_MINUTE = 60_000.0
+private const val MILLIS_IN_5_MIN = 300_000.0
+private const val MILLIS_IN_15_MIN = 900_000.0
+private const val MILLIS_IN_30_MIN = 1_800_000.0
+private const val MILLIS_IN_1_HOUR = 3_600_000.0
+private const val MILLIS_IN_6_HOURS = 21_600_000.0
+private const val MILLIS_IN_1_DAY = 86_400_000.0
+
 fun niceStep(range: Double): Double {
-    if (range <= 0.0) return 1.0
+    if (range <= 0.0) return NICE_STEP_VALUE_1
     val exponent = floor(log10(range)).toInt()
     val fraction = range / 10.0.pow(exponent)
     val niceFraction = when {
-        fraction < 1.5 -> 1.0
-        fraction < 3.0 -> 2.0
-        fraction < 7.0 -> 5.0
-        else -> 10.0
+        fraction < NICE_STEP_THRESHOLD_1 -> NICE_STEP_VALUE_1
+        fraction < NICE_STEP_THRESHOLD_2 -> NICE_STEP_VALUE_2
+        fraction < NICE_STEP_THRESHOLD_3 -> NICE_STEP_VALUE_5
+        else -> NICE_STEP_VALUE_10
     }
     return niceFraction * 10.0.pow(exponent)
 }
@@ -62,12 +86,12 @@ fun niceStep(range: Double): Double {
 private fun niceTimeStep(rangeMs: Double): Double {
     val rangeSec = rangeMs / 1000.0
     return when {
-        rangeSec < 60 -> 60_000.0
-        rangeSec < 60 * 10 -> 300_000.0
-        rangeSec < 60 * 30 -> 900_000.0
-        rangeSec < 3600 -> 1_800_000.0
-        rangeSec < 3600 * 6 -> 3_600_000.0
-        rangeSec < 3600 * 24 -> 21_600_000.0
-        else -> 86_400_000.0
+        rangeSec < SECONDS_IN_MINUTE -> MILLIS_IN_MINUTE
+        rangeSec < SECONDS_IN_MINUTE * 10 -> MILLIS_IN_5_MIN
+        rangeSec < SECONDS_IN_MINUTE * 30 -> MILLIS_IN_15_MIN
+        rangeSec < SECONDS_IN_HOUR -> MILLIS_IN_30_MIN
+        rangeSec < SECONDS_IN_HOUR * 6 -> MILLIS_IN_1_HOUR
+        rangeSec < SECONDS_IN_HOUR * 24 -> MILLIS_IN_6_HOURS
+        else -> MILLIS_IN_1_DAY
     }
 }

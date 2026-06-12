@@ -10,7 +10,4 @@ sealed class Fallible<out T> {
     data class Success<T>(val value: T) : Fallible<T>()
 }
 
-fun <T> Result<T>.toFallible(message: String): Fallible<T> = this.fold(
-    onSuccess = { Fallible.Success(it) },
-    onFailure = { Fallible.Failed(AppError.GenericError(it, message)) }
-)
+

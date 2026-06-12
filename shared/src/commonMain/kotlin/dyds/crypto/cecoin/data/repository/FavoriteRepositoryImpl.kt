@@ -4,7 +4,7 @@ import dyds.crypto.cecoin.data.local.FavoriteLocalSource
 import dyds.crypto.cecoin.domain.repository.FavoriteRepository
 import kotlinx.coroutines.flow.Flow
 
-internal class FavoriteRepositoryImpl(
+class FavoriteRepositoryImpl(
     private val source: FavoriteLocalSource,
 ) : FavoriteRepository {
     override fun observeFavorites(): Flow<Set<String>> = source.favorites

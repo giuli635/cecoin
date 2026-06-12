@@ -27,8 +27,14 @@ import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.presentation.chart.component.GranularitySelector
 import dyds.crypto.cecoin.presentation.chart.component.PriceChart
 import dyds.crypto.cecoin.presentation.chart.util.ChartColors
+import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
+
+private const val BACK_BUTTON = "Back"
+private const val USD_LABEL = "USD"
+private const val RETRY_BUTTON = "Retry"
+private const val STREAM_ERROR_RETRY = "Reconnecting..."
 
 @Composable
 fun ChartScreen(
@@ -37,6 +43,7 @@ fun ChartScreen(
     onBack: () -> Unit,
 ) {
     val asyncLoadState by viewModel.asyncLoadState.collectAsState()
+    val streamState by viewModel.streamState.collectAsState()
     val granularity by viewModel.granularity.collectAsState()
     val lastPrice by viewModel.lastPrice.collectAsState()
 
@@ -56,7 +63,7 @@ fun ChartScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
-            Button(onClick = onBack) { Text("Back") }
+            Button(onClick = onBack) { Text(BACK_BUTTON) }
         }
 
         if (lastPrice > 0.0) {
@@ -69,7 +76,7 @@ fun ChartScreen(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "USD",
+                    text = USD_LABEL,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 4.dp),
@@ -114,8 +121,22 @@ fun ChartScreen(
                         contentAlignment = Alignment.Center,
                     ) {
                         Button(onClick = viewModel::loadPrices) {
-                            Text("Retry")
+                            Text(RETRY_BUTTON)
                         }
+                    }
+                }
+                val streamFailed = streamState is Loadable.Loaded &&
+                    (streamState as Loadable.Loaded).value is Fallible.Failed
+                if (streamFailed) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = STREAM_ERROR_RETRY,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     }
                 }
             }

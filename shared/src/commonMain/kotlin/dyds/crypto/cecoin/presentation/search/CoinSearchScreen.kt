@@ -24,6 +24,11 @@ import dyds.crypto.cecoin.presentation.search.component.FilterDropdown
 import dyds.crypto.cecoin.presentation.utils.buildAsyncComposable
 import dyds.crypto.cecoin.utils.Loadable
 
+private const val SEARCH_TITLE = "Search Coins"
+private const val SEARCH_LABEL = "Search symbol (e.g., BTC, ETH)"
+private const val AVAILABLE_COINS_LABEL = "Available Coins"
+private const val NO_COINS_FOUND = "No coins found matching '"
+
 @Composable
 fun CoinSearchScreen(
     modifier: Modifier = Modifier,
@@ -41,7 +46,7 @@ fun CoinSearchScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            text = "Search Coins",
+            text = SEARCH_TITLE,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
         )
@@ -54,7 +59,7 @@ fun CoinSearchScreen(
             OutlinedTextField(
                 value = uiState.searchQuery,
                 onValueChange = viewModel::onSearchQueryChange,
-                label = { Text("Search symbol (e.g., BTC, ETH)") },
+                label = { Text(SEARCH_LABEL) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
                 enabled = asyncFilteredCoins !is Loadable.Loading,
@@ -67,7 +72,7 @@ fun CoinSearchScreen(
         }
 
         Text(
-            text = "Available Coins",
+            text = AVAILABLE_COINS_LABEL,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
         )
@@ -95,7 +100,6 @@ private fun coinsListRenderer(
                 coin = coin,
                 isFavorite = coin in favorites,
                 onClick = {
-                    viewModel.selectCoin(coin)
                     onCoinSelected(coin)
                 },
                 onFavoriteClick = { viewModel.toggleFavorite(coin) },
@@ -105,7 +109,7 @@ private fun coinsListRenderer(
         if (coins.isEmpty() && searchQuery.isNotEmpty()) {
             item {
                 Text(
-                    text = "No coins found matching '$searchQuery'",
+                    text = "$NO_COINS_FOUND$searchQuery'",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp),
                 )

@@ -30,6 +30,8 @@ import kotlin.time.Duration.Companion.milliseconds
 private const val DEFAULT_HISTORICAL_LIMIT = 200
 private const val RETRY_DELAY_MS = 1_000L
 private const val SAMPLE_INTERVAL_MS = 33L
+private const val MAX_STREAM_RETRIES = 3
+private const val FAILED_TO_LOAD_CHART = "Failed to load chart"
 
 class LiveChartViewModel(
     private val getHistoricalPricesUseCase: GetHistoricalPricesUseCase,
@@ -42,6 +44,9 @@ class LiveChartViewModel(
 
     private val _asyncLoadState = MutableStateFlow<AsyncResult<Unit>>(Loadable.Loading)
     val asyncLoadState: StateFlow<AsyncResult<Unit>> = _asyncLoadState.asStateFlow()
+
+    private val _streamState = MutableStateFlow<AsyncResult<Unit>>(Loadable.Loading)
+    val streamState: StateFlow<AsyncResult<Unit>> = _streamState.asStateFlow()
 
     private val _granularity = MutableStateFlow(Granularity.M1)
     val granularity: StateFlow<Granularity> = _granularity.asStateFlow()
@@ -89,7 +94,7 @@ class LiveChartViewModel(
             getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
         }.onFailure {
             _asyncLoadState.value = Loadable.Loaded(
-                Fallible.Failed(AppError.GenericError(it, "Failed to load chart"))
+                Fallible.Failed(AppError.GenericError(it, FAILED_TO_LOAD_CHART))
             )
         }.onSuccess { historical ->
             points.addAll(historical.toPricePoints(g.millis))
@@ -100,14 +105,25 @@ class LiveChartViewModel(
 
     @OptIn(FlowPreview::class)
     private suspend fun observeLivePrices(g: Granularity) {
+        var retryCount = 0
+        _streamState.value = Loadable.Loading
+
         observeTradePricesUseCase(symbol)
             .retryWhen { cause, _ ->
                 if (cause is CancellationException) return@retryWhen false
+                retryCount++
+                if (retryCount >= MAX_STREAM_RETRIES) {
+                    _streamState.value = Loadable.Loaded(
+                        Fallible.Failed(AppError.GenericError(cause, "Live stream failed"))
+                    )
+                    return@retryWhen false
+                }
                 delay(RETRY_DELAY_MS.milliseconds)
                 true
             }
             .sample(SAMPLE_INTERVAL_MS.milliseconds)
             .collect { trade ->
+                _streamState.value = Loadable.Loaded(Fallible.Success(Unit))
                 points.foldTradePrice(trade, g)
                 pushModel()
             }
