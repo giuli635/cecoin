@@ -48,7 +48,7 @@ private val startAxisLabel = TextComponent(
     padding = Insets(2.dp, 0.dp),
 )
 
-private const val INITIAL_ZOOM_FACTOR = 0.3f
+private const val INITIAL_ZOOM_FACTOR = 0.5f
 private const val MIN_ZOOM_FACTOR = 0.1f
 private const val CHART_HEIGHT_DP = 480
 
@@ -118,7 +118,7 @@ fun PriceChart(
             ),
             modelProducer,
             Modifier.fillMaxSize(),
-            scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.Start),
+            scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End),
             zoomState = rememberVicoZoomState(
                 initialZoom = initialZoom,
                 minZoom = minZoom,
