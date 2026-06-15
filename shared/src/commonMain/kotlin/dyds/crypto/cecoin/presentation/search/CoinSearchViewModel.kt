@@ -28,7 +28,6 @@ class CoinSearchViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CoinSearchUiState())
     val uiState: StateFlow<CoinSearchUiState> = _uiState.asStateFlow()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, CoinSearchUiState())
 
     private val _asyncAvailableSymbols = MutableStateFlow<AsyncResult<List<String>>>(Loadable.Loading)
 
@@ -79,6 +78,7 @@ class CoinSearchViewModel(
 
     fun onCancelLoadSymbols() {
         loadSymbolsJob?.cancel()
+        loadSymbolsJob = null
     }
 
     fun onSearchQueryChange(query: String) {

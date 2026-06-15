@@ -1,8 +1,8 @@
 package dyds.crypto.cecoin.data.repository
 
-import dyds.crypto.cecoin.data.remote.CoinHistoricalSource
-import dyds.crypto.cecoin.data.remote.CoinListDataSource
-import dyds.crypto.cecoin.data.remote.CoinPriceSource
+import dyds.crypto.cecoin.data.FakeCoinHistoricalSource
+import dyds.crypto.cecoin.data.FakeCoinListDataSource
+import dyds.crypto.cecoin.data.FakeCoinPriceSource
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.domain.model.TradePrice
@@ -81,43 +81,4 @@ class CecoinRepositoryImplTest {
     }
 }
 
-// --- Fakes ---
 
-internal class FakeCoinListDataSource(
-    private val symbols: List<CryptoSymbol> = emptyList(),
-) : CoinListDataSource {
-    override suspend fun fetchSymbols(): List<CryptoSymbol> = symbols
-    override fun close() {}
-}
-
-internal class FakeCoinHistoricalSource(
-    private val prices: List<TradePrice> = emptyList(),
-) : CoinHistoricalSource {
-    var lastSymbol: String = ""
-    var lastInterval: String = ""
-    var lastLimit: Int = 0
-
-    override suspend fun getHistoricalPrices(
-        symbol: String, interval: String, limit: Int,
-    ): List<TradePrice> {
-        lastSymbol = symbol
-        lastInterval = interval
-        lastLimit = limit
-        return prices
-    }
-
-    override fun close() {}
-}
-
-internal class FakeCoinPriceSource(
-    private val flow: kotlinx.coroutines.flow.Flow<TradePrice> = kotlinx.coroutines.flow.emptyFlow(),
-) : CoinPriceSource {
-    var lastSymbol: String = ""
-
-    override fun tradePrices(symbol: String): kotlinx.coroutines.flow.Flow<TradePrice> {
-        lastSymbol = symbol
-        return flow
-    }
-
-    override fun close() {}
-}

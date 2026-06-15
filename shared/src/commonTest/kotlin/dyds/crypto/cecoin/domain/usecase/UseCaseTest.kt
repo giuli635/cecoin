@@ -1,17 +1,16 @@
 package dyds.crypto.cecoin.domain.usecase
 
+import dyds.crypto.cecoin.domain.FakeCryptoSymbolRepository
+import dyds.crypto.cecoin.domain.FakeFavoriteRepository
+import dyds.crypto.cecoin.domain.FakeTradePriceRepository
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.domain.model.TradePrice
-import dyds.crypto.cecoin.domain.repository.CryptoSymbolRepository
-import dyds.crypto.cecoin.domain.repository.FavoriteRepository
-import dyds.crypto.cecoin.domain.repository.TradePriceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 
 class GetAvailableSymbolsUseCaseTest {
     @Test
@@ -64,7 +63,7 @@ class ObserveTradePricesUseCaseTest {
     @Test
     fun `invoke returns flow from repository`() = runTest {
         val expected = TradePrice("BTCUSDT", PricePoint(1000L, 50000.0))
-        val repo = FakeTradePriceRepository(priceFlow = flowOf(expected))
+        val repo = FakeTradePriceRepository(tradeFlow = flowOf(expected))
         val useCase = ObserveTradePricesUseCase(repo)
 
         val result = useCase("BTCUSDT")
@@ -77,7 +76,7 @@ class ObserveFavoritesUseCaseTest {
     @Test
     fun `invoke returns favorites flow from repository`() = runTest {
         val expected = setOf("BTCUSDT", "ETHUSDT")
-        val repo = FakeFavoriteRepository(flowOf(expected))
+        val repo = FakeFavoriteRepository(initialFavorites = expected)
         val useCase = ObserveFavoritesUseCase(repo)
 
         val result = useCase()
@@ -98,33 +97,4 @@ class ToggleFavoriteUseCaseTest {
     }
 }
 
-// --- Fakes ---
 
-internal class FakeCryptoSymbolRepository(
-    private val symbols: List<CryptoSymbol> = emptyList(),
-) : CryptoSymbolRepository {
-    override suspend fun getAvailableSymbols(): List<CryptoSymbol> = symbols
-}
-
-internal class FakeTradePriceRepository(
-    private val historical: List<TradePrice> = emptyList(),
-    private val priceFlow: kotlinx.coroutines.flow.Flow<TradePrice> = kotlinx.coroutines.flow.emptyFlow(),
-) : TradePriceRepository {
-    override suspend fun getHistoricalPrices(
-        symbol: String, interval: String, limit: Int,
-    ): List<TradePrice> = historical
-
-    override fun observeTradePrices(symbol: String): kotlinx.coroutines.flow.Flow<TradePrice> = priceFlow
-}
-
-internal class FakeFavoriteRepository(
-    private val favoritesFlow: kotlinx.coroutines.flow.Flow<Set<String>> = kotlinx.coroutines.flow.flowOf(emptySet()),
-) : FavoriteRepository {
-    var toggledSymbol: String? = null
-
-    override fun observeFavorites(): kotlinx.coroutines.flow.Flow<Set<String>> = favoritesFlow
-
-    override suspend fun toggleFavorite(symbol: String) {
-        toggledSymbol = symbol
-    }
-}

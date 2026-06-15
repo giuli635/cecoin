@@ -1,53 +1,35 @@
 package dyds.crypto.cecoin.presentation
 
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import dyds.crypto.cecoin.domain.FakeTradePriceRepository
 import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.domain.model.TradePrice
-import dyds.crypto.cecoin.domain.repository.TradePriceRepository
 import dyds.crypto.cecoin.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.presentation.chart.LiveChartViewModel
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
-import dyds.crypto.cecoin.presentation.chart.util.ChartModelBuilder
+import dyds.crypto.cecoin.presentation.chart.util.foldTradePrice
 import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class LiveChartViewModelTest {
 
-    @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(Dispatchers.Unconfined)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
     @Test
-    fun `loadPrices loads historical data and emits success`() = runBlocking {
+    fun `loadPrices loads historical data and emits success`() = runTest {
         val historical = listOf(
             TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
             TradePrice("BTCUSDT", PricePoint(60_000L, 51000.0)),
         )
-        val priceSource = FakeTradePriceRepo2(historical = historical)
+        val priceSource = FakeTradePriceRepository(historical = historical)
         val fakeBuilder = FakeChartModelBuilder()
         val viewModel = createViewModel(priceSource, fakeBuilder)
 
@@ -59,36 +41,35 @@ class LiveChartViewModelTest {
     }
 
     @Test
-    fun `loadPrices emits failure when historical fetch fails`() = runBlocking {
-        val priceSource = FakeTradePriceRepo2(historicalException = RuntimeException("Network error"))
+    fun `loadPrices emits failure when historical fetch fails`() = runTest {
+        val priceSource = FakeTradePriceRepository(historicalException = RuntimeException("Network error"))
         val viewModel = createViewModel(priceSource)
 
         viewModel.loadPrices()
 
-        val state = viewModel.asyncLoadState.first()
+        val state = viewModel.asyncLoadState.first { it !is Loadable.Loading }
         assertIs<Loadable.Loaded<*>>(state)
         val fallible = (state as Loadable.Loaded).value
         assertIs<Fallible.Failed>(fallible)
-        val error = (fallible as Fallible.Failed).error
+        val error = fallible.error
         assertIs<AppError.GenericError>(error)
         assertTrue(error.userMessage.contains("Failed to load chart"))
     }
 
     @Test
-    fun `loadPrices sets stream state as Loading`() = runBlocking {
-        val priceSource = FakeTradePriceRepo2(historical = emptyList(), tradeFlow = MutableSharedFlow())
+    fun `loadPrices sets stream state as Loading`() = runTest {
+        val priceSource = FakeTradePriceRepository(historical = emptyList(), tradeFlow = MutableSharedFlow())
         val viewModel = createViewModel(priceSource)
 
         viewModel.loadPrices()
 
         viewModel.asyncLoadState.first { it !is Loadable.Loading }
         assertIs<Loadable.Loading>(viewModel.streamState.first())
-        Unit
     }
 
     @Test
-    fun `setGranularity updates granularity`() = runBlocking {
-        val priceSource = FakeTradePriceRepo2(historical = emptyList())
+    fun `setGranularity updates granularity`() = runTest {
+        val priceSource = FakeTradePriceRepository(historical = emptyList())
         val viewModel = createViewModel(priceSource)
 
         viewModel.setGranularity(Granularity.M5)
@@ -97,8 +78,8 @@ class LiveChartViewModelTest {
     }
 
     @Test
-    fun `setGranularity same value does not reload`() = runBlocking {
-        val priceSource = FakeTradePriceRepo2(historical = listOf(
+    fun `setGranularity same value does not reload`() = runTest {
+        val priceSource = FakeTradePriceRepository(historical = listOf(
             TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
         ))
         val viewModel = createViewModel(priceSource)
@@ -109,29 +90,30 @@ class LiveChartViewModelTest {
         viewModel.setGranularity(Granularity.M1)
 
         assertIs<Loadable.Loaded<*>>(viewModel.asyncLoadState.first())
-        Unit
     }
 
     @Test
-    fun `historical limit is passed through`() = runBlocking {
-        val priceSource = FakeTradePriceRepo2(historical = emptyList())
+    fun `historical limit is passed through`() = runTest {
+        val priceSource = FakeTradePriceRepository(historical = emptyList())
         val viewModel = LiveChartViewModel(
             getHistoricalPricesUseCase = GetHistoricalPricesUseCase(priceSource),
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
             historicalPointLimit = 50,
             chartModelBuilder = FakeChartModelBuilder(),
+            retryDelayMs = 0,
         )
 
         viewModel.loadPrices()
+        viewModel.asyncLoadState.first { it !is Loadable.Loading }
 
         assertEquals(50, priceSource.lastLimit)
     }
 
     @Test
-    fun `live prices update lastPrice`() = runBlocking {
+    fun `live prices update lastPrice`() = runTest {
         val tradeFlow = MutableSharedFlow<TradePrice>()
-        val priceSource = FakeTradePriceRepo2(
+        val priceSource = FakeTradePriceRepository(
             historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
             tradeFlow = tradeFlow,
         )
@@ -147,8 +129,163 @@ class LiveChartViewModelTest {
         assertTrue(fakeBuilder.called)
     }
 
+    @Test
+    fun `out of order trade is ignored`() = runTest {
+        val tradeFlow = MutableSharedFlow<TradePrice>()
+        val priceSource = FakeTradePriceRepository(
+            historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
+            tradeFlow = tradeFlow,
+        )
+        val fakeBuilder = FakeChartModelBuilder()
+        val viewModel = createViewModel(priceSource, fakeBuilder)
+
+        viewModel.loadPrices()
+        viewModel.asyncLoadState.first { it !is Loadable.Loading }
+
+        tradeFlow.emit(TradePrice("BTCUSDT", PricePoint(100_000L, 52000.0)))
+
+        viewModel.lastPrice.first { it == 52000.0 }
+
+        tradeFlow.emit(TradePrice("BTCUSDT", PricePoint(30_000L, 51000.0)))
+
+        assertEquals(52000.0, viewModel.lastPrice.first())
+    }
+
+    @Test
+    fun `loadPrices called twice cancels previous job and skips historical when points exist`() = runTest {
+        val historical = listOf(
+            TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
+            TradePrice("BTCUSDT", PricePoint(60_000L, 51000.0)),
+        )
+        val priceSource = FakeTradePriceRepository(historical = historical)
+        val fakeBuilder = FakeChartModelBuilder()
+        val viewModel = createViewModel(priceSource, fakeBuilder)
+
+        viewModel.loadPrices()
+        viewModel.asyncLoadState.first { it !is Loadable.Loading }
+
+        viewModel.loadPrices()
+        viewModel.asyncLoadState.first { it !is Loadable.Loading }
+
+        assertIs<Loadable.Loaded<*>>(viewModel.asyncLoadState.first())
+    }
+
+    @Test
+    fun `onCleared does not crash when no active job`() = runTest {
+        val priceSource = FakeTradePriceRepository()
+        val viewModel = LiveChartViewModel(
+            getHistoricalPricesUseCase = GetHistoricalPricesUseCase(priceSource),
+            observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
+            symbol = "BTCUSDT",
+            historicalPointLimit = 200,
+            chartModelBuilder = FakeChartModelBuilder(),
+            retryDelayMs = 0,
+        )
+
+        viewModel.onCleared()
+
+        val state = viewModel.asyncLoadState.first()
+        assertIs<Loadable.Loading>(state)
+    }
+
+    @Test
+    fun `onCleared cancels active job`() = runTest {
+        val priceSource = FakeTradePriceRepository(historical = listOf(
+            TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
+        ))
+        val viewModel = LiveChartViewModel(
+            getHistoricalPricesUseCase = GetHistoricalPricesUseCase(priceSource),
+            observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
+            symbol = "BTCUSDT",
+            historicalPointLimit = 200,
+            chartModelBuilder = FakeChartModelBuilder(),
+            retryDelayMs = 0,
+        )
+
+        viewModel.loadPrices()
+        viewModel.asyncLoadState.first { it !is Loadable.Loading }
+
+        viewModel.onCleared()
+
+        assertIs<Loadable.Loaded<*>>(viewModel.asyncLoadState.first())
+    }
+
+    @Test
+    fun `live stream retries on failure and emits error state`() = runTest {
+        val tradeFlow = flow<Nothing> { throw RuntimeException("Stream error") }
+        val priceSource = FakeTradePriceRepository(
+            historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
+            tradeFlow = tradeFlow,
+        )
+        val viewModel = createViewModel(priceSource)
+
+        viewModel.loadPrices()
+
+        val state = viewModel.streamState.first { it !is Loadable.Loading }
+        assertIs<Loadable.Loaded<*>>(state)
+        val fallible = (state as Loadable.Loaded).value
+        assertIs<Fallible.Failed>(fallible)
+        val error = fallible.error as AppError.GenericError
+        assertTrue(error.userMessage.contains("Live stream failed"))
+    }
+
+    @Test
+    fun `live stream processes trade when historical fetch fails and points are empty`() = runTest {
+        val tradeFlow = MutableSharedFlow<TradePrice>()
+        val priceSource = FakeTradePriceRepository(
+            historical = emptyList(),
+            historicalException = RuntimeException("History error"),
+            tradeFlow = tradeFlow,
+        )
+        val viewModel = createViewModel(priceSource)
+
+        viewModel.loadPrices()
+        viewModel.asyncLoadState.first { it !is Loadable.Loading }
+
+        tradeFlow.emit(TradePrice("BTCUSDT", PricePoint(100_000L, 52000.0)))
+        viewModel.lastPrice.first { it == 52000.0 }
+
+        assertIs<Loadable.Loaded<*>>(viewModel.asyncLoadState.first())
+    }
+
+    @Test
+    fun `foldTradePrice adds price when points is empty`() = runTest {
+        val points = mutableListOf<PricePoint>()
+        val trade = TradePrice("BTCUSDT", PricePoint(100_000L, 52000.0))
+        points.foldTradePrice(trade, Granularity.M1)
+
+        val expectedTimestamp = (100_000L / 60_000L) * 60_000L
+        assertEquals(1, points.size)
+        assertEquals(expectedTimestamp, points[0].timestamp)
+        assertEquals(52000.0, points[0].price)
+    }
+
+    @Test
+    fun `live stream stops retrying on CancellationException`() = runTest {
+        val tradeFlow = flow<Nothing> { throw CancellationException("Cancelled") }
+        val priceSource = FakeTradePriceRepository(
+            historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
+            tradeFlow = tradeFlow,
+        )
+        val viewModel = createViewModel(priceSource)
+
+        viewModel.loadPrices()
+
+        assertIs<Loadable.Loading>(viewModel.streamState.first())
+    }
+
+    @Test
+    fun `foldTradePrice ignores out of order trade`() = runTest {
+        val points = mutableListOf(PricePoint(60_000L, 52000.0))
+        val trade = TradePrice("BTCUSDT", PricePoint(30_000L, 51000.0))
+        points.foldTradePrice(trade, Granularity.M1)
+
+        assertEquals(1, points.size)
+        assertEquals(52000.0, points[0].price)
+    }
+
     private fun createViewModel(
-        priceSource: FakeTradePriceRepo2 = FakeTradePriceRepo2(),
+        priceSource: FakeTradePriceRepository = FakeTradePriceRepository(),
         fakeBuilder: FakeChartModelBuilder = FakeChartModelBuilder(),
     ): LiveChartViewModel {
         return LiveChartViewModel(
@@ -157,46 +294,7 @@ class LiveChartViewModelTest {
             symbol = "BTCUSDT",
             historicalPointLimit = 200,
             chartModelBuilder = fakeBuilder,
+            retryDelayMs = 0,
         )
-    }
-}
-
-internal class FakeTradePriceRepo2(
-    private val historical: List<TradePrice> = emptyList(),
-    private val historicalException: Throwable? = null,
-    private val tradeFlow: Flow<TradePrice> = emptyFlow(),
-) : TradePriceRepository {
-    var lastSymbol: String = ""
-    var lastInterval: String = ""
-    var lastLimit: Int = 0
-
-    override suspend fun getHistoricalPrices(
-        symbol: String, interval: String, limit: Int,
-    ): List<TradePrice> {
-        lastSymbol = symbol
-        lastInterval = interval
-        lastLimit = limit
-        historicalException?.let { throw it }
-        return historical
-    }
-
-    override fun observeTradePrices(symbol: String): Flow<TradePrice> {
-        lastSymbol = symbol
-        return tradeFlow
-    }
-}
-
-internal class FakeChartModelBuilder : ChartModelBuilder {
-    var called = false
-    var lastPoints: List<PricePoint> = emptyList()
-    var lastProducer: CartesianChartModelProducer? = null
-
-    override suspend fun buildModel(
-        points: List<PricePoint>,
-        modelProducer: CartesianChartModelProducer,
-    ) {
-        called = true
-        lastPoints = points
-        lastProducer = modelProducer
     }
 }

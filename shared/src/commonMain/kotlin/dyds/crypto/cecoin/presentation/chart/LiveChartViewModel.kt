@@ -16,29 +16,28 @@ import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.retryWhen
-import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val DEFAULT_HISTORICAL_LIMIT = 200
 private const val RETRY_DELAY_MS = 1_000L
-private const val SAMPLE_INTERVAL_MS = 33L
 private const val MAX_STREAM_RETRIES = 3
 private const val FAILED_TO_LOAD_CHART = "Failed to load chart"
 
-class LiveChartViewModel(
+open class LiveChartViewModel(
     private val getHistoricalPricesUseCase: GetHistoricalPricesUseCase,
     private val observeTradePricesUseCase: ObserveTradePricesUseCase,
     val symbol: String,
     private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
     private val chartModelBuilder: ChartModelBuilder = VicoChartModelBuilder(),
+    private val retryDelayMs: Long = RETRY_DELAY_MS,
 ) : ViewModel() {
     val modelProducer = CartesianChartModelProducer()
 
@@ -65,7 +64,6 @@ class LiveChartViewModel(
         loadPrices()
     }
 
-    @OptIn(FlowPreview::class)
     fun loadPrices() {
         priceJob?.cancel()
         priceJob = viewModelScope.launch {
@@ -103,7 +101,6 @@ class LiveChartViewModel(
         }
     }
 
-    @OptIn(FlowPreview::class)
     private suspend fun observeLivePrices(g: Granularity) {
         var retryCount = 0
         _streamState.value = Loadable.Loading
@@ -112,16 +109,16 @@ class LiveChartViewModel(
             .retryWhen { cause, _ ->
                 if (cause is CancellationException) return@retryWhen false
                 retryCount++
-                if (retryCount >= MAX_STREAM_RETRIES) {
-                    _streamState.value = Loadable.Loaded(
-                        Fallible.Failed(AppError.GenericError(cause, "Live stream failed"))
-                    )
-                    return@retryWhen false
-                }
-                delay(RETRY_DELAY_MS.milliseconds)
+                if (retryCount >= MAX_STREAM_RETRIES) return@retryWhen false
+                delay(retryDelayMs.milliseconds)
                 true
             }
-            .sample(SAMPLE_INTERVAL_MS.milliseconds)
+            .catch { e ->
+                if (e is CancellationException) throw e
+                _streamState.value = Loadable.Loaded(
+                    Fallible.Failed(AppError.GenericError(e, "Live stream failed"))
+                )
+            }
             .collect { trade ->
                 _streamState.value = Loadable.Loaded(Fallible.Success(Unit))
                 points.foldTradePrice(trade, g)
@@ -135,7 +132,7 @@ class LiveChartViewModel(
         chartModelBuilder.buildModel(points, modelProducer)
     }
 
-    override fun onCleared() {
+    public override fun onCleared() {
         super.onCleared()
         priceJob?.cancel()
     }
