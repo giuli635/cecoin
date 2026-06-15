@@ -7,14 +7,19 @@ import dyds.crypto.cecoin.data.local.createFavoriteStorage
 import dyds.crypto.cecoin.data.remote.BinanceCoinHistoricalSource
 import dyds.crypto.cecoin.data.remote.BinanceCoinListDataSource
 import dyds.crypto.cecoin.data.remote.BinanceCoinPriceSource
+import dyds.crypto.cecoin.data.remote.NewsApiRestDataSource
+import dyds.crypto.cecoin.data.remote.NewsApiDataSource
 import dyds.crypto.cecoin.data.repository.CecoinRepositoryImpl
 import dyds.crypto.cecoin.data.repository.FavoriteRepositoryImpl
+import dyds.crypto.cecoin.data.repository.NewsRepositoryImpl
 import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
 import dyds.crypto.cecoin.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
+import dyds.crypto.cecoin.domain.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.presentation.chart.LiveChartViewModel
+import dyds.crypto.cecoin.presentation.news.NewsViewModel
 import dyds.crypto.cecoin.presentation.search.CoinSearchViewModel
 
 object CecoinDependencyInjector {
@@ -35,10 +40,15 @@ object CecoinDependencyInjector {
     private val toggleFavoriteUseCase = ToggleFavoriteUseCase(favoriteRepository)
     private val observeFavoritesUseCase = ObserveFavoritesUseCase(favoriteRepository)
 
+    private val newsApiDataSource: NewsApiDataSource = NewsApiRestDataSource()
+    private val newsRepository = NewsRepositoryImpl(newsApiDataSource)
+    private val getCryptoNewsUseCase = GetCryptoNewsUseCase(newsRepository)
+
     fun dispose() {
         coinPriceSource.close()
         coinHistoricalSource.close()
         coinListDataSource.close()
+        newsApiDataSource.close()
     }
 
     @Composable
@@ -59,6 +69,15 @@ object CecoinDependencyInjector {
                 getHistoricalPricesUseCase = getHistoricalPricesUseCase,
                 observeTradePricesUseCase = observeTradePricesUseCase,
                 symbol = symbol,
+            )
+        }
+    }
+
+    @Composable
+    fun getNewsViewModel(): NewsViewModel {
+        return viewModel {
+            NewsViewModel(
+                getCryptoNewsUseCase = getCryptoNewsUseCase,
             )
         }
     }
