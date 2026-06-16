@@ -13,8 +13,9 @@ private const val BINANCE_API_URL = "https://api.binance.com/api/v3"
 private const val KLINE_OPEN_TIME_INDEX = 0
 private const val KLINE_CLOSE_PRICE_INDEX = 4
 
-class BinanceCoinHistoricalDataSource : CoinHistoricalDataSource {
-    private val http = HttpClient()
+class BinanceCoinHistoricalDataSource(
+    private val http: HttpClient,
+) : CoinHistoricalDataSource {
     private val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun getHistoricalPrices(symbol: String, interval: String, limit: Int): List<TradePrice> {
@@ -34,7 +35,4 @@ class BinanceCoinHistoricalDataSource : CoinHistoricalDataSource {
         }
     }
 
-    override fun close() {
-        http.close()
-    }
 }

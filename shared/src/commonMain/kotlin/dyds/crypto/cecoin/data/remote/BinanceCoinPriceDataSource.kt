@@ -21,10 +21,9 @@ private val BASE_URLS = listOf(
 private const val WEBSOCKET_CONNECT_ERROR = "No se pudo abrir el WebSocket de Binance"
 private const val STREAM_SUFFIX = "@trade"
 
-class BinanceCoinPriceDataSource : CoinPriceDataSource {
-    private val http = HttpClient {
-        install(WebSockets)
-    }
+class BinanceCoinPriceDataSource(
+    private val http: HttpClient,
+) : CoinPriceDataSource {
     private val json = Json { ignoreUnknownKeys = true }
 
     override fun tradePrices(symbol: String): Flow<TradePrice> = flow {
@@ -59,7 +58,4 @@ class BinanceCoinPriceDataSource : CoinPriceDataSource {
             TradePrice(symbol, PricePoint(timestamp, price))
         }.getOrNull()
 
-    override fun close() {
-        http.close()
-    }
 }

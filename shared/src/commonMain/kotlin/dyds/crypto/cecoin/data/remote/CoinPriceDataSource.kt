@@ -5,6 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface CoinPriceDataSource {
     fun tradePrices(symbol: String): Flow<TradePrice>
-    fun close()
 }
 

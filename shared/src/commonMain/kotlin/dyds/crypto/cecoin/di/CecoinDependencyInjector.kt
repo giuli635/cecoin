@@ -8,8 +8,9 @@ import dyds.crypto.cecoin.data.remote.BinanceCoinHistoricalDataSource
 import dyds.crypto.cecoin.data.remote.BinanceCoinListDataSource
 import dyds.crypto.cecoin.data.remote.BinanceCoinPriceDataSource
 import dyds.crypto.cecoin.data.remote.NewsApiRestDataSource
-import dyds.crypto.cecoin.data.remote.NewsApiDataSource
 import dyds.crypto.cecoin.data.repository.CecoinRepositoryImpl
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.websocket.WebSockets
 import dyds.crypto.cecoin.data.repository.FavoriteRepositoryImpl
 import dyds.crypto.cecoin.data.repository.NewsRepositoryImpl
 import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
@@ -25,9 +26,13 @@ import dyds.crypto.cecoin.presentation.chart.GranularityStateHolder
 import dyds.crypto.cecoin.presentation.search.CoinSearchViewModel
 
 object CecoinDependencyInjector {
-    private val coinPriceSource = BinanceCoinPriceDataSource()
-    private val coinHistoricalSource = BinanceCoinHistoricalDataSource()
-    private val coinListDataSource = BinanceCoinListDataSource()
+    private val httpClient = HttpClient {
+        install(WebSockets)
+    }
+
+    private val coinPriceSource = BinanceCoinPriceDataSource(httpClient)
+    private val coinHistoricalSource = BinanceCoinHistoricalDataSource(httpClient)
+    private val coinListDataSource = BinanceCoinListDataSource(httpClient)
 
     private val repository = CecoinRepositoryImpl(
         coinPriceSource, coinHistoricalSource, coinListDataSource,
@@ -41,15 +46,12 @@ object CecoinDependencyInjector {
     private val toggleFavoriteUseCase = ToggleFavoriteUseCase(favoriteRepository)
     private val observeFavoritesUseCase = ObserveFavoritesUseCase(favoriteRepository)
 
-    private val newsApiDataSource: NewsApiDataSource = NewsApiRestDataSource()
+    private val newsApiDataSource = NewsApiRestDataSource(httpClient)
     private val newsRepository = NewsRepositoryImpl(newsApiDataSource)
     private val getCryptoNewsUseCase = GetCryptoNewsUseCase(newsRepository)
 
     fun dispose() {
-        coinPriceSource.close()
-        coinHistoricalSource.close()
-        coinListDataSource.close()
-        newsApiDataSource.close()
+        httpClient.close()
     }
 
     @Composable

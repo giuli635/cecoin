@@ -16,7 +16,6 @@ internal class FakeCoinListDataSource(
     private val symbols: List<CryptoSymbol> = emptyList(),
 ) : CoinListDataSource {
     override suspend fun fetchSymbols(): List<CryptoSymbol> = symbols
-    override fun close() {}
 }
 
 internal class FakeCoinHistoricalSource(
@@ -34,8 +33,6 @@ internal class FakeCoinHistoricalSource(
         lastLimit = limit
         return prices
     }
-
-    override fun close() {}
 }
 
 internal class FakeCoinPriceSource(
@@ -47,15 +44,12 @@ internal class FakeCoinPriceSource(
         lastSymbol = symbol
         return flow
     }
-
-    override fun close() {}
 }
 
 internal class FakeNewsApiDataSource(
     private val articles: List<NewsArticle> = emptyList(),
 ) : NewsApiDataSource {
     override suspend fun fetchCryptoNews(): List<NewsArticle> = articles
-    override fun close() {}
 }
 
 internal class FakeFavoriteDataSource(

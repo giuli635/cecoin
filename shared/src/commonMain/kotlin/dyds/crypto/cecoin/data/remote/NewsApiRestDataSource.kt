@@ -17,13 +17,10 @@ private const val NEWS_LANGUAGE = "es"
 private const val NEWS_SORT_BY = "publishedAt"
 private const val NEWS_PAGE_SIZE = 50
 
-class NewsApiRestDataSource : NewsApiDataSource {
-    private val http = HttpClient()
+class NewsApiRestDataSource(
+    private val http: HttpClient,
+) : NewsApiDataSource {
     private val json = Json { ignoreUnknownKeys = true }
-
-    override fun close() {
-        http.close()
-    }
 
     override suspend fun fetchCryptoNews(): List<NewsArticle> {
         val url = buildString {

@@ -18,13 +18,10 @@ private const val QUOTE_ASSET_FIELD = "quoteAsset"
 private const val BASE_ASSET_FIELD = "baseAsset"
 private const val SYMBOL_FIELD = "symbol"
 
-class BinanceCoinListDataSource : CoinListDataSource {
-    private val http = HttpClient()
+class BinanceCoinListDataSource(
+    private val http: HttpClient,
+) : CoinListDataSource {
     private val json = Json { ignoreUnknownKeys = true }
-
-    override fun close() {
-        http.close()
-    }
 
     override suspend fun fetchSymbols(): List<CryptoSymbol> {
         val url = "$BINANCE_API_URL/exchangeInfo"
