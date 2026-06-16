@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import dyds.crypto.cecoin.di.CecoinDependencyInjector
 import dyds.crypto.cecoin.di.CecoinDependencyInjector.getCoinDetailsViewModel
 import dyds.crypto.cecoin.di.CecoinDependencyInjector.getGranularityStateHolder
 import dyds.crypto.cecoin.di.CecoinDependencyInjector.getNewsViewModel
@@ -92,6 +93,7 @@ private fun NavGraphBuilder.detailDestination(navController: NavHostController) 
         ChartScreen(
             granularityHolder = granularityHolder,
             viewModel = getCoinDetailsViewModel(detail.symbol),
+            errorClassifier = CecoinDependencyInjector.errorClassifier,
             onBack = { navController.popBackStack() }
         )
     }

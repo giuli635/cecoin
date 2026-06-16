@@ -6,6 +6,7 @@ import dyds.crypto.cecoin.presentation.chart.model.ChartData
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
 import dyds.crypto.cecoin.presentation.chart.util.foldTradePrice
 import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +30,7 @@ class ChartDataController(
     private val scope: CoroutineScope,
     val symbol: String,
     historical: List<PricePoint>,
+    private val errorClassifier: ErrorClassifier,
     private val retryDelayMs: Long = RETRY_DELAY_MS,
     private val maxRetries: Int = MAX_STREAM_RETRIES,
 ) {
@@ -54,14 +56,14 @@ class ChartDataController(
                 .retryWhen { cause, _ ->
                     if (cause is CancellationException) return@retryWhen false
                     retryCount++
-                    _chartData.value = Fallible.Failed(AppError.GenericError(cause, STREAM_FAILED))
+                    _chartData.value = Fallible.Failed(errorClassifier.classify(cause, STREAM_FAILED))
                     if (retryCount >= maxRetries) return@retryWhen false
                     delay(retryDelayMs.milliseconds)
                     true
                 }
                 .catch { e ->
                     if (e is CancellationException) throw e
-                    _chartData.value = Fallible.Failed(AppError.GenericError(e, STREAM_FAILED))
+                    _chartData.value = Fallible.Failed(errorClassifier.classify(e, STREAM_FAILED))
                 }
                 .collect { trade ->
                     points.foldTradePrice(trade, granularity)

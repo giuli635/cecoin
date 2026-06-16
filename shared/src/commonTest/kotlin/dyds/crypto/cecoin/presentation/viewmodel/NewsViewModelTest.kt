@@ -5,6 +5,7 @@ import dyds.crypto.cecoin.domain.model.NewsArticle
 import dyds.crypto.cecoin.domain.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.presentation.news.NewsViewModel
 import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.flow.first
@@ -104,6 +105,8 @@ class NewsViewModelTest {
 
     private fun createViewModel(repo: FakeNewsRepository): NewsViewModel {
         val useCase = GetCryptoNewsUseCase(repo)
-        return NewsViewModel(useCase)
+        return NewsViewModel(useCase, object : ErrorClassifier() {
+            override fun isNetworkError(e: Throwable) = false
+        })
     }
 }

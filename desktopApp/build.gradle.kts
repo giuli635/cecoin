@@ -14,6 +14,8 @@ dependencies {
 
     implementation(libs.ktor.client.websockets)
 
+    implementation(libs.datastore.preferences)
+
     implementation("org.slf4j:slf4j-simple:2.0.16")
 
     implementation(libs.compose.uiToolingPreview)

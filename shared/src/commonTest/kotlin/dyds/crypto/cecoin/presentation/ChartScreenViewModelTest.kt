@@ -10,6 +10,8 @@ import dyds.crypto.cecoin.presentation.chart.ChartScreenViewModel
 import dyds.crypto.cecoin.presentation.chart.model.ChartData
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
 import dyds.crypto.cecoin.presentation.chart.util.foldTradePrice
+import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.CancellationException
@@ -296,6 +298,9 @@ class ChartScreenViewModelTest {
         priceSource: FakeTradePriceRepository = FakeTradePriceRepository(),
         historicalPointLimit: Int = 200,
     ): ChartScreenViewModel {
+        val classifier = object : ErrorClassifier() {
+            override fun isNetworkError(e: Throwable) = false
+        }
         return ChartScreenViewModel(
             getHistoricalPricesUseCase = GetHistoricalPricesUseCase(priceSource),
             controllerFactory = { g, historical, scope ->
@@ -305,10 +310,12 @@ class ChartScreenViewModelTest {
                     scope = scope,
                     historical = historical,
                     granularity = g,
+                    errorClassifier = classifier,
                     retryDelayMs = 0,
                 )
             },
             symbol = "BTCUSDT",
+            errorClassifier = classifier,
             historicalPointLimit = historicalPointLimit,
         )
     }

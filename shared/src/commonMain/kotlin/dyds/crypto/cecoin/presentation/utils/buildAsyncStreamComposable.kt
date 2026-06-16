@@ -3,7 +3,7 @@ package dyds.crypto.cecoin.presentation.utils
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dyds.crypto.cecoin.presentation.Renderer
-import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.onStart
 fun <T> buildAsyncStreamComposable(
     onCancel: () -> Unit,
     onRetry: () -> Unit,
+    errorClassifier: ErrorClassifier,
     inner: Renderer<T>,
 ): Renderer<AsyncResult<Flow<T>>> =
     buildAsyncComposable(
@@ -23,7 +24,7 @@ fun <T> buildAsyncStreamComposable(
             val asyncResult by flow
                 .map { Loadable.Loaded(Fallible.Success(it)) as AsyncResult<T> }
                 .onStart { emit(Loadable.Loading) }
-                .catch { e -> emit(Loadable.Loaded(Fallible.Failed(AppError.GenericError(e, "La transmisión de datos falló")))) }
+                .catch { e -> emit(Loadable.Loaded(Fallible.Failed(errorClassifier.classify(e, "La transmisión de datos falló")))) }
                 .collectAsState(Loadable.Loading)
 
             buildAsyncComposable(

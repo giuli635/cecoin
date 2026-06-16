@@ -8,6 +8,7 @@ import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.search.util.filterBy
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.Job
@@ -25,6 +26,7 @@ class CoinSearchViewModel(
     private val getAvailableSymbolsUseCase: GetAvailableSymbolsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val observeFavoritesUseCase: ObserveFavoritesUseCase,
+    private val errorClassifier: ErrorClassifier,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CoinSearchUiState())
     val uiState: StateFlow<CoinSearchUiState> = _uiState.asStateFlow()
@@ -66,7 +68,7 @@ class CoinSearchViewModel(
                 _asyncAvailableSymbols.value = Loadable.Loaded(Fallible.Success(symbols))
             } catch (e: Exception) {
                 _asyncAvailableSymbols.value = Loadable.Loaded(
-                    Fallible.Failed(AppError.GenericError(e, FAILED_TO_LOAD_SYMBOLS))
+                    Fallible.Failed(errorClassifier.classify(e, FAILED_TO_LOAD_SYMBOLS))
                 )
             }
         }

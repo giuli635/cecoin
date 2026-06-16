@@ -7,6 +7,7 @@ import dyds.crypto.cecoin.presentation.chart.model.ChartData
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import androidx.lifecycle.ViewModel
@@ -26,6 +27,7 @@ class ChartScreenViewModel(
     private val getHistoricalPricesUseCase: GetHistoricalPricesUseCase,
     private val controllerFactory: (Granularity, List<PricePoint>, CoroutineScope) -> ChartDataController,
     val symbol: String,
+    private val errorClassifier: ErrorClassifier,
     private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
 ) : ViewModel() {
     private val _state = MutableStateFlow<AsyncResult<Flow<ChartData>>>(Loadable.Loading)
@@ -50,7 +52,7 @@ class ChartScreenViewModel(
                 getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
                     .toPricePoints(g.millis)
             } catch (e: Exception) {
-                _state.value = Loadable.Loaded(Fallible.Failed(AppError.GenericError(e, HISTORICAL_FAILED)))
+                _state.value = Loadable.Loaded(Fallible.Failed(errorClassifier.classify(e, HISTORICAL_FAILED)))
                 return@launch
             }
             val c = controllerFactory(g, historical, viewModelScope)

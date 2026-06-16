@@ -6,6 +6,7 @@ import dyds.crypto.cecoin.domain.model.NewsArticle
 import dyds.crypto.cecoin.domain.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.Job
@@ -18,6 +19,7 @@ private const val FAILED_TO_LOAD_NEWS = "Error al cargar noticias"
 
 class NewsViewModel(
     private val getCryptoNewsUseCase: GetCryptoNewsUseCase,
+    private val errorClassifier: ErrorClassifier,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NewsUiState())
     val uiState: StateFlow<NewsUiState> = _uiState.asStateFlow()
@@ -40,7 +42,7 @@ class NewsViewModel(
                 _asyncNews.value = Loadable.Loaded(Fallible.Success(news))
             } catch (e: Exception) {
                 _asyncNews.value = Loadable.Loaded(
-                    Fallible.Failed(AppError.GenericError(e, FAILED_TO_LOAD_NEWS))
+                    Fallible.Failed(errorClassifier.classify(e, FAILED_TO_LOAD_NEWS))
                 )
             }
         }

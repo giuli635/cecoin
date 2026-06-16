@@ -10,6 +10,7 @@ import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.search.CoinSearchViewModel
 import dyds.crypto.cecoin.presentation.search.FilterMode
 import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.flow.first
@@ -168,6 +169,7 @@ class CoinSearchViewModelTest {
             getAvailableSymbolsUseCase = GetAvailableSymbolsUseCase(repo),
             toggleFavoriteUseCase = ToggleFavoriteUseCase(favRepo),
             observeFavoritesUseCase = ObserveFavoritesUseCase(favRepo),
+            errorClassifier = fakeClassifier(),
         )
 
         val initial = viewModel.filteredCoins.first()
@@ -216,11 +218,15 @@ class CoinSearchViewModelTest {
         val getSymbols = GetAvailableSymbolsUseCase(symbolRepo)
         val toggleFav = ToggleFavoriteUseCase(favRepo)
         val observeFav = ObserveFavoritesUseCase(favRepo)
-        return CoinSearchViewModel(getSymbols, toggleFav, observeFav)
+        return CoinSearchViewModel(getSymbols, toggleFav, observeFav, fakeClassifier())
     }
 
     private fun createFakeFavoriteRepository(initialFavorites: Set<String> = emptySet()): FakeFavoriteRepository {
         return FakeFavoriteRepository(initialFavorites = initialFavorites)
+    }
+
+    private fun fakeClassifier() = object : ErrorClassifier() {
+        override fun isNetworkError(e: Throwable) = false
     }
 
     private fun extractSymbols(result: Loadable<*>): List<String> {

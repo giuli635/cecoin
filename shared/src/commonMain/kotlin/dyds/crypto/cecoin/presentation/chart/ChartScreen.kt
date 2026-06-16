@@ -27,6 +27,7 @@ import dyds.crypto.cecoin.presentation.chart.component.PriceChart
 import dyds.crypto.cecoin.presentation.chart.util.ChartColors
 import dyds.crypto.cecoin.presentation.utils.buildAsyncStreamComposable
 import dyds.crypto.cecoin.presentation.utils.buildFallibleComposable
+import dyds.crypto.cecoin.utils.ErrorClassifier
 
 private const val BACK_BUTTON = "Atrás"
 private const val USD_LABEL = "USD"
@@ -70,6 +71,7 @@ fun ChartScreen(
     modifier: Modifier = Modifier,
     granularityHolder: GranularityStateHolder,
     viewModel: ChartScreenViewModel,
+    errorClassifier: ErrorClassifier,
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
@@ -109,6 +111,7 @@ fun ChartScreen(
             buildAsyncStreamComposable(
                 onCancel = { viewModel.cancel() },
                 onRetry = { viewModel.load(granularity) },
+                errorClassifier = errorClassifier,
                 inner = buildFallibleComposable(
                     inner = { data: List<PricePoint>, _ ->
                         ChartContent(data, modifier = Modifier.fillMaxWidth().padding(8.dp))

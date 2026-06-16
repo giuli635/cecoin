@@ -6,6 +6,8 @@ import dyds.crypto.cecoin.domain.model.TradePrice
 import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.presentation.chart.ChartDataController
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
+import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +40,9 @@ class ChartDataControllerTest {
             scope = scope,
             historical = listOf(PricePoint(0L, 50000.0), PricePoint(60_000L, 51000.0)),
             granularity = Granularity.M1,
+            errorClassifier = object : ErrorClassifier() {
+            override fun isNetworkError(e: Throwable) = false
+        },
             retryDelayMs = 0,
         )
         controller.startStream()
@@ -65,6 +70,9 @@ class ChartDataControllerTest {
             scope = scope,
             historical = emptyList(),
             granularity = Granularity.M1,
+            errorClassifier = object : ErrorClassifier() {
+            override fun isNetworkError(e: Throwable) = false
+        },
             retryDelayMs = 0,
         )
         controller.startStream()
@@ -94,6 +102,9 @@ class ChartDataControllerTest {
             scope = scope,
             historical = emptyList(),
             granularity = Granularity.M1,
+            errorClassifier = object : ErrorClassifier() {
+            override fun isNetworkError(e: Throwable) = false
+        },
             retryDelayMs = 0,
         )
         controller.startStream()
@@ -122,6 +133,9 @@ class ChartDataControllerTest {
             scope = scope,
             historical = emptyList(),
             granularity = Granularity.M1,
+            errorClassifier = object : ErrorClassifier() {
+            override fun isNetworkError(e: Throwable) = false
+        },
             retryDelayMs = 0,
         )
         controller.startStream()
@@ -146,6 +160,9 @@ class ChartDataControllerTest {
             scope = scope,
             historical = listOf(PricePoint(0L, 50000.0)),
             granularity = Granularity.M1,
+            errorClassifier = object : ErrorClassifier() {
+            override fun isNetworkError(e: Throwable) = false
+        },
             retryDelayMs = 0,
         )
         controller.startStream()
