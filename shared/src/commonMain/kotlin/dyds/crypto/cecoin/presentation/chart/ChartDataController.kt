@@ -21,7 +21,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 private const val RETRY_DELAY_MS = 1_000L
 private const val MAX_STREAM_RETRIES = 3
-private const val STREAM_FAILED = "Live stream failed"
+private const val STREAM_FAILED = "La transmisión en vivo falló"
 
 class ChartDataController(
     private val observeTradePricesUseCase: ObserveTradePricesUseCase,

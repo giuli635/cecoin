@@ -11,6 +11,7 @@ import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 private const val DEFAULT_HISTORICAL_LIMIT = 200
-private const val HISTORICAL_FAILED = "Failed to load historical data"
+private const val HISTORICAL_FAILED = "Error al cargar datos históricos"
 
 class ChartScreenViewModel(
     private val getHistoricalPricesUseCase: GetHistoricalPricesUseCase,
@@ -49,6 +50,8 @@ class ChartScreenViewModel(
             val historical = try {
                 getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
                     .toPricePoints(g.millis)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _state.value = Loadable.Loaded(Fallible.Failed(AppError.GenericError(e, HISTORICAL_FAILED)))
                 return@launch

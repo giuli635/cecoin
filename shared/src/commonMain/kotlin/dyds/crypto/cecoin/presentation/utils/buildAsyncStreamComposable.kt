@@ -23,7 +23,7 @@ fun <T> buildAsyncStreamComposable(
             val asyncResult by flow
                 .map { Loadable.Loaded(Fallible.Success(it)) as AsyncResult<T> }
                 .onStart { emit(Loadable.Loading) }
-                .catch { e -> emit(Loadable.Loaded(Fallible.Failed(AppError.GenericError(e, "Stream failed")))) }
+                .catch { e -> emit(Loadable.Loaded(Fallible.Failed(AppError.GenericError(e, "La transmisión de datos falló")))) }
                 .collectAsState(Loadable.Loading)
 
             buildAsyncComposable(
