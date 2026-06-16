@@ -28,6 +28,7 @@ private const val SEARCH_TITLE = "Buscar Criptos"
 private const val SEARCH_LABEL = "Buscar símbolo (ej: BTC, ETH)"
 private const val AVAILABLE_COINS_LABEL = "Criptos disponibles"
 private const val NO_COINS_FOUND = "No se encontraron criptos con '"
+private const val NO_COINS_AVAILABLE = "No hay criptomonedas disponibles"
 
 @Composable
 fun CoinSearchScreen(
@@ -110,6 +111,14 @@ private fun coinsListRenderer(
             item {
                 Text(
                     text = "$NO_COINS_FOUND$searchQuery'",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp),
+                )
+            }
+        } else if (coins.isEmpty()) {
+            item {
+                Text(
+                    text = NO_COINS_AVAILABLE,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp),
                 )
