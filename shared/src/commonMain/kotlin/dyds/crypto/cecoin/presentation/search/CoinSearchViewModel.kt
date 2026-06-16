@@ -82,6 +82,7 @@ class CoinSearchViewModel(
     fun onCancelLoadSymbols() {
         loadSymbolsJob?.cancel()
         loadSymbolsJob = null
+        _asyncAvailableSymbols.value = Loadable.Loaded(Fallible.Success(emptyList()))
     }
 
     fun onSearchQueryChange(query: String) {

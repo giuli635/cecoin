@@ -56,6 +56,7 @@ class NewsViewModel(
     fun onCancelLoadNews() {
         loadNewsJob?.cancel()
         loadNewsJob = null
+        _asyncNews.value = Loadable.Loaded(Fallible.Success(emptyList()))
     }
 
     fun onSearchQueryChange(query: String) {
