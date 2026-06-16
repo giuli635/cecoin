@@ -35,12 +35,12 @@ private const val PRICE_FORMAT = "%,.2f"
 
 @Composable
 private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) {
-    val lastPrice = data.lastOrNull()?.price ?: 0.0
+    val lastPrice = data.lastOrNull()?.price
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (lastPrice > 0.0) {
+        if (lastPrice != null) {
             Row(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.padding(start = 12.dp),
