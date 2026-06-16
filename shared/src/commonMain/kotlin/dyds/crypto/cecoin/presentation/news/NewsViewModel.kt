@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import dyds.crypto.cecoin.domain.model.NewsArticle
 import dyds.crypto.cecoin.domain.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,6 +40,8 @@ class NewsViewModel(
             try {
                 val news = getCryptoNewsUseCase()
                 _asyncNews.value = Loadable.Loaded(Fallible.Success(news))
+            } catch (_: CancellationException) {
+                _asyncNews.value = Loadable.Cancelled
             } catch (e: Exception) {
                 _asyncNews.value = Loadable.Loaded(
                     Fallible.Failed(errorClassifier.classify(e, FAILED_TO_LOAD_NEWS))

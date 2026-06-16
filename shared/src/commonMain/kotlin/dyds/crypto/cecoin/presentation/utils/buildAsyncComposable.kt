@@ -11,4 +11,4 @@ fun <T> buildAsyncComposable(
     onRetry: () -> Unit,
     inner: Renderer<T>
 ): Renderer<AsyncResult<T>> =
-    buildLoadableComposable(onCancel, buildFallibleComposable(inner, onCancel, onRetry))
+    buildLoadableComposable(onCancel, onRetry, buildFallibleComposable(inner, onCancel, onRetry))

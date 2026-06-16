@@ -7,10 +7,10 @@ import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.search.util.filterBy
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +25,7 @@ private const val FAILED_TO_LOAD_SYMBOLS = "Error al cargar símbolos"
 class CoinSearchViewModel(
     private val getAvailableSymbolsUseCase: GetAvailableSymbolsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
-    private val observeFavoritesUseCase: ObserveFavoritesUseCase,
+    observeFavoritesUseCase: ObserveFavoritesUseCase,
     private val errorClassifier: ErrorClassifier,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CoinSearchUiState())
@@ -39,6 +39,7 @@ class CoinSearchViewModel(
     val filteredCoins = combine(_uiState, _asyncAvailableSymbols, favorites) { uiState, asyncSymbols, favs ->
         when (asyncSymbols) {
             is Loadable.Loading -> Loadable.Loading
+            is Loadable.Cancelled -> Loadable.Cancelled
             is Loadable.Loaded -> {
                 when (val fallibleSymbols = asyncSymbols.value) {
                     is Fallible.Failed -> Loadable.Loaded(fallibleSymbols)
@@ -66,6 +67,8 @@ class CoinSearchViewModel(
                     .map { it.symbol }
                     .sorted()
                 _asyncAvailableSymbols.value = Loadable.Loaded(Fallible.Success(symbols))
+            } catch (_: CancellationException) {
+                _asyncAvailableSymbols.value = Loadable.Cancelled
             } catch (e: Exception) {
                 _asyncAvailableSymbols.value = Loadable.Loaded(
                     Fallible.Failed(errorClassifier.classify(e, FAILED_TO_LOAD_SYMBOLS))

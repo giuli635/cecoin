@@ -2,6 +2,7 @@ package dyds.crypto.cecoin.utils
 
 sealed class Loadable<out T> {
     object Loading : Loadable<Nothing>()
+    object Cancelled : Loadable<Nothing>()
     data class Loaded<T>(val value: T) : Loadable<T>()
 }
 
