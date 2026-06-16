@@ -32,6 +32,11 @@ class ChartScreenViewModel(
     private var controller: ChartDataController? = null
     private var loadJob: Job? = null
 
+    fun cancel() {
+        controller?.cancel()
+        loadJob?.cancel()
+    }
+
     fun load(g: Granularity) {
         controller?.cancel()
         controller = null
@@ -54,8 +59,7 @@ class ChartScreenViewModel(
     }
 
     public override fun onCleared() {
-        controller?.cancel()
-        loadJob?.cancel()
+        cancel()
         super.onCleared()
     }
 }

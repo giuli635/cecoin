@@ -12,11 +12,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 fun <T> buildAsyncStreamComposable(
+    onCancel: () -> Unit,
     onRetry: () -> Unit,
     inner: Renderer<T>,
 ): Renderer<AsyncResult<Flow<T>>> =
     buildAsyncComposable(
-        onCancel = {},
+        onCancel = onCancel,
         onRetry = onRetry,
         inner = { flow: Flow<T>, modifier ->
             val asyncResult by flow
@@ -26,7 +27,7 @@ fun <T> buildAsyncStreamComposable(
                 .collectAsState(Loadable.Loading)
 
             buildAsyncComposable(
-                onCancel = {},
+                onCancel = onCancel,
                 onRetry = onRetry,
                 inner = inner,
             )(asyncResult, modifier)
