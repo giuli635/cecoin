@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.File
 
-class FavoriteDataStoreDataSource(
+class DataStoreFavoriteDataSource(
     private val dataStore: DataStore<Preferences> = createDefaultDataStore(),
 ) : FavoriteDataSource {
     private val favoritesKey = stringSetPreferencesKey("favorites")
