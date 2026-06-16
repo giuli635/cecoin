@@ -46,7 +46,7 @@ private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) 
                 modifier = Modifier.padding(start = 12.dp),
             ) {
                 Text(
-                    text = "$${priceStr(lastPrice)}",
+                    text = priceStr(lastPrice),
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     color = ChartColors.accent,
