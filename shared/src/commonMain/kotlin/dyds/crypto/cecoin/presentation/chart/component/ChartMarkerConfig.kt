@@ -19,7 +19,7 @@ import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import dyds.crypto.cecoin.presentation.chart.util.ChartColors
-import dyds.crypto.cecoin.presentation.chart.util.priceStr
+import dyds.crypto.cecoin.utils.priceStr
 
 @Composable
 fun rememberChartMarker(): DefaultCartesianMarker {
