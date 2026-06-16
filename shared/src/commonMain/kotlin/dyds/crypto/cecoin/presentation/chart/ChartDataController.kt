@@ -25,7 +25,10 @@ private const val STREAM_FAILED = "Live stream failed"
 
 class ChartDataController(
     private val observeTradePricesUseCase: ObserveTradePricesUseCase,
+    private var granularity: Granularity,
+    private val scope: CoroutineScope,
     val symbol: String,
+    historical: List<PricePoint>,
     private val retryDelayMs: Long = RETRY_DELAY_MS,
     private val maxRetries: Int = MAX_STREAM_RETRIES,
 ) {
@@ -35,22 +38,15 @@ class ChartDataController(
     val chartData: StateFlow<ChartData> = _chartData.asStateFlow()
 
     private val points = mutableListOf<PricePoint>()
-    private var granularity = Granularity.M1
     private var streamJob: Job? = null
 
-    fun initialize(
-        scope: CoroutineScope,
-        historical: List<PricePoint>,
-        g: Granularity,
-    ) {
-        granularity = g
+    init {
         points.clear()
         points.addAll(historical)
         _chartData.value = Fallible.Success(points.toList())
-        startStream(scope)
     }
 
-    private fun startStream(scope: CoroutineScope) {
+    fun startStream() {
         streamJob?.cancel()
         streamJob = scope.launch {
             var retryCount = 0

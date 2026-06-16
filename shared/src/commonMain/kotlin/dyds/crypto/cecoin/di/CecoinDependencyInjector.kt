@@ -18,6 +18,7 @@ import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.chart.ChartDataController
 import dyds.crypto.cecoin.presentation.chart.ChartScreenViewModel
 import dyds.crypto.cecoin.presentation.chart.GranularityStateHolder
+import kotlinx.coroutines.CoroutineScope
 import dyds.crypto.cecoin.presentation.search.CoinSearchViewModel
 
 object CecoinDependencyInjector {
@@ -67,10 +68,13 @@ object CecoinDependencyInjector {
         return viewModel {
             ChartScreenViewModel(
                 getHistoricalPricesUseCase = getHistoricalPricesUseCase,
-                controllerFactory = { g ->
+                controllerFactory = { g, historical, scope ->
                     ChartDataController(
                         observeTradePricesUseCase = observeTradePricesUseCase,
+                        granularity = g,
+                        scope = scope,
                         symbol = symbol,
+                        historical = historical,
                     )
                 },
                 symbol = symbol,

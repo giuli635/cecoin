@@ -31,15 +31,16 @@ class ChartDataControllerTest {
     fun `seed with historical data emits Success snapshot`() = runTest {
         val tradeFlow = MutableSharedFlow<TradePrice>(extraBufferCapacity = 1)
         val priceSource = FakeTradePriceRepository(tradeFlow = tradeFlow)
+        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
+            scope = scope,
+            historical = listOf(PricePoint(0L, 50000.0), PricePoint(60_000L, 51000.0)),
+            granularity = Granularity.M1,
             retryDelayMs = 0,
         )
-        val scope = createScope()
-
-        val historical = listOf(PricePoint(0L, 50000.0), PricePoint(60_000L, 51000.0))
-        controller.initialize(scope = scope, historical = historical, g = Granularity.M1)
+        controller.startStream()
 
         val snapshot = controller.chartData.first { it is Fallible.Success }
         val success = snapshot as Fallible.Success
@@ -57,14 +58,16 @@ class ChartDataControllerTest {
             historical = emptyList(),
             tradeFlow = tradeFlow,
         )
+        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
+            scope = scope,
+            historical = emptyList(),
+            granularity = Granularity.M1,
             retryDelayMs = 0,
         )
-        val scope = createScope()
-
-        controller.initialize(scope = scope, historical = emptyList(), g = Granularity.M1)
+        controller.startStream()
 
         tradeFlow.emit(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
 
@@ -84,14 +87,16 @@ class ChartDataControllerTest {
             historical = emptyList(),
             tradeFlow = tradeFlow,
         )
+        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
+            scope = scope,
+            historical = emptyList(),
+            granularity = Granularity.M1,
             retryDelayMs = 0,
         )
-        val scope = createScope()
-
-        controller.initialize(scope = scope, historical = emptyList(), g = Granularity.M1)
+        controller.startStream()
 
         controller.cancel()
 
@@ -110,14 +115,16 @@ class ChartDataControllerTest {
             historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
             tradeFlow = tradeFlow,
         )
+        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
+            scope = scope,
+            historical = emptyList(),
+            granularity = Granularity.M1,
             retryDelayMs = 0,
         )
-        val scope = createScope()
-
-        controller.initialize(scope = scope, historical = emptyList(), g = Granularity.M1)
+        controller.startStream()
 
         val failed = controller.chartData.first { it is Fallible.Failed }
         assertIs<Fallible.Failed>(failed)
@@ -132,18 +139,16 @@ class ChartDataControllerTest {
             historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
             tradeFlow = tradeFlow,
         )
+        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
-            retryDelayMs = 0,
-        )
-        val scope = createScope()
-
-        controller.initialize(
             scope = scope,
             historical = listOf(PricePoint(0L, 50000.0)),
-            g = Granularity.M1,
+            granularity = Granularity.M1,
+            retryDelayMs = 0,
         )
+        controller.startStream()
 
         val snapshot = controller.chartData.first { it is Fallible.Success }
         val data = (snapshot as Fallible.Success).value

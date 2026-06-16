@@ -1,5 +1,6 @@
 package dyds.crypto.cecoin.presentation.chart
 
+import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.domain.model.toPricePoints
 import dyds.crypto.cecoin.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.presentation.chart.model.ChartData
@@ -10,6 +11,7 @@ import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +24,7 @@ private const val HISTORICAL_FAILED = "Failed to load historical data"
 
 class ChartScreenViewModel(
     private val getHistoricalPricesUseCase: GetHistoricalPricesUseCase,
-    private val controllerFactory: (Granularity) -> ChartDataController,
+    private val controllerFactory: (Granularity, List<PricePoint>, CoroutineScope) -> ChartDataController,
     val symbol: String,
     private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
 ) : ViewModel() {
@@ -44,7 +46,6 @@ class ChartScreenViewModel(
         _state.value = Loadable.Loading
 
         loadJob = viewModelScope.launch {
-            val c = controllerFactory(g)
             val historical = try {
                 getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
                     .toPricePoints(g.millis)
@@ -52,7 +53,8 @@ class ChartScreenViewModel(
                 _state.value = Loadable.Loaded(Fallible.Failed(AppError.GenericError(e, HISTORICAL_FAILED)))
                 return@launch
             }
-            c.initialize(viewModelScope, historical, g)
+            val c = controllerFactory(g, historical, viewModelScope)
+            c.startStream()
             controller = c
             _state.value = Loadable.Loaded(Fallible.Success(c.chartData))
         }

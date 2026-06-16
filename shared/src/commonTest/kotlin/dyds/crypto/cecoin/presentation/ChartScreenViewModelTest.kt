@@ -298,10 +298,13 @@ class ChartScreenViewModelTest {
     ): ChartScreenViewModel {
         return ChartScreenViewModel(
             getHistoricalPricesUseCase = GetHistoricalPricesUseCase(priceSource),
-            controllerFactory = { g ->
+            controllerFactory = { g, historical, scope ->
                 ChartDataController(
                     observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
                     symbol = "BTCUSDT",
+                    scope = scope,
+                    historical = historical,
+                    granularity = g,
                     retryDelayMs = 0,
                 )
             },
