@@ -15,7 +15,6 @@ import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
@@ -53,8 +52,9 @@ class ChartScreenViewModelTest {
             TradePrice("BTCUSDT", PricePoint(60_000L, 51000.0)),
         )
         val priceSource = FakeTradePriceRepository(historical = historical)
-        val (viewModel, _) = createViewModel(priceSource)
+        val viewModel = createViewModel(priceSource)
 
+        viewModel.load(Granularity.M1)
         val chartData = viewModel.awaitChartData()
 
         assertTrue(chartData.isNotEmpty())
@@ -64,22 +64,21 @@ class ChartScreenViewModelTest {
     @Test
     fun `emits failure when historical fetch fails`() = runTest {
         val priceSource = FakeTradePriceRepository(historicalException = RuntimeException("Network error"))
-        val (viewModel, _) = createViewModel(priceSource)
+        val viewModel = createViewModel(priceSource)
 
+        viewModel.load(Granularity.M1)
         val state = viewModel.state.first { it !is Loadable.Loading }
         assertIs<Loadable.Loaded<*>>(state)
         val loaded = state as Loadable.Loaded
-        val success = loaded.value as Fallible.Success
-        val flow: Flow<Fallible<ChartData>> = success.value
-        val fallible = flow.first { it is Fallible.Failed }
-        assertIs<Fallible.Failed>(fallible)
+        assertIs<Fallible.Failed>(loaded.value)
     }
 
     @Test
     fun `sets stream state as Loading`() = runTest {
         val priceSource = FakeTradePriceRepository(historical = emptyList(), tradeFlow = MutableSharedFlow())
-        val (viewModel, _) = createViewModel(priceSource)
+        val viewModel = createViewModel(priceSource)
 
+        viewModel.load(Granularity.M1)
         val chartData = viewModel.awaitChartData()
 
         assertTrue(chartData.isEmpty())
@@ -88,12 +87,12 @@ class ChartScreenViewModelTest {
     @Test
     fun `granularity change triggers new load`() = runTest {
         val priceSource = FakeTradePriceRepository(historical = emptyList())
-        val (viewModel, granularitySource) = createViewModel(priceSource)
+        val viewModel = createViewModel(priceSource)
 
+        viewModel.load(Granularity.M1)
         viewModel.awaitChartData()
 
-        granularitySource.value = Granularity.M5
-
+        viewModel.load(Granularity.M5)
         val data = viewModel.awaitChartData()
         assertTrue(data.isEmpty())
     }
@@ -103,8 +102,12 @@ class ChartScreenViewModelTest {
         val priceSource = FakeTradePriceRepository(historical = listOf(
             TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
         ))
-        val (viewModel, _) = createViewModel(priceSource)
+        val viewModel = createViewModel(priceSource)
 
+        viewModel.load(Granularity.M1)
+        viewModel.awaitChartData()
+
+        viewModel.load(Granularity.M1)
         val state = viewModel.state.first { it !is Loadable.Loading }
         assertIs<Loadable.Loaded<*>>(state)
     }
@@ -112,11 +115,12 @@ class ChartScreenViewModelTest {
     @Test
     fun `historical limit is passed through`() = runTest {
         val priceSource = FakeTradePriceRepository(historical = emptyList())
-        val (viewModel, _) = createViewModel(
+        val viewModel = createViewModel(
             priceSource = priceSource,
             historicalPointLimit = 50,
         )
 
+        viewModel.load(Granularity.M1)
         viewModel.awaitChartData()
 
         assertEquals(50, priceSource.lastLimit)
@@ -129,8 +133,9 @@ class ChartScreenViewModelTest {
             historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
             tradeFlow = tradeFlow,
         )
-        val (viewModel, _) = createViewModel(priceSource)
+        val viewModel = createViewModel(priceSource)
 
+        viewModel.load(Granularity.M1)
         val initialData = viewModel.awaitChartData()
         assertEquals(50000.0, initialData.last().price)
 
@@ -148,8 +153,9 @@ class ChartScreenViewModelTest {
             historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
             tradeFlow = tradeFlow,
         )
-        val (viewModel, _) = createViewModel(priceSource)
+        val viewModel = createViewModel(priceSource)
 
+        viewModel.load(Granularity.M1)
         viewModel.awaitChartData()
 
         tradeFlow.emit(TradePrice("BTCUSDT", PricePoint(100_000L, 52000.0)))
@@ -163,16 +169,16 @@ class ChartScreenViewModelTest {
     }
 
     @Test
-    fun `loadPrices called twice cancels previous job`() = runTest {
+    fun `load called twice cancels previous job`() = runTest {
         val priceSource = FakeTradePriceRepository(historical = listOf(
             TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
         ))
-        val (viewModel, _) = createViewModel(priceSource)
+        val viewModel = createViewModel(priceSource)
 
-        viewModel.loadPrices()
+        viewModel.load(Granularity.M1)
         viewModel.awaitChartData()
 
-        viewModel.loadPrices()
+        viewModel.load(Granularity.M1)
         viewModel.awaitChartData()
 
         val state = viewModel.state.first()
@@ -182,7 +188,7 @@ class ChartScreenViewModelTest {
     @Test
     fun `onCleared does not crash when no active job`() = runTest {
         val priceSource = FakeTradePriceRepository()
-        val (viewModel, _) = createViewModel(
+        val viewModel = createViewModel(
             priceSource = priceSource,
             historicalPointLimit = 200,
         )
@@ -195,11 +201,12 @@ class ChartScreenViewModelTest {
         val priceSource = FakeTradePriceRepository(historical = listOf(
             TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
         ))
-        val (viewModel, _) = createViewModel(
+        val viewModel = createViewModel(
             priceSource = priceSource,
             historicalPointLimit = 200,
         )
 
+        viewModel.load(Granularity.M1)
         viewModel.awaitChartData()
 
         viewModel.onCleared()
@@ -212,8 +219,9 @@ class ChartScreenViewModelTest {
             historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
             tradeFlow = tradeFlow,
         )
-        val (viewModel, _) = createViewModel(priceSource)
+        val viewModel = createViewModel(priceSource)
 
+        viewModel.load(Granularity.M1)
         viewModel.state.first { it !is Loadable.Loading }
         val loaded = viewModel.state.value as Loadable.Loaded
         val success = loaded.value as Fallible.Success
@@ -223,22 +231,18 @@ class ChartScreenViewModelTest {
     }
 
     @Test
-    fun `live stream processes trade when historical fetch fails and points are empty`() = runTest {
-        val tradeFlow = MutableSharedFlow<TradePrice>()
+    fun `emits failed state when historical fetch fails without starting stream`() = runTest {
         val priceSource = FakeTradePriceRepository(
             historical = emptyList(),
             historicalException = RuntimeException("History error"),
-            tradeFlow = tradeFlow,
         )
-        val (viewModel, _) = createViewModel(priceSource)
+        val viewModel = createViewModel(priceSource)
 
-        viewModel.state.first { it !is Loadable.Loading }
-
-        tradeFlow.emit(TradePrice("BTCUSDT", PricePoint(100_000L, 52000.0)))
-
-        val points = viewModel.waitForPoints(52000.0)
-        assertTrue(points.any { it.price == 52000.0 })
-        viewModel.onCleared()
+        viewModel.load(Granularity.M1)
+        val state = viewModel.state.first { it !is Loadable.Loading }
+        assertIs<Loadable.Loaded<*>>(state)
+        val loaded = state as Loadable.Loaded
+        assertIs<Fallible.Failed>(loaded.value)
     }
 
     @Test
@@ -260,8 +264,9 @@ class ChartScreenViewModelTest {
             historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
             tradeFlow = tradeFlow,
         )
-        val (viewModel, _) = createViewModel(priceSource)
+        val viewModel = createViewModel(priceSource)
 
+        viewModel.load(Granularity.M1)
         val chartData = viewModel.awaitChartData()
 
         assertEquals(50000.0, chartData.last().price)
@@ -290,9 +295,8 @@ class ChartScreenViewModelTest {
     private fun createViewModel(
         priceSource: FakeTradePriceRepository = FakeTradePriceRepository(),
         historicalPointLimit: Int = 200,
-    ): Pair<ChartScreenViewModel, MutableStateFlow<Granularity>> {
-        val granularitySource = MutableStateFlow(Granularity.M1)
-        val viewModel = ChartScreenViewModel(
+    ): ChartScreenViewModel {
+        return ChartScreenViewModel(
             getHistoricalPricesUseCase = GetHistoricalPricesUseCase(priceSource),
             controllerFactory = { g ->
                 ChartDataController(
@@ -301,10 +305,8 @@ class ChartScreenViewModelTest {
                     retryDelayMs = 0,
                 )
             },
-            granularitySource = granularitySource,
             symbol = "BTCUSDT",
             historicalPointLimit = historicalPointLimit,
         )
-        return Pair(viewModel, granularitySource)
     }
 }

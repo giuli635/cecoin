@@ -23,7 +23,6 @@ private const val HISTORICAL_FAILED = "Failed to load historical data"
 class ChartScreenViewModel(
     private val getHistoricalPricesUseCase: GetHistoricalPricesUseCase,
     private val controllerFactory: (Granularity) -> ChartDataController,
-    private val granularitySource: Flow<Granularity>,
     val symbol: String,
     private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
 ) : ViewModel() {
@@ -31,49 +30,26 @@ class ChartScreenViewModel(
     val state: StateFlow<AsyncResult<Flow<Fallible<ChartData>>>> = _state.asStateFlow()
 
     private var controller: ChartDataController? = null
-    private var lastGranularity = Granularity.M1
     private var loadJob: Job? = null
 
-    init {
-        viewModelScope.launch {
-            granularitySource.collect { g -> loadFresh(g) }
-        }
-    }
-
-    fun loadPrices() {
-        loadFresh(lastGranularity)
-    }
-
-    private fun loadFresh(g: Granularity) {
+    fun load(g: Granularity) {
         controller?.cancel()
         controller = null
         loadJob?.cancel()
-        lastGranularity = g
         _state.value = Loadable.Loading
 
         loadJob = viewModelScope.launch {
-            try {
-                val c = controllerFactory(g)
-                try {
-                    val historical = getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
-                    c.initialize(
-                        scope = viewModelScope,
-                        historical = historical.toPricePoints(g.millis),
-                        g = g,
-                    )
-                } catch (e: Exception) {
-                    c.initialize(
-                        scope = viewModelScope,
-                        historical = emptyList(),
-                        g = g,
-                        failed = AppError.GenericError(e, HISTORICAL_FAILED),
-                    )
-                }
-                controller = c
-                _state.value = Loadable.Loaded(Fallible.Success(c.chartData))
+            val c = controllerFactory(g)
+            val historical = try {
+                getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
+                    .toPricePoints(g.millis)
             } catch (e: Exception) {
                 _state.value = Loadable.Loaded(Fallible.Failed(AppError.GenericError(e, HISTORICAL_FAILED)))
+                return@launch
             }
+            c.initialize(viewModelScope, historical, g)
+            controller = c
+            _state.value = Loadable.Loaded(Fallible.Success(c.chartData))
         }
     }
 

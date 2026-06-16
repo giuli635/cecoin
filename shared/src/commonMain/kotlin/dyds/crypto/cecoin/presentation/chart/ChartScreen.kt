@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -42,6 +43,10 @@ fun ChartScreen(
     val state by viewModel.state.collectAsState()
     val granularity by granularityHolder.granularity.collectAsState()
 
+    LaunchedEffect(granularity) {
+        viewModel.load(granularity)
+    }
+
     Column(
         modifier = modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -69,8 +74,8 @@ fun ChartScreen(
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            buildAsyncStreamComposable<Fallible<ChartData>>(
-                onRetry = viewModel::loadPrices,
+            buildAsyncStreamComposable(
+                onRetry = { viewModel.load(granularity) },
                 inner = buildFallibleComposable(
                     inner = { data: ChartData, _ ->
                         val lastPrice = data.lastOrNull()?.price ?: 0.0
@@ -107,7 +112,7 @@ fun ChartScreen(
                         }
                     },
                     onCancel = {},
-                    onRetry = viewModel::loadPrices,
+                    onRetry = { viewModel.load(granularity) },
                 ),
             )(state, Modifier.fillMaxSize())
         }

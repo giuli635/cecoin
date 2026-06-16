@@ -1,6 +1,7 @@
 package dyds.crypto.cecoin.di
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dyds.crypto.cecoin.data.local.FavoriteLocalSource
 import dyds.crypto.cecoin.data.local.createFavoriteStorage
@@ -16,6 +17,7 @@ import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.chart.ChartDataController
 import dyds.crypto.cecoin.presentation.chart.ChartScreenViewModel
+import dyds.crypto.cecoin.presentation.chart.GranularityStateHolder
 import dyds.crypto.cecoin.presentation.search.CoinSearchViewModel
 
 object CecoinDependencyInjector {
@@ -54,9 +56,13 @@ object CecoinDependencyInjector {
     }
 
     @Composable
+    fun getGranularityStateHolder(): GranularityStateHolder {
+        return remember { GranularityStateHolder() }
+    }
+
+    @Composable
     fun getCoinDetailsViewModel(
         symbol: String,
-        granularitySource: kotlinx.coroutines.flow.Flow<dyds.crypto.cecoin.presentation.chart.model.Granularity>,
     ): ChartScreenViewModel {
         return viewModel {
             ChartScreenViewModel(
@@ -67,7 +73,6 @@ object CecoinDependencyInjector {
                         symbol = symbol,
                     )
                 },
-                granularitySource = granularitySource,
                 symbol = symbol,
             )
         }

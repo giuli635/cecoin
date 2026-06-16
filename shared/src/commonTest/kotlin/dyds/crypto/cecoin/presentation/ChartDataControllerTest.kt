@@ -6,7 +6,6 @@ import dyds.crypto.cecoin.domain.model.TradePrice
 import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.presentation.chart.ChartDataController
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
-import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -47,32 +46,6 @@ class ChartDataControllerTest {
         val data = success.value
         assertEquals(2, data.size)
         assertEquals(51000.0, data.last().price)
-        controller.cancel()
-        scope.cancel()
-    }
-
-    @Test
-    fun `seed with failed parameter emits Failed`() = runTest {
-        val tradeFlow = MutableSharedFlow<TradePrice>(extraBufferCapacity = 1)
-        val priceSource = FakeTradePriceRepository(tradeFlow = tradeFlow)
-        val controller = ChartDataController(
-            observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
-            symbol = "BTCUSDT",
-            retryDelayMs = 0,
-        )
-        val scope = createScope()
-
-        controller.initialize(
-            scope = scope,
-            historical = emptyList(),
-            g = Granularity.M1,
-            failed = AppError.GenericError(RuntimeException("error"), "Failed"),
-        )
-
-        val emission = controller.chartData.first { it is Fallible.Failed }
-        val failed = emission as Fallible.Failed
-        assertIs<AppError.GenericError>(failed.error)
-        assertEquals("Failed", failed.error.userMessage)
         controller.cancel()
         scope.cancel()
     }

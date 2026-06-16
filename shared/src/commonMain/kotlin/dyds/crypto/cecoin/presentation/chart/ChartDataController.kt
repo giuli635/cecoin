@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val RETRY_DELAY_MS = 1_000L
 private const val MAX_STREAM_RETRIES = 3
@@ -41,16 +42,11 @@ class ChartDataController(
         scope: CoroutineScope,
         historical: List<PricePoint>,
         g: Granularity,
-        failed: AppError? = null,
     ) {
         granularity = g
         points.clear()
         points.addAll(historical)
-        if (failed != null) {
-            _chartData.value = Fallible.Failed(failed)
-        } else {
-            emitSnapshot()
-        }
+        _chartData.value = Fallible.Success(points.toList())
         startStream(scope)
     }
 
@@ -64,7 +60,7 @@ class ChartDataController(
                     retryCount++
                     _chartData.value = Fallible.Failed(AppError.GenericError(cause, STREAM_FAILED))
                     if (retryCount >= maxRetries) return@retryWhen false
-                    delay(retryDelayMs)
+                    delay(retryDelayMs.milliseconds)
                     true
                 }
                 .catch { e ->
@@ -73,13 +69,9 @@ class ChartDataController(
                 }
                 .collect { trade ->
                     points.foldTradePrice(trade, granularity)
-                    emitSnapshot()
+                    _chartData.value = Fallible.Success(points.toList())
                 }
         }
-    }
-
-    private fun emitSnapshot() {
-        _chartData.value = Fallible.Success(points.toList())
     }
 
     fun cancel() {
