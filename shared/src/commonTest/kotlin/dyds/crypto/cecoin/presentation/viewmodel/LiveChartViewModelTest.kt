@@ -1,4 +1,4 @@
-package dyds.crypto.cecoin.presentation
+package dyds.crypto.cecoin.presentation.viewmodel
 
 import dyds.crypto.cecoin.domain.FakeTradePriceRepository
 import dyds.crypto.cecoin.domain.model.PricePoint
@@ -8,6 +8,7 @@ import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.presentation.chart.LiveChartViewModel
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
 import dyds.crypto.cecoin.presentation.chart.util.foldTradePrice
+import dyds.crypto.cecoin.presentation.FakeChartModelBuilder
 import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable

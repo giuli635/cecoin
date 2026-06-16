@@ -1,4 +1,4 @@
-package dyds.crypto.cecoin.presentation
+package dyds.crypto.cecoin.presentation.viewmodel
 
 import dyds.crypto.cecoin.domain.FakeNewsRepository
 import dyds.crypto.cecoin.domain.model.NewsArticle

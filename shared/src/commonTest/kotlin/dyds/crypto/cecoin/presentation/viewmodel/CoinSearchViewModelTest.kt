@@ -1,4 +1,4 @@
-package dyds.crypto.cecoin.presentation
+package dyds.crypto.cecoin.presentation.viewmodel
 
 import dyds.crypto.cecoin.domain.FakeCryptoSymbolRepository
 import dyds.crypto.cecoin.domain.FakeFavoriteRepository
