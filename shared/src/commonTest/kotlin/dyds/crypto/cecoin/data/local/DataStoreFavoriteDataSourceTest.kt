@@ -8,7 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class FavoriteDataStoreSourceTest {
+class DataStoreFavoriteDataSourceTest {
     @Test
     fun `initial favorites are empty`() = runTest {
         val source = createSource()
@@ -43,10 +43,29 @@ class FavoriteDataStoreSourceTest {
         assertEquals(setOf("B"), result)
     }
 
-    private fun createSource(file: File? = null): FavoriteDataStoreDataSource {
+    @Test
+    fun `default constructor creates working source`() = runTest {
+        val originalUserHome = System.getProperty("user.home")
+        val tempDir = File.createTempFile("cecoin_test_home", "").also { it.delete(); it.mkdirs() }
+        try {
+            System.setProperty("user.home", tempDir.absolutePath)
+            val source = DataStoreFavoriteDataSource()
+            val result = source.favorites.first()
+            assertEquals(emptySet(), result)
+
+            source.toggle("BTCUSDT")
+            val afterToggle = source.favorites.first()
+            assertEquals(setOf("BTCUSDT"), afterToggle)
+        } finally {
+            System.setProperty("user.home", originalUserHome)
+            tempDir.deleteRecursively()
+        }
+    }
+
+    private fun createSource(file: File? = null): DataStoreFavoriteDataSource {
         val dataStore = PreferenceDataStoreFactory.create {
             file ?: File.createTempFile("favorites_test", ".preferences_pb").also { it.delete() }
         }
-        return FavoriteDataStoreDataSource(dataStore)
+        return DataStoreFavoriteDataSource(dataStore)
     }
 }

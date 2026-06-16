@@ -13,7 +13,7 @@ private const val BINANCE_API_URL = "https://api.binance.com/api/v3"
 private const val KLINE_OPEN_TIME_INDEX = 0
 private const val KLINE_CLOSE_PRICE_INDEX = 4
 
-class BinanceCoinHistoricalSource : CoinHistoricalSource {
+class BinanceCoinHistoricalDataSource : CoinHistoricalDataSource {
     private val http = HttpClient()
     private val json = Json { ignoreUnknownKeys = true }
 

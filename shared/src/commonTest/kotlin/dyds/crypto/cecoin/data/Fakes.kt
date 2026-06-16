@@ -1,9 +1,9 @@
 package dyds.crypto.cecoin.data
 
 import dyds.crypto.cecoin.data.local.FavoriteDataSource
-import dyds.crypto.cecoin.data.remote.CoinHistoricalSource
+import dyds.crypto.cecoin.data.remote.CoinHistoricalDataSource
 import dyds.crypto.cecoin.data.remote.CoinListDataSource
-import dyds.crypto.cecoin.data.remote.CoinPriceSource
+import dyds.crypto.cecoin.data.remote.CoinPriceDataSource
 import dyds.crypto.cecoin.data.remote.NewsApiDataSource
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.domain.model.NewsArticle
@@ -21,7 +21,7 @@ internal class FakeCoinListDataSource(
 
 internal class FakeCoinHistoricalSource(
     private val prices: List<TradePrice> = emptyList(),
-) : CoinHistoricalSource {
+) : CoinHistoricalDataSource {
     var lastSymbol: String = ""
     var lastInterval: String = ""
     var lastLimit: Int = 0
@@ -40,7 +40,7 @@ internal class FakeCoinHistoricalSource(
 
 internal class FakeCoinPriceSource(
     private val flow: Flow<TradePrice> = emptyFlow(),
-) : CoinPriceSource {
+) : CoinPriceDataSource {
     var lastSymbol: String = ""
 
     override fun tradePrices(symbol: String): Flow<TradePrice> {

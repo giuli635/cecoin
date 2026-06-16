@@ -21,7 +21,7 @@ private val BASE_URLS = listOf(
 private const val WEBSOCKET_CONNECT_ERROR = "No se pudo abrir el WebSocket de Binance"
 private const val STREAM_SUFFIX = "@trade"
 
-class BinanceCoinPriceSource : CoinPriceSource {
+class BinanceCoinPriceDataSource : CoinPriceDataSource {
     private val http = HttpClient {
         install(WebSockets)
     }

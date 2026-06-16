@@ -3,10 +3,10 @@ package dyds.crypto.cecoin.di
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dyds.crypto.cecoin.data.local.FavoriteDataStoreDataSource
-import dyds.crypto.cecoin.data.remote.BinanceCoinHistoricalSource
+import dyds.crypto.cecoin.data.local.DataStoreFavoriteDataSource
+import dyds.crypto.cecoin.data.remote.BinanceCoinHistoricalDataSource
 import dyds.crypto.cecoin.data.remote.BinanceCoinListDataSource
-import dyds.crypto.cecoin.data.remote.BinanceCoinPriceSource
+import dyds.crypto.cecoin.data.remote.BinanceCoinPriceDataSource
 import dyds.crypto.cecoin.data.remote.NewsApiRestDataSource
 import dyds.crypto.cecoin.data.remote.NewsApiDataSource
 import dyds.crypto.cecoin.data.repository.CecoinRepositoryImpl
@@ -25,8 +25,8 @@ import dyds.crypto.cecoin.presentation.chart.GranularityStateHolder
 import dyds.crypto.cecoin.presentation.search.CoinSearchViewModel
 
 object CecoinDependencyInjector {
-    private val coinPriceSource = BinanceCoinPriceSource()
-    private val coinHistoricalSource = BinanceCoinHistoricalSource()
+    private val coinPriceSource = BinanceCoinPriceDataSource()
+    private val coinHistoricalSource = BinanceCoinHistoricalDataSource()
     private val coinListDataSource = BinanceCoinListDataSource()
 
     private val repository = CecoinRepositoryImpl(
@@ -36,7 +36,7 @@ object CecoinDependencyInjector {
     private val getAvailableSymbolsUseCase = GetAvailableSymbolsUseCase(repository)
     private val getHistoricalPricesUseCase = GetHistoricalPricesUseCase(repository)
 
-    private val favoriteSource = FavoriteDataStoreDataSource()
+    private val favoriteSource = DataStoreFavoriteDataSource()
     private val favoriteRepository = FavoriteRepositoryImpl(favoriteSource)
     private val toggleFavoriteUseCase = ToggleFavoriteUseCase(favoriteRepository)
     private val observeFavoritesUseCase = ObserveFavoritesUseCase(favoriteRepository)

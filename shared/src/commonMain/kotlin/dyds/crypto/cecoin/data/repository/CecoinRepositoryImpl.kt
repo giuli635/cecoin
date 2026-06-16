@@ -1,8 +1,8 @@
 package dyds.crypto.cecoin.data.repository
 
-import dyds.crypto.cecoin.data.remote.CoinHistoricalSource
+import dyds.crypto.cecoin.data.remote.CoinHistoricalDataSource
 import dyds.crypto.cecoin.data.remote.CoinListDataSource
-import dyds.crypto.cecoin.data.remote.CoinPriceSource
+import dyds.crypto.cecoin.data.remote.CoinPriceDataSource
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.domain.model.TradePrice
 import dyds.crypto.cecoin.domain.repository.CryptoSymbolRepository
@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.Flow
 private const val DefaultSymbol = "BTCUSDT"
 
 class CecoinRepositoryImpl(
-    private val coinPriceSource: CoinPriceSource,
-    private val coinHistoricalSource: CoinHistoricalSource,
+    private val coinPriceSource: CoinPriceDataSource,
+    private val coinHistoricalSource: CoinHistoricalDataSource,
     private val coinListDataSource: CoinListDataSource,
 ) : CryptoSymbolRepository, TradePriceRepository {
 
