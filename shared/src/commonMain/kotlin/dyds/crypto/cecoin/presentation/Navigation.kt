@@ -24,9 +24,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import dyds.crypto.cecoin.di.CecoinDependencyInjector.getGranularityStateHolder
+import dyds.crypto.cecoin.di.CecoinDependencyInjector.getSearchViewModel
 import dyds.crypto.cecoin.di.CecoinDependencyInjector.getCoinDetailsViewModel
 import dyds.crypto.cecoin.di.CecoinDependencyInjector.getNewsViewModel
-import dyds.crypto.cecoin.di.CecoinDependencyInjector.getSearchViewModel
 import dyds.crypto.cecoin.presentation.chart.ChartScreen
 import dyds.crypto.cecoin.presentation.news.NewsScreen
 import dyds.crypto.cecoin.presentation.search.CoinSearchScreen
@@ -121,7 +122,9 @@ private fun NavGraphBuilder.newsDestination() {
 private fun NavGraphBuilder.detailDestination(navController: NavHostController) {
     composable<Detail> { backstackEntry ->
         val detail = backstackEntry.toRoute<Detail>()
+        val granularityHolder = getGranularityStateHolder()
         ChartScreen(
+            granularityHolder = granularityHolder,
             viewModel = getCoinDetailsViewModel(detail.symbol),
             onBack = { navController.popBackStack() }
         )

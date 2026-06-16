@@ -52,7 +52,7 @@ class CoinSearchViewModelTest {
         assertIs<Loadable.Loaded<*>>(result)
         val fallible = (result as Loadable.Loaded).value
         assertIs<Fallible.Failed>(fallible)
-        val error = (fallible as Fallible.Failed).error
+        val error = fallible.error
         assertIs<AppError.GenericError>(error)
         assertTrue(error.userMessage.contains("Error al cargar símbolos"))
     }

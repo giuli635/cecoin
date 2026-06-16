@@ -1,6 +1,7 @@
 package dyds.crypto.cecoin.di
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dyds.crypto.cecoin.data.local.FavoriteDataStoreDataSource
 import dyds.crypto.cecoin.data.remote.BinanceCoinHistoricalSource
@@ -17,8 +18,10 @@ import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.domain.usecase.GetCryptoNewsUseCase
-import dyds.crypto.cecoin.presentation.chart.LiveChartViewModel
 import dyds.crypto.cecoin.presentation.news.NewsViewModel
+import dyds.crypto.cecoin.presentation.chart.ChartDataController
+import dyds.crypto.cecoin.presentation.chart.ChartScreenViewModel
+import dyds.crypto.cecoin.presentation.chart.GranularityStateHolder
 import dyds.crypto.cecoin.presentation.search.CoinSearchViewModel
 
 object CecoinDependencyInjector {
@@ -61,11 +64,26 @@ object CecoinDependencyInjector {
     }
 
     @Composable
-    fun getCoinDetailsViewModel(symbol: String): LiveChartViewModel {
+    fun getGranularityStateHolder(): GranularityStateHolder {
+        return remember { GranularityStateHolder() }
+    }
+
+    @Composable
+    fun getCoinDetailsViewModel(
+        symbol: String,
+    ): ChartScreenViewModel {
         return viewModel {
-            LiveChartViewModel(
+            ChartScreenViewModel(
                 getHistoricalPricesUseCase = getHistoricalPricesUseCase,
-                observeTradePricesUseCase = observeTradePricesUseCase,
+                controllerFactory = { g, historical, scope ->
+                    ChartDataController(
+                        observeTradePricesUseCase = observeTradePricesUseCase,
+                        granularity = g,
+                        scope = scope,
+                        symbol = symbol,
+                        historical = historical,
+                    )
+                },
                 symbol = symbol,
             )
         }
