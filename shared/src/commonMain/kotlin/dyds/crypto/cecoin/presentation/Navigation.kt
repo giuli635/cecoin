@@ -36,8 +36,22 @@ data class Detail(val symbol: String)
 
 private val tabs = listOf(Home, News)
 
-private fun NavHostController.navigateToTab(tab: Tab) {
-    navigate(tab) { launchSingleTop = true }
+@Composable
+private fun TabbedScreen(
+    currentTab: Tab,
+    navController: NavHostController,
+    content: @Composable () -> Unit,
+) {
+    Column(Modifier.fillMaxSize()) {
+        TabHeader(
+            tabs = tabs,
+            selectedTab = currentTab,
+            onTabSelected = { tab ->
+                navController.navigate(tab) { launchSingleTop = true }
+            },
+        )
+        content()
+    }
 }
 
 @Composable
@@ -55,12 +69,7 @@ fun Navigation() {
 
 private fun NavGraphBuilder.homeDestination(navController: NavHostController) {
     composable<Home> {
-        Column(Modifier.fillMaxSize()) {
-            TabHeader(
-                tabs = tabs,
-                selectedTab = Home,
-                onTabSelected = navController::navigateToTab,
-            )
+        TabbedScreen(currentTab = Home, navController = navController) {
             CoinSearchScreen(
                 viewModel = getSearchViewModel(),
                 onCoinSelected = {
@@ -73,15 +82,8 @@ private fun NavGraphBuilder.homeDestination(navController: NavHostController) {
 
 private fun NavGraphBuilder.newsDestination(navController: NavHostController) {
     composable<News> {
-        Column(Modifier.fillMaxSize()) {
-            TabHeader(
-                tabs = tabs,
-                selectedTab = News,
-                onTabSelected = navController::navigateToTab,
-            )
-            NewsScreen(
-                viewModel = getNewsViewModel(),
-            )
+        TabbedScreen(currentTab = News, navController = navController) {
+            NewsScreen(viewModel = getNewsViewModel())
         }
     }
 }
