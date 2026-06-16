@@ -25,11 +25,11 @@ import kotlin.test.assertTrue
 
 class ChartScreenViewModelTest {
 
-    private suspend fun ChartScreenViewModel.awaitChartData(): ChartData {
+    private suspend fun ChartScreenViewModel.awaitChartData(): List<PricePoint> {
         val state = state.first { it !is Loadable.Loading }
         val loaded = state as Loadable.Loaded
         val success = loaded.value as Fallible.Success
-        val flow: Flow<Fallible<ChartData>> = success.value
+        val flow: Flow<Fallible<List<PricePoint>>> = success.value
         val fallible = flow.first { it is Fallible.Success }
         val successValue = fallible as Fallible.Success
         return successValue.value
@@ -39,7 +39,7 @@ class ChartScreenViewModelTest {
         val state = state.first()
         val loaded = state as Loadable.Loaded
         val success = loaded.value as Fallible.Success
-        val flow: Flow<Fallible<ChartData>> = success.value
+        val flow: Flow<Fallible<List<PricePoint>>> = success.value
         val emission = flow.first { it is Fallible.Success && it.value.any { p -> p.price == price } }
         val successValue = emission as Fallible.Success
         return successValue.value
@@ -225,7 +225,7 @@ class ChartScreenViewModelTest {
         viewModel.state.first { it !is Loadable.Loading }
         val loaded = viewModel.state.value as Loadable.Loaded
         val success = loaded.value as Fallible.Success
-        val flow: Flow<Fallible<ChartData>> = success.value
+        val flow: Flow<Fallible<List<PricePoint>>> = success.value
         val fallible = flow.first { it is Fallible.Failed }
         assertIs<Fallible.Failed>(fallible)
     }
@@ -286,7 +286,7 @@ class ChartScreenViewModelTest {
         val state = viewModel.state.first()
         val loaded = state as Loadable.Loaded
         val success = loaded.value as Fallible.Success
-        val flow: Flow<Fallible<ChartData>> = success.value
+        val flow: Flow<Fallible<List<PricePoint>>> = success.value
         val emission = flow.first { it is Fallible.Success }
         val successValue = emission as Fallible.Success
         return successValue.value

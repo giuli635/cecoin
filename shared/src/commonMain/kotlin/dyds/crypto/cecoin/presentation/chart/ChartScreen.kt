@@ -21,17 +21,49 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.presentation.chart.component.GranularitySelector
 import dyds.crypto.cecoin.presentation.chart.component.PriceChart
-import dyds.crypto.cecoin.presentation.chart.model.ChartData
-import dyds.crypto.cecoin.presentation.chart.model.Granularity
 import dyds.crypto.cecoin.presentation.chart.util.ChartColors
 import dyds.crypto.cecoin.presentation.utils.buildAsyncStreamComposable
-import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.presentation.utils.buildFallibleComposable
 
 private const val BACK_BUTTON = "Back"
 private const val USD_LABEL = "USD"
+
+@Composable
+private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) {
+    val lastPrice = data.lastOrNull()?.price ?: 0.0
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (lastPrice > 0.0) {
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.padding(start = 12.dp),
+            ) {
+                Text(
+                    text = "$${String.format("%,.2f", lastPrice)}",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = ChartColors.accent,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = USD_LABEL,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 4.dp),
+                )
+            }
+        }
+        PriceChart(
+            points = data,
+            modifier = Modifier.padding(4.dp),
+        )
+    }
+}
 
 @Composable
 fun ChartScreen(
@@ -77,39 +109,8 @@ fun ChartScreen(
             buildAsyncStreamComposable(
                 onRetry = { viewModel.load(granularity) },
                 inner = buildFallibleComposable(
-                    inner = { data: ChartData, _ ->
-                        val lastPrice = data.lastOrNull()?.price ?: 0.0
-
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            if (lastPrice > 0.0) {
-                                Row(
-                                    verticalAlignment = Alignment.Bottom,
-                                    modifier = Modifier.padding(start = 12.dp),
-                                ) {
-                                    Text(
-                                        text = "$${String.format("%,.2f", lastPrice)}",
-                                        style = MaterialTheme.typography.headlineLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = ChartColors.accent,
-                                    )
-                                    Spacer(Modifier.width(8.dp))
-                                    Text(
-                                        text = USD_LABEL,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(bottom = 4.dp),
-                                    )
-                                }
-                            }
-
-                            PriceChart(
-                                points = data,
-                                modifier = Modifier.padding(4.dp),
-                            )
-                        }
+                    inner = { data: List<PricePoint>, _ ->
+                        ChartContent(data, modifier = Modifier.fillMaxWidth().padding(8.dp))
                     },
                     onCancel = {},
                     onRetry = { viewModel.load(granularity) },

@@ -29,10 +29,10 @@ class ChartDataController(
     private val retryDelayMs: Long = RETRY_DELAY_MS,
     private val maxRetries: Int = MAX_STREAM_RETRIES,
 ) {
-    private val _chartData = MutableStateFlow<Fallible<ChartData>>(
+    private val _chartData = MutableStateFlow<ChartData>(
         Fallible.Success(emptyList())
     )
-    val chartData: StateFlow<Fallible<ChartData>> = _chartData.asStateFlow()
+    val chartData: StateFlow<ChartData> = _chartData.asStateFlow()
 
     private val points = mutableListOf<PricePoint>()
     private var granularity = Granularity.M1

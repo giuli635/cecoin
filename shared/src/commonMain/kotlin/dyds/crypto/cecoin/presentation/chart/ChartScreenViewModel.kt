@@ -26,8 +26,8 @@ class ChartScreenViewModel(
     val symbol: String,
     private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
 ) : ViewModel() {
-    private val _state = MutableStateFlow<AsyncResult<Flow<Fallible<ChartData>>>>(Loadable.Loading)
-    val state: StateFlow<AsyncResult<Flow<Fallible<ChartData>>>> = _state.asStateFlow()
+    private val _state = MutableStateFlow<AsyncResult<Flow<ChartData>>>(Loadable.Loading)
+    val state: StateFlow<AsyncResult<Flow<ChartData>>> = _state.asStateFlow()
 
     private var controller: ChartDataController? = null
     private var loadJob: Job? = null
