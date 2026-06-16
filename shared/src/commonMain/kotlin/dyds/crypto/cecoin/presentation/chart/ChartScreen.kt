@@ -28,10 +28,10 @@ import dyds.crypto.cecoin.presentation.chart.util.ChartColors
 import dyds.crypto.cecoin.presentation.utils.buildAsyncStreamComposable
 import dyds.crypto.cecoin.presentation.utils.buildFallibleComposable
 import dyds.crypto.cecoin.utils.ErrorClassifier
+import dyds.crypto.cecoin.utils.priceStr
 
 private const val BACK_BUTTON = "Atrás"
 private const val USD_LABEL = "USD"
-private const val PRICE_FORMAT = "%,.2f"
 
 @Composable
 private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) {
@@ -46,7 +46,7 @@ private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) 
                 modifier = Modifier.padding(start = 12.dp),
             ) {
                 Text(
-                    text = "$${String.format(PRICE_FORMAT, lastPrice)}",
+                    text = "$${priceStr(lastPrice)}",
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     color = ChartColors.accent,

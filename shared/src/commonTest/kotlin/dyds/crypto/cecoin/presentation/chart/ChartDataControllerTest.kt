@@ -10,13 +10,9 @@ import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,17 +23,14 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class ChartDataControllerTest {
 
-    private fun createScope() = CoroutineScope(SupervisorJob() + UnconfinedTestDispatcher())
-
     @Test
     fun `seed with historical data emits Success snapshot`() = runTest {
         val tradeFlow = MutableSharedFlow<TradePrice>(extraBufferCapacity = 1)
         val priceSource = FakeTradePriceRepository(tradeFlow = tradeFlow)
-        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
-            scope = scope,
+            scope = this,
             historical = listOf(PricePoint(0L, 50000.0), PricePoint(60_000L, 51000.0)),
             granularity = Granularity.M1,
             errorClassifier = object : ErrorClassifier() {
@@ -53,7 +46,7 @@ class ChartDataControllerTest {
         assertEquals(2, data.size)
         assertEquals(51000.0, data.last().price)
         controller.cancel()
-        scope.cancel()
+
     }
 
     @Test
@@ -63,11 +56,10 @@ class ChartDataControllerTest {
             historical = emptyList(),
             tradeFlow = tradeFlow,
         )
-        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
-            scope = scope,
+            scope = this,
             historical = emptyList(),
             granularity = Granularity.M1,
             errorClassifier = object : ErrorClassifier() {
@@ -85,7 +77,7 @@ class ChartDataControllerTest {
         val data = (snapshot as Fallible.Success).value
         assertTrue(data.any { it.price == 52000.0 })
         controller.cancel()
-        scope.cancel()
+        advanceUntilIdle()
     }
 
     @Test
@@ -95,11 +87,10 @@ class ChartDataControllerTest {
             historical = emptyList(),
             tradeFlow = tradeFlow,
         )
-        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
-            scope = scope,
+            scope = this,
             historical = emptyList(),
             granularity = Granularity.M1,
             errorClassifier = object : ErrorClassifier() {
@@ -116,18 +107,17 @@ class ChartDataControllerTest {
         val afterCancel = controller.chartData.value
         val success = afterCancel as Fallible.Success
         assertTrue(success.value.isEmpty())
-        scope.cancel()
+
     }
 
     @Test
     fun `startStream cancels previous stream when called twice`() = runTest {
         val tradeFlow = MutableSharedFlow<TradePrice>(extraBufferCapacity = 1)
         val priceSource = FakeTradePriceRepository(tradeFlow = tradeFlow)
-        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
-            scope = scope,
+            scope = this,
             historical = listOf(PricePoint(0L, 50000.0)),
             granularity = Granularity.M1,
             errorClassifier = object : ErrorClassifier() {
@@ -145,7 +135,7 @@ class ChartDataControllerTest {
         }
         assertTrue((snapshot as Fallible.Success).value.any { it.price == 52000.0 })
         controller.cancel()
-        scope.cancel()
+        advanceUntilIdle()
     }
 
     @Test
@@ -155,11 +145,10 @@ class ChartDataControllerTest {
             historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
             tradeFlow = tradeFlow,
         )
-        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
-            scope = scope,
+            scope = this,
             historical = emptyList(),
             granularity = Granularity.M1,
             errorClassifier = object : ErrorClassifier() {
@@ -172,16 +161,15 @@ class ChartDataControllerTest {
         val failed = controller.chartData.first { it is Fallible.Failed }
         assertIs<Fallible.Failed>(failed)
         controller.cancel()
-        scope.cancel()
+
     }
 
     @Test
     fun `cancel when streamJob is null does nothing`() = runTest {
-        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(FakeTradePriceRepository()),
             symbol = "BTCUSDT",
-            scope = scope,
+            scope = this,
             historical = emptyList(),
             granularity = Granularity.M1,
             errorClassifier = object : ErrorClassifier() {
@@ -190,7 +178,7 @@ class ChartDataControllerTest {
             retryDelayMs = 0,
         )
         controller.cancel()
-        scope.cancel()
+
     }
 
     @Test
@@ -200,11 +188,10 @@ class ChartDataControllerTest {
             historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
             tradeFlow = tradeFlow,
         )
-        val scope = createScope()
         val controller = ChartDataController(
             observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
             symbol = "BTCUSDT",
-            scope = scope,
+            scope = this,
             historical = listOf(PricePoint(0L, 50000.0)),
             granularity = Granularity.M1,
             errorClassifier = object : ErrorClassifier() {
@@ -218,6 +205,6 @@ class ChartDataControllerTest {
         val data = (snapshot as Fallible.Success).value
         assertEquals(50000.0, data.last().price)
         controller.cancel()
-        scope.cancel()
+
     }
 }
