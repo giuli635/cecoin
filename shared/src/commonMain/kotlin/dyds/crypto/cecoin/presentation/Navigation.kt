@@ -1,6 +1,7 @@
 package dyds.crypto.cecoin.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -10,6 +11,7 @@ import androidx.navigation.toRoute
 import dyds.crypto.cecoin.di.CecoinDependencyInjector.getSearchViewModel
 import dyds.crypto.cecoin.di.CecoinDependencyInjector.getCoinDetailsViewModel
 import dyds.crypto.cecoin.presentation.chart.ChartScreen
+import dyds.crypto.cecoin.presentation.chart.GranularityStateHolder
 import dyds.crypto.cecoin.presentation.search.CoinSearchScreen
 import kotlinx.serialization.Serializable
 
@@ -43,8 +45,10 @@ private fun NavGraphBuilder.homeDestination(navController: NavHostController) {
 private fun NavGraphBuilder.detailDestination(navController: NavHostController) {
     composable<Detail> { backstackEntry ->
         val detail = backstackEntry.toRoute<Detail>()
+        val granularityHolder = remember { GranularityStateHolder() }
         ChartScreen(
-            viewModel = getCoinDetailsViewModel(detail.symbol),
+            granularityHolder = granularityHolder,
+            viewModel = getCoinDetailsViewModel(detail.symbol, granularityHolder.granularity),
             onBack = { navController.popBackStack() }
         )
     }

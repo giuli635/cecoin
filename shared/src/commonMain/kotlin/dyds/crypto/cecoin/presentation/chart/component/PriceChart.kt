@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import dyds.crypto.cecoin.domain.model.PricePoint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +36,7 @@ import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import dyds.crypto.cecoin.presentation.chart.util.ChartColors
+import dyds.crypto.cecoin.presentation.chart.util.VicoChartModelBuilder
 import dyds.crypto.cecoin.presentation.chart.util.priceFormatter
 import dyds.crypto.cecoin.presentation.chart.util.priceStr
 import dyds.crypto.cecoin.presentation.chart.util.timeFormatter
@@ -60,9 +62,18 @@ private val minZoom = Zoom.fixed(MIN_ZOOM_FACTOR)
 
 @Composable
 fun PriceChart(
-    modelProducer: CartesianChartModelProducer,
+    points: List<PricePoint>,
     modifier: Modifier = Modifier,
 ) {
+    val modelProducer = remember { CartesianChartModelProducer() }
+    val chartModelBuilder = remember { VicoChartModelBuilder() }
+
+    LaunchedEffect(points) {
+        if (points.isNotEmpty()) {
+            chartModelBuilder.buildModel(points, modelProducer)
+        }
+    }
+
     Box(modifier = modifier.height(CHART_HEIGHT_DP.dp)) {
         val markerIndicator = rememberLineComponent(
             fill = Fill(ChartColors.accent),
