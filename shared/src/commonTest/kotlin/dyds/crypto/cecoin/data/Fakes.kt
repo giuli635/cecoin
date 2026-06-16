@@ -1,12 +1,13 @@
 package dyds.crypto.cecoin.data
 
-import dyds.crypto.cecoin.data.local.FavoriteStorage
+import dyds.crypto.cecoin.data.local.FavoriteDataSource
 import dyds.crypto.cecoin.data.remote.CoinHistoricalSource
 import dyds.crypto.cecoin.data.remote.CoinListDataSource
 import dyds.crypto.cecoin.data.remote.CoinPriceSource
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.domain.model.TradePrice
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 
 internal class FakeCoinListDataSource(
@@ -48,16 +49,18 @@ internal class FakeCoinPriceSource(
     override fun close() {}
 }
 
-internal class FakeFavoriteStorage(
+internal class FakeFavoriteDataSource(
     initial: Set<String> = emptySet(),
-) : FavoriteStorage {
-    private val data = initial.toMutableSet()
-    var saved: Set<String> = initial
+) : FavoriteDataSource {
+    private val _favorites = MutableStateFlow(initial)
 
-    override fun load(): Set<String> = data.toSet()
-    override fun save(favorites: Set<String>) {
-        data.clear()
-        data.addAll(favorites)
-        saved = data.toSet()
+    override val favorites: Flow<Set<String>> = _favorites
+
+    override suspend fun toggle(symbol: String) {
+        _favorites.value = if (symbol in _favorites.value) {
+            _favorites.value - symbol
+        } else {
+            _favorites.value + symbol
+        }
     }
 }

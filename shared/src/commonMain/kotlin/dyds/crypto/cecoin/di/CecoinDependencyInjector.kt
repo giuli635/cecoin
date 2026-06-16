@@ -2,8 +2,7 @@ package dyds.crypto.cecoin.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dyds.crypto.cecoin.data.local.FavoriteLocalSource
-import dyds.crypto.cecoin.data.local.createFavoriteStorage
+import dyds.crypto.cecoin.data.local.FavoriteDataStoreDataSource
 import dyds.crypto.cecoin.data.remote.BinanceCoinHistoricalSource
 import dyds.crypto.cecoin.data.remote.BinanceCoinListDataSource
 import dyds.crypto.cecoin.data.remote.BinanceCoinPriceSource
@@ -34,8 +33,7 @@ object CecoinDependencyInjector {
     private val getAvailableSymbolsUseCase = GetAvailableSymbolsUseCase(repository)
     private val getHistoricalPricesUseCase = GetHistoricalPricesUseCase(repository)
 
-    private val favoriteStorage = createFavoriteStorage()
-    private val favoriteSource = FavoriteLocalSource(favoriteStorage)
+    private val favoriteSource = FavoriteDataStoreDataSource()
     private val favoriteRepository = FavoriteRepositoryImpl(favoriteSource)
     private val toggleFavoriteUseCase = ToggleFavoriteUseCase(favoriteRepository)
     private val observeFavoritesUseCase = ObserveFavoritesUseCase(favoriteRepository)
