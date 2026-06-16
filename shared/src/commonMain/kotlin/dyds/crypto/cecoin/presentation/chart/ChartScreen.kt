@@ -107,7 +107,7 @@ fun ChartScreen(
             modifier = Modifier.fillMaxWidth(),
         ) {
             buildAsyncStreamComposable(
-                onCancel = onBack,
+                onCancel = { viewModel.cancel() },
                 onRetry = { viewModel.load(granularity) },
                 inner = buildFallibleComposable(
                     inner = { data: List<PricePoint>, _ ->
