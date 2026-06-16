@@ -179,7 +179,6 @@ No se detectaron imports sin usar significativos. Todos los archivos se referenc
 
 | ID | Severidad | Archivo | Problema |
 |----|-----------|---------|----------|
-| U1 | **High** | `chart/ChartScreen.kt:83` | `buildAsyncStreamComposable` recibe `onBack` como `onCancel`. Presionar "Cancelar" durante la carga navega hacia atrás (vuelve al listado) en vez de solo cancelar el stream. Es por esto que NUNCA veían el falso error de `CancellationException` en el chart: al navegar hacia atrás, la pantalla se destruye antes de que el error se renderice. En cambio, en SearchScreen y NewsScreen cancelar NO navega — se queda en la misma pantalla, por eso ahí SÍ aparecía el mensaje "StandaloneCoroutine was cancelled" |
 | U2 | **Medium** | `chart/ChartScreen.kt:38-48` | `lastOrNull()?.price ?: 0.0` trata precio = 0.0 como "sin datos". Si una crypto vale exactamente 0 (stablecoin colapsada, por ejemplo), no se muestra el precio. Mejor usar `null` o un flag explícito |
 | U3 | **Medium** | `search/CoinSearchScreen.kt:97-98` | Cuando no hay query de búsqueda (`searchQuery` vacío) y la lista de monedas está vacía, no se muestra ningún mensaje. Solo hay mensaje de "no se encontraron criptos" cuando hay query. Debería mostrar "No hay criptomonedas disponibles" |
 | U4 | **Low** | `chart/ChartScreen.kt:78-80` | `LaunchedEffect(granularity)` se re-ejecuta al cambiar granularidad, lo pisa el `GranularityStateHolder` que no emite si el valor no cambia. Correcto por ahora, pero frágil si alguien cambia `GranularityStateHolder.set()` |
@@ -493,22 +492,9 @@ Fragmentá Navigation.kt separando cada NavGraphBuilder en su propio archivo. ho
 ```
 Fragmentá PriceChart.kt separando la configuración del marker, ejes, y scroll/zoom en archivos independientes. PriceChart.kt debe quedar solo con el @Composable principal. Cada sub-componente recibe los mismos parámetros que antes. Verificá que la UI del chart se comporte exactamente igual.
 ```
-
 ---
 
-### Tarea 6: Desacoplar onCancel de onBack en ChartScreen
-
-**Archivos a modificar:**
-- `presentation/chart/ChartScreen.kt` — cambiar `onCancel = onBack` por `onCancel = { viewModel.cancel() }` en el `buildAsyncStreamComposable`
-
-**Prompt para el desarrollador:**
-```
-En ChartScreen.kt, el buildAsyncStreamComposable recibe onBack como parámetro onCancel. Esto hace que presionar "Cancelar" durante la carga navegue hacia atrás en vez de solo cancelar el stream. Cambiá onCancel por una lambda que llame a viewModel.cancel(). La navegación atrás debe seguir siendo manejada exclusivamente por el botón "Atrás".
-```
-
----
-
-### Tarea 7: Agregar empty state en CoinSearchScreen para lista vacía
+### Tarea 6: Agregar empty state en CoinSearchScreen para lista vacía
 
 **Archivos a modificar:**
 - `presentation/search/CoinSearchScreen.kt` — agregar mensaje cuando lista vacía sin query
@@ -520,7 +506,7 @@ En CoinSearchScreen, cuando searchQuery está vacío y la lista de símbolos tam
 
 ---
 
-### Tarea 8: Extraer constantes en ChartFormatter.kt y RangeProvider.kt
+### Tarea 7: Extraer constantes en ChartFormatter.kt y RangeProvider.kt
 
 **Archivos a modificar:**
 - `presentation/chart/util/ChartFormatter.kt` — extraer `1000`, `60`, `3600`, `24`
@@ -533,7 +519,7 @@ Reemplazá los números mágicos en ChartFormatter.kt y RangeProvider.kt con con
 
 ---
 
-### Tarea 9: Extraer magic string de formato en ChartScreen.kt
+### Tarea 8: Extraer magic string de formato en ChartScreen.kt
 
 **Archivos a modificar:**
 - `presentation/chart/ChartScreen.kt` — extraer `"%,.2f"` a constante
@@ -545,7 +531,7 @@ Extraé el string de formato "%,.2f" en ChartScreen.kt a una constante privada c
 
 ---
 
-### Tarea 10: Agregar edge cases faltantes en tests existentes
+### Tarea 9: Agregar edge cases faltantes en tests existentes
 
 **Archivos a modificar:**
 - `domain/usecase/GetAvailableSymbolsUseCaseTest.kt` — agregar test de excepción
@@ -569,7 +555,7 @@ Usá runTest y las Fakes existentes.
 
 ---
 
-### Tarea 11: Extraer precio = 0.0 como caso válido en ChartScreen
+### Tarea 10: Extraer precio = 0.0 como caso válido en ChartScreen
 
 **Archivos a modificar:**
 - `presentation/chart/ChartScreen.kt` — manejar precio = 0.0 sin ocultarlo
@@ -581,7 +567,7 @@ En ChartScreen.kt, ChartContent oculta el precio cuando lastPrice <= 0.0 porque 
 
 ---
 
-### Tarea 12: Agregar timeout en buildAsyncStreamComposable para evitar Loading infinito
+### Tarea 11: Agregar timeout en buildAsyncStreamComposable para evitar Loading infinito
 
 **Archivos a modificar:**
 - `presentation/utils/buildAsyncStreamComposable.kt` — agregar timeout configurable
