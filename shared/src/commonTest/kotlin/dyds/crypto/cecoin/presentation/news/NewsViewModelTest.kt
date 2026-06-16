@@ -1,10 +1,12 @@
-package dyds.crypto.cecoin.presentation.viewmodel
+package dyds.crypto.cecoin.presentation.news
 
 import dyds.crypto.cecoin.domain.FakeNewsRepository
 import dyds.crypto.cecoin.domain.model.NewsArticle
 import dyds.crypto.cecoin.domain.usecase.GetCryptoNewsUseCase
+import dyds.crypto.cecoin.domain.repository.NewsRepository
 import dyds.crypto.cecoin.presentation.news.NewsViewModel
 import dyds.crypto.cecoin.utils.AppError
+import kotlinx.coroutines.CompletableDeferred
 import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
@@ -93,10 +95,36 @@ class NewsViewModelTest {
     }
 
     @Test
+    fun `onCancelLoadNews emits Cancelled when load is in progress`() = runTest {
+        val deferred = CompletableDeferred<List<NewsArticle>>()
+        val repo = object : NewsRepository {
+            override suspend fun getCryptoNews(): List<NewsArticle> {
+                return deferred.await()
+            }
+        }
+        val viewModel = NewsViewModel(
+            GetCryptoNewsUseCase(repo),
+            object : ErrorClassifier() {
+                override fun isNetworkError(e: Throwable) = false
+            },
+        )
+
+        val loading = viewModel.asyncNews.first { it is Loadable.Loading }
+        assertIs<Loadable.Loading>(loading)
+
+        viewModel.onCancelLoadNews()
+
+        val cancelled = viewModel.asyncNews.first { it is Loadable.Cancelled }
+        assertIs<Loadable.Cancelled>(cancelled)
+    }
+
+    @Test
     fun `onCancelLoadNews does nothing when no active job`() = runTest {
         val repo = FakeNewsRepository()
         val viewModel = createViewModel(repo)
 
+        viewModel.asyncNews.first { it !is Loadable.Loading }
+        viewModel.onCancelLoadNews()
         viewModel.onCancelLoadNews()
 
         val state = viewModel.uiState.first()

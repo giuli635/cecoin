@@ -48,4 +48,15 @@ class FavoriteRepositoryImplTest {
 
         assertEquals(setOf("BTCUSDT", "ETHUSDT"), result)
     }
+
+    @Test
+    fun `toggleFavorite with empty symbol does not crash`() = runTest {
+        val source = FakeFavoriteDataSource()
+        val repo = FavoriteRepositoryImpl(source)
+
+        repo.toggleFavorite("")
+
+        val result = repo.observeFavorites().first()
+        assertEquals(setOf(""), result)
+    }
 }

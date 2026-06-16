@@ -5,6 +5,7 @@ import dyds.crypto.cecoin.domain.model.NewsArticle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class GetCryptoNewsUseCaseTest {
     @Test
@@ -28,5 +29,15 @@ class GetCryptoNewsUseCaseTest {
         val result = useCase()
 
         assertEquals(0, result.size)
+    }
+
+    @Test
+    fun `invoke propagates repository exception`() = runTest {
+        val repo = FakeNewsRepository(exception = RuntimeException("repo fail"))
+        val useCase = GetCryptoNewsUseCase(repo)
+
+        assertFailsWith<RuntimeException> {
+            useCase()
+        }
     }
 }

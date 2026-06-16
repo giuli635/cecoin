@@ -1,4 +1,4 @@
-package dyds.crypto.cecoin.presentation
+package dyds.crypto.cecoin.presentation.chart
 
 import dyds.crypto.cecoin.domain.FakeTradePriceRepository
 import dyds.crypto.cecoin.domain.model.PricePoint
@@ -9,7 +9,6 @@ import dyds.crypto.cecoin.presentation.chart.ChartDataController
 import dyds.crypto.cecoin.presentation.chart.ChartScreenViewModel
 import dyds.crypto.cecoin.presentation.chart.model.ChartData
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
-import dyds.crypto.cecoin.presentation.chart.util.foldTradePrice
 import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
@@ -248,18 +247,6 @@ class ChartScreenViewModelTest {
     }
 
     @Test
-    fun `foldTradePrice adds price when points is empty`() = runTest {
-        val points = mutableListOf<PricePoint>()
-        val trade = TradePrice("BTCUSDT", PricePoint(100_000L, 52000.0))
-        points.foldTradePrice(trade, Granularity.M1)
-
-        val expectedTimestamp = (100_000L / 60_000L) * 60_000L
-        assertEquals(1, points.size)
-        assertEquals(expectedTimestamp, points[0].timestamp)
-        assertEquals(52000.0, points[0].price)
-    }
-
-    @Test
     fun `live stream stops retrying on CancellationException`() = runTest {
         val tradeFlow = flow<Nothing> { throw CancellationException("Cancelled") }
         val priceSource = FakeTradePriceRepository(
@@ -272,16 +259,6 @@ class ChartScreenViewModelTest {
         val chartData = viewModel.awaitChartData()
 
         assertEquals(50000.0, chartData.last().price)
-    }
-
-    @Test
-    fun `foldTradePrice ignores out of order trade`() = runTest {
-        val points = mutableListOf(PricePoint(60_000L, 52000.0))
-        val trade = TradePrice("BTCUSDT", PricePoint(30_000L, 51000.0))
-        points.foldTradePrice(trade, Granularity.M1)
-
-        assertEquals(1, points.size)
-        assertEquals(52000.0, points[0].price)
     }
 
     private suspend fun waitForPriceStillVisible(viewModel: ChartScreenViewModel, price: Double): List<PricePoint> {

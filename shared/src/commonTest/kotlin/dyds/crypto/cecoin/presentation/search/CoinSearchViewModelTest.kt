@@ -1,4 +1,4 @@
-package dyds.crypto.cecoin.presentation.viewmodel
+package dyds.crypto.cecoin.presentation.search
 
 import dyds.crypto.cecoin.domain.FakeCryptoSymbolRepository
 import dyds.crypto.cecoin.domain.FakeFavoriteRepository
@@ -192,6 +192,30 @@ class CoinSearchViewModelTest {
 
         viewModel.onCancelLoadSymbols()
         viewModel.onCancelLoadSymbols()
+    }
+
+    @Test
+    fun `onCancelLoadSymbols emits Cancelled when load is in progress`() = runTest {
+        val symbolsDeferred = CompletableDeferred<List<CryptoSymbol>>()
+        val repo = object : CryptoSymbolRepository {
+            override suspend fun getAvailableSymbols(): List<CryptoSymbol> {
+                return symbolsDeferred.await()
+            }
+        }
+        val viewModel = CoinSearchViewModel(
+            getAvailableSymbolsUseCase = GetAvailableSymbolsUseCase(repo),
+            toggleFavoriteUseCase = ToggleFavoriteUseCase(FakeFavoriteRepository()),
+            observeFavoritesUseCase = ObserveFavoritesUseCase(FakeFavoriteRepository()),
+            errorClassifier = fakeClassifier(),
+        )
+
+        val loading = viewModel.filteredCoins.first { it is Loadable.Loading }
+        assertIs<Loadable.Loading>(loading)
+
+        viewModel.onCancelLoadSymbols()
+
+        val cancelled = viewModel.filteredCoins.first { it is Loadable.Cancelled }
+        assertIs<Loadable.Cancelled>(cancelled)
     }
 
     @Test

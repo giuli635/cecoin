@@ -20,6 +20,7 @@ internal class FakeCoinListDataSource(
 
 internal class FakeCoinHistoricalSource(
     private val prices: List<TradePrice> = emptyList(),
+    var exception: Throwable? = null,
 ) : CoinHistoricalDataSource {
     var lastSymbol: String = ""
     var lastInterval: String = ""
@@ -31,6 +32,7 @@ internal class FakeCoinHistoricalSource(
         lastSymbol = symbol
         lastInterval = interval
         lastLimit = limit
+        exception?.let { throw it }
         return prices
     }
 }

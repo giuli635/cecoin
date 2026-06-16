@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class CecoinRepositoryImplTest {
@@ -78,6 +79,16 @@ class CecoinRepositoryImplTest {
         val result = repo.getAvailableSymbols()
 
         assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun `getHistoricalPrices propagates source exception`() = runTest {
+        val historicalSource = FakeCoinHistoricalSource(exception = RuntimeException("source fail"))
+        val repo = CecoinRepositoryImpl(FakeCoinPriceSource(), historicalSource, FakeCoinListDataSource())
+
+        assertFailsWith<RuntimeException> {
+            repo.getHistoricalPrices("BTCUSDT", "1m", 200)
+        }
     }
 }
 

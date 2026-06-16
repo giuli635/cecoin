@@ -1,4 +1,4 @@
-package dyds.crypto.cecoin.presentation
+package dyds.crypto.cecoin.presentation.chart
 
 import dyds.crypto.cecoin.presentation.chart.GranularityStateHolder
 import dyds.crypto.cecoin.presentation.chart.model.Granularity

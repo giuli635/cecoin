@@ -61,13 +61,13 @@ private const val NICE_STEP_VALUE_10 = 10.0
 
 private const val SECONDS_IN_MINUTE = 60
 private const val SECONDS_IN_HOUR = 3600
-private const val SECONDS_IN_DAY = 86_400
 private const val MILLIS_IN_MINUTE = 60_000.0
 private const val MILLIS_IN_5_MIN = 300_000.0
 private const val MILLIS_IN_15_MIN = 900_000.0
 private const val MILLIS_IN_30_MIN = 1_800_000.0
 private const val MILLIS_IN_1_HOUR = 3_600_000.0
 private const val MILLIS_IN_6_HOURS = 21_600_000.0
+private const val MILLIS_IN_SECOND = 1000.0
 private const val MILLIS_IN_1_DAY = 86_400_000.0
 
 fun niceStep(range: Double): Double {
@@ -84,7 +84,7 @@ fun niceStep(range: Double): Double {
 }
 
 private fun niceTimeStep(rangeMs: Double): Double {
-    val rangeSec = rangeMs / 1000.0
+    val rangeSec = rangeMs / MILLIS_IN_SECOND
     return when {
         rangeSec < SECONDS_IN_MINUTE -> MILLIS_IN_MINUTE
         rangeSec < SECONDS_IN_MINUTE * 10 -> MILLIS_IN_5_MIN

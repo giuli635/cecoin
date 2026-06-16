@@ -1,4 +1,4 @@
-package dyds.crypto.cecoin.presentation
+package dyds.crypto.cecoin.presentation.chart
 
 import dyds.crypto.cecoin.domain.FakeTradePriceRepository
 import dyds.crypto.cecoin.domain.model.PricePoint
@@ -120,6 +120,35 @@ class ChartDataControllerTest {
     }
 
     @Test
+    fun `startStream cancels previous stream when called twice`() = runTest {
+        val tradeFlow = MutableSharedFlow<TradePrice>(extraBufferCapacity = 1)
+        val priceSource = FakeTradePriceRepository(tradeFlow = tradeFlow)
+        val scope = createScope()
+        val controller = ChartDataController(
+            observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
+            symbol = "BTCUSDT",
+            scope = scope,
+            historical = listOf(PricePoint(0L, 50000.0)),
+            granularity = Granularity.M1,
+            errorClassifier = object : ErrorClassifier() {
+            override fun isNetworkError(e: Throwable) = false
+        },
+            retryDelayMs = 0,
+        )
+        controller.startStream()
+        controller.startStream()
+
+        tradeFlow.emit(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
+
+        val snapshot = controller.chartData.first {
+            it is Fallible.Success && it.value.any { p -> p.price == 52000.0 }
+        }
+        assertTrue((snapshot as Fallible.Success).value.any { it.price == 52000.0 })
+        controller.cancel()
+        scope.cancel()
+    }
+
+    @Test
     fun `stream emits Failed on error`() = runTest {
         val tradeFlow = flow<Nothing> { throw RuntimeException("Stream crash") }
         val priceSource = FakeTradePriceRepository(
@@ -142,6 +171,24 @@ class ChartDataControllerTest {
 
         val failed = controller.chartData.first { it is Fallible.Failed }
         assertIs<Fallible.Failed>(failed)
+        controller.cancel()
+        scope.cancel()
+    }
+
+    @Test
+    fun `cancel when streamJob is null does nothing`() = runTest {
+        val scope = createScope()
+        val controller = ChartDataController(
+            observeTradePricesUseCase = ObserveTradePricesUseCase(FakeTradePriceRepository()),
+            symbol = "BTCUSDT",
+            scope = scope,
+            historical = emptyList(),
+            granularity = Granularity.M1,
+            errorClassifier = object : ErrorClassifier() {
+            override fun isNetworkError(e: Throwable) = false
+        },
+            retryDelayMs = 0,
+        )
         controller.cancel()
         scope.cancel()
     }

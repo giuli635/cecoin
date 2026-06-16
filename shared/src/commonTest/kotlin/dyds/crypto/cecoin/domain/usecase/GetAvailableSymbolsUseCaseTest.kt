@@ -5,6 +5,7 @@ import dyds.crypto.cecoin.domain.model.CryptoSymbol
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class GetAvailableSymbolsUseCaseTest {
     @Test
@@ -26,5 +27,15 @@ class GetAvailableSymbolsUseCaseTest {
         val result = useCase()
 
         assertEquals(0, result.size)
+    }
+
+    @Test
+    fun `invoke propagates repository exception`() = runTest {
+        val repo = FakeCryptoSymbolRepository(exception = RuntimeException("repo fail"))
+        val useCase = GetAvailableSymbolsUseCase(repo)
+
+        assertFailsWith<RuntimeException> {
+            useCase()
+        }
     }
 }

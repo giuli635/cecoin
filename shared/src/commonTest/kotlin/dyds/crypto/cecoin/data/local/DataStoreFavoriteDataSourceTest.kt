@@ -43,6 +43,14 @@ class DataStoreFavoriteDataSourceTest {
         assertEquals(setOf("B"), result)
     }
 
+    @Test
+    fun `toggle with spaces in symbol works without crashing`() = runTest {
+        val source = createSource()
+        source.toggle("  BTC  ")
+        val result = source.favorites.first()
+        assertEquals(setOf("  BTC  "), result)
+    }
+
     private fun createSource(file: File? = null): DataStoreFavoriteDataSource {
         val dataStore = PreferenceDataStoreFactory.create {
             file ?: File.createTempFile("favorites_test", ".preferences_pb").also { it.delete() }
