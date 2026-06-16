@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-private const val FAILED_TO_LOAD_SYMBOLS = "Failed to load symbols"
+private const val FAILED_TO_LOAD_SYMBOLS = "Error al cargar símbolos"
 
 class CoinSearchViewModel(
     private val getAvailableSymbolsUseCase: GetAvailableSymbolsUseCase,

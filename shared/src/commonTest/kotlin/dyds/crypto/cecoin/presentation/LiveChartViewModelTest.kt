@@ -53,7 +53,7 @@ class LiveChartViewModelTest {
         assertIs<Fallible.Failed>(fallible)
         val error = fallible.error
         assertIs<AppError.GenericError>(error)
-        assertTrue(error.userMessage.contains("Failed to load chart"))
+        assertTrue(error.userMessage.contains("Error al cargar gráfico"))
     }
 
     @Test
@@ -226,7 +226,7 @@ class LiveChartViewModelTest {
         val fallible = (state as Loadable.Loaded).value
         assertIs<Fallible.Failed>(fallible)
         val error = fallible.error as AppError.GenericError
-        assertTrue(error.userMessage.contains("Live stream failed"))
+        assertTrue(error.userMessage.contains("Error en transmisión en vivo"))
     }
 
     @Test

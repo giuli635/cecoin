@@ -31,10 +31,10 @@ import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 
-private const val BACK_BUTTON = "Back"
+private const val BACK_BUTTON = "Atrás"
 private const val USD_LABEL = "USD"
-private const val RETRY_BUTTON = "Retry"
-private const val STREAM_ERROR_RETRY = "Reconnecting..."
+private const val RETRY_BUTTON = "Reintentar"
+private const val STREAM_ERROR_RETRY = "Reconectando..."
 
 @Composable
 fun ChartScreen(

@@ -24,10 +24,10 @@ import dyds.crypto.cecoin.presentation.search.component.FilterDropdown
 import dyds.crypto.cecoin.presentation.utils.buildAsyncComposable
 import dyds.crypto.cecoin.utils.Loadable
 
-private const val SEARCH_TITLE = "Search Coins"
-private const val SEARCH_LABEL = "Search symbol (e.g., BTC, ETH)"
-private const val AVAILABLE_COINS_LABEL = "Available Coins"
-private const val NO_COINS_FOUND = "No coins found matching '"
+private const val SEARCH_TITLE = "Buscar Criptos"
+private const val SEARCH_LABEL = "Buscar símbolo (ej: BTC, ETH)"
+private const val AVAILABLE_COINS_LABEL = "Criptos disponibles"
+private const val NO_COINS_FOUND = "No se encontraron criptos con '"
 
 @Composable
 fun CoinSearchScreen(

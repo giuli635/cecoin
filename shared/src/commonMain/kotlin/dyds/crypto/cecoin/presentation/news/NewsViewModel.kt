@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-private const val FAILED_TO_LOAD_NEWS = "Failed to load news"
+private const val FAILED_TO_LOAD_NEWS = "Error al cargar noticias"
 
 class NewsViewModel(
     private val getCryptoNewsUseCase: GetCryptoNewsUseCase,

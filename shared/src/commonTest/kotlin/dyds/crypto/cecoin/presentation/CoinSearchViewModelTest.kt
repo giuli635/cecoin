@@ -54,7 +54,7 @@ class CoinSearchViewModelTest {
         assertIs<Fallible.Failed>(fallible)
         val error = (fallible as Fallible.Failed).error
         assertIs<AppError.GenericError>(error)
-        assertTrue(error.userMessage.contains("Failed to load symbols"))
+        assertTrue(error.userMessage.contains("Error al cargar símbolos"))
     }
 
     @Test

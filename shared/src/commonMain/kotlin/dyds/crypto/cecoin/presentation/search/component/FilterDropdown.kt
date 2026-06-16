@@ -12,8 +12,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dyds.crypto.cecoin.presentation.search.FilterMode
 
-private const val ALL_COINS_LABEL = "All Coins"
-private const val FAVORITES_LABEL = "Favorites"
+private const val ALL_COINS_LABEL = "Todas"
+private const val FAVORITES_LABEL = "Favoritas"
 
 @Composable
 fun FilterDropdown(

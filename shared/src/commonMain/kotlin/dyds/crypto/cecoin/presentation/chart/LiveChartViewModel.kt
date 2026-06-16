@@ -29,7 +29,7 @@ import kotlin.time.Duration.Companion.milliseconds
 private const val DEFAULT_HISTORICAL_LIMIT = 200
 private const val RETRY_DELAY_MS = 1_000L
 private const val MAX_STREAM_RETRIES = 3
-private const val FAILED_TO_LOAD_CHART = "Failed to load chart"
+private const val FAILED_TO_LOAD_CHART = "Error al cargar gráfico"
 
 open class LiveChartViewModel(
     private val getHistoricalPricesUseCase: GetHistoricalPricesUseCase,
@@ -116,7 +116,7 @@ open class LiveChartViewModel(
             .catch { e ->
                 if (e is CancellationException) throw e
                 _streamState.value = Loadable.Loaded(
-                    Fallible.Failed(AppError.GenericError(e, "Live stream failed"))
+                    Fallible.Failed(AppError.GenericError(e, "Error en transmisión en vivo"))
                 )
             }
             .collect { trade ->

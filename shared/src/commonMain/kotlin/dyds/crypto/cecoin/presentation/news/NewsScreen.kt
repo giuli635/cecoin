@@ -22,10 +22,10 @@ import dyds.crypto.cecoin.presentation.news.component.NewsCard
 import dyds.crypto.cecoin.presentation.utils.buildAsyncComposable
 import dyds.crypto.cecoin.utils.Loadable
 
-private const val NEWS_TITLE = "Crypto News"
-private const val SEARCH_LABEL = "Filter news..."
-private const val NO_NEWS_FOUND = "No news found matching '"
-private const val NO_NEWS_AVAILABLE = "No news available at the moment"
+private const val NEWS_TITLE = "Noticias Crypto"
+private const val SEARCH_LABEL = "Filtrar noticias..."
+private const val NO_NEWS_FOUND = "No se encontraron noticias con '"
+private const val NO_NEWS_AVAILABLE = "No hay noticias disponibles"
 
 @Composable
 fun NewsScreen(

@@ -64,7 +64,7 @@ fun Navigation() {
                     if (!isHome) navController.navigate(Home) { popUpTo(Home) { inclusive = true } }
                 }) {
                     Text(
-                        text = "Search",
+                        text = "Buscar",
                         fontWeight = if (isHome) FontWeight.Bold else FontWeight.Normal,
                         color = if (isHome) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -75,7 +75,7 @@ fun Navigation() {
                     if (!isNews) navController.navigate(News) { popUpTo(Home) }
                 }) {
                     Text(
-                        text = "News",
+                        text = "Noticias",
                         fontWeight = if (isNews) FontWeight.Bold else FontWeight.Normal,
                         color = if (isNews) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant,

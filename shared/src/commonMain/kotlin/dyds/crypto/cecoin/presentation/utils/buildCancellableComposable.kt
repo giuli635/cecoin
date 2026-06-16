@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.presentation.Renderer
 
-private const val CANCEL_BUTTON = "Cancel"
+private const val CANCEL_BUTTON = "Cancelar"
 
 fun <T> buildCancellableComposable(onCancel: () -> Unit, inner: Renderer<T>): Renderer<T> =
     { value, modifier ->
