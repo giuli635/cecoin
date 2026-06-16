@@ -11,7 +11,6 @@ import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -50,8 +49,6 @@ class ChartScreenViewModel(
             val historical = try {
                 getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
                     .toPricePoints(g.millis)
-            } catch (e: CancellationException) {
-                throw e
             } catch (e: Exception) {
                 _state.value = Loadable.Loaded(Fallible.Failed(AppError.GenericError(e, HISTORICAL_FAILED)))
                 return@launch

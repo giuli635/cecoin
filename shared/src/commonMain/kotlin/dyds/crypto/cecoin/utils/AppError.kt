@@ -1,5 +1,6 @@
 package dyds.crypto.cecoin.utils
 
+import kotlinx.coroutines.CancellationException
 import java.io.IOException
 
 sealed class AppError {
@@ -17,6 +18,7 @@ sealed class AppError {
 
         private fun getUserFriendlyDetail(e: Throwable): String? = when {
             e.isNetworkError() -> "Sin conexión a internet. Revisa tu Wi-Fi o datos móviles."
+            e is CancellationException -> null
             e.message != null -> e.message
             else -> "Error desconocido (${e.javaClass.simpleName})"
         }

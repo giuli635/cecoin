@@ -10,7 +10,6 @@ import dyds.crypto.cecoin.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -65,8 +64,6 @@ class CoinSearchViewModel(
                     .map { it.symbol }
                     .sorted()
                 _asyncAvailableSymbols.value = Loadable.Loaded(Fallible.Success(symbols))
-            } catch (e: CancellationException) {
-                throw e
             } catch (e: Exception) {
                 _asyncAvailableSymbols.value = Loadable.Loaded(
                     Fallible.Failed(AppError.GenericError(e, FAILED_TO_LOAD_SYMBOLS))
@@ -82,7 +79,6 @@ class CoinSearchViewModel(
     fun onCancelLoadSymbols() {
         loadSymbolsJob?.cancel()
         loadSymbolsJob = null
-        _asyncAvailableSymbols.value = Loadable.Loaded(Fallible.Success(emptyList()))
     }
 
     fun onSearchQueryChange(query: String) {

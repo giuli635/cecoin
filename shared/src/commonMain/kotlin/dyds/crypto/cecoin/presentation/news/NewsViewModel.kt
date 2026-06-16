@@ -8,7 +8,6 @@ import dyds.crypto.cecoin.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,8 +38,6 @@ class NewsViewModel(
             try {
                 val news = getCryptoNewsUseCase()
                 _asyncNews.value = Loadable.Loaded(Fallible.Success(news))
-            } catch (e: CancellationException) {
-                throw e
             } catch (e: Exception) {
                 _asyncNews.value = Loadable.Loaded(
                     Fallible.Failed(AppError.GenericError(e, FAILED_TO_LOAD_NEWS))
@@ -56,7 +53,6 @@ class NewsViewModel(
     fun onCancelLoadNews() {
         loadNewsJob?.cancel()
         loadNewsJob = null
-        _asyncNews.value = Loadable.Loaded(Fallible.Success(emptyList()))
     }
 
     fun onSearchQueryChange(query: String) {
