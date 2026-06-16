@@ -4,7 +4,9 @@ import dyds.crypto.cecoin.data.local.FavoriteDataSource
 import dyds.crypto.cecoin.data.remote.CoinHistoricalSource
 import dyds.crypto.cecoin.data.remote.CoinListDataSource
 import dyds.crypto.cecoin.data.remote.CoinPriceSource
+import dyds.crypto.cecoin.data.remote.NewsApiDataSource
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.domain.model.NewsArticle
 import dyds.crypto.cecoin.domain.model.TradePrice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +48,13 @@ internal class FakeCoinPriceSource(
         return flow
     }
 
+    override fun close() {}
+}
+
+internal class FakeNewsApiDataSource(
+    private val articles: List<NewsArticle> = emptyList(),
+) : NewsApiDataSource {
+    override suspend fun fetchCryptoNews(): List<NewsArticle> = articles
     override fun close() {}
 }
 

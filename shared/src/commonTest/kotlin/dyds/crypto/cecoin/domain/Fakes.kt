@@ -1,9 +1,11 @@
 package dyds.crypto.cecoin.domain
 
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.domain.model.NewsArticle
 import dyds.crypto.cecoin.domain.model.TradePrice
 import dyds.crypto.cecoin.domain.repository.CryptoSymbolRepository
 import dyds.crypto.cecoin.domain.repository.FavoriteRepository
+import dyds.crypto.cecoin.domain.repository.NewsRepository
 import dyds.crypto.cecoin.domain.repository.TradePriceRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +47,18 @@ internal class FakeTradePriceRepository(
     override fun observeTradePrices(symbol: String): Flow<TradePrice> {
         lastSymbol = symbol
         return tradeFlow
+    }
+}
+
+internal class FakeNewsRepository(
+    articles: List<NewsArticle> = emptyList(),
+    var exception: Throwable? = null,
+) : NewsRepository {
+    var articles: List<NewsArticle> = articles
+
+    override suspend fun getCryptoNews(): List<NewsArticle> {
+        exception?.let { throw it }
+        return articles
     }
 }
 

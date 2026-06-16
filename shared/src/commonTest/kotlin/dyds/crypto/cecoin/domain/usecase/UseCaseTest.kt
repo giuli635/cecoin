@@ -2,8 +2,10 @@ package dyds.crypto.cecoin.domain.usecase
 
 import dyds.crypto.cecoin.domain.FakeCryptoSymbolRepository
 import dyds.crypto.cecoin.domain.FakeFavoriteRepository
+import dyds.crypto.cecoin.domain.FakeNewsRepository
 import dyds.crypto.cecoin.domain.FakeTradePriceRepository
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.domain.model.NewsArticle
 import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.domain.model.TradePrice
 import kotlinx.coroutines.flow.first
@@ -94,6 +96,31 @@ class ToggleFavoriteUseCaseTest {
         useCase("BTCUSDT")
 
         assertEquals("BTCUSDT", repo.toggledSymbol)
+    }
+}
+
+class GetCryptoNewsUseCaseTest {
+    @Test
+    fun `invoke returns articles from repository`() = runTest {
+        val expected = listOf(
+            NewsArticle("Title", "Desc", "url", null, "Source", "2024-01-01"),
+        )
+        val repo = FakeNewsRepository(articles = expected)
+        val useCase = GetCryptoNewsUseCase(repo)
+
+        val result = useCase()
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `invoke returns empty list when repository returns empty`() = runTest {
+        val repo = FakeNewsRepository()
+        val useCase = GetCryptoNewsUseCase(repo)
+
+        val result = useCase()
+
+        assertEquals(0, result.size)
     }
 }
 
