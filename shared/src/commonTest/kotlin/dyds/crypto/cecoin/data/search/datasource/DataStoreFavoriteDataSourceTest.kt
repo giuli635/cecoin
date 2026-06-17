@@ -4,11 +4,19 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import java.io.File
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DataStoreFavoriteDataSourceTest {
+    private var tempFile: File? = null
+
+    @AfterTest
+    fun cleanup() {
+        tempFile?.delete()
+    }
+
     @Test
     fun `initial favorites are empty`() = runTest {
         val source = createSource()
@@ -51,10 +59,19 @@ class DataStoreFavoriteDataSourceTest {
         assertEquals(setOf("  BTC  "), result)
     }
 
-    private fun createSource(file: File? = null): DataStoreFavoriteDataSource {
-        val dataStore = PreferenceDataStoreFactory.create {
-            file ?: File.createTempFile("favorites_test", ".preferences_pb").also { it.delete() }
-        }
+    @Test
+    fun `toggle with empty symbol does not crash`() = runTest {
+        val source = createSource()
+        source.toggle("")
+        val result = source.favorites.first()
+        assertEquals(setOf(""), result)
+    }
+
+    private fun createSource(): DataStoreFavoriteDataSource {
+        val file = File.createTempFile("favorites_test", ".preferences_pb")
+        file.delete()
+        tempFile = file
+        val dataStore = PreferenceDataStoreFactory.create { file }
         return DataStoreFavoriteDataSource(dataStore)
     }
 }

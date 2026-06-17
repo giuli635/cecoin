@@ -19,35 +19,29 @@ import kotlin.test.assertTrue
 
 class ChartScreenViewModelTest {
 
-    private suspend fun ChartScreenViewModel.awaitChartData(): List<PricePoint> {
-        val state = state.first { it !is Loadable.Loading }
-        val loaded = state as Loadable.Loaded
-        val success = loaded.value as Fallible.Success
-        val flow: Flow<Fallible<List<PricePoint>>> = success.value
-        val fallible = flow.first { it is Fallible.Success }
-        val successValue = fallible as Fallible.Success
-        return successValue.value
+    private suspend fun extractFlowSuccess(
+        stateProvider: suspend () -> Loadable<*>,
+        flowPredicate: (Fallible<List<PricePoint>>) -> Boolean = { it is Fallible.Success },
+    ): List<PricePoint> {
+        val state = stateProvider()
+        val loaded = assertIs<Loadable.Loaded<Flow<Fallible<List<PricePoint>>>>>(state)
+        val success = assertIs<Fallible.Success<Flow<Fallible<List<PricePoint>>>>>(loaded.value)
+        val flow = success.value
+        val emission = flow.first { flowPredicate(it) }
+        return assertIs<Fallible.Success<List<PricePoint>>>(emission).value
     }
 
-    private suspend fun ChartScreenViewModel.waitForPoints(price: Double): List<PricePoint> {
-        val state = state.first()
-        val loaded = state as Loadable.Loaded
-        val success = loaded.value as Fallible.Success
-        val flow: Flow<Fallible<List<PricePoint>>> = success.value
-        val emission = flow.first { it is Fallible.Success && it.value.any { p -> p.price == price } }
-        val successValue = emission as Fallible.Success
-        return successValue.value
-    }
+    private suspend fun ChartScreenViewModel.awaitChartData(): List<PricePoint> =
+        extractFlowSuccess({ state.first { it !is Loadable.Loading } })
 
-    private suspend fun waitForPriceStillVisible(viewModel: ChartScreenViewModel, price: Double): List<PricePoint> {
-        val state = viewModel.state.first()
-        val loaded = state as Loadable.Loaded
-        val success = loaded.value as Fallible.Success
-        val flow: Flow<Fallible<List<PricePoint>>> = success.value
-        val emission = flow.first { it is Fallible.Success }
-        val successValue = emission as Fallible.Success
-        return successValue.value
-    }
+    private suspend fun ChartScreenViewModel.waitForPoints(price: Double): List<PricePoint> =
+        extractFlowSuccess(
+            stateProvider = { state.first() },
+            flowPredicate = { it is Fallible.Success && it.value.any { p -> p.price == price } },
+        )
+
+    private suspend fun waitForPriceStillVisible(viewModel: ChartScreenViewModel): List<PricePoint> =
+        extractFlowSuccess({ viewModel.state.first() })
 
     private data class VMScope(
         val viewModel: ChartScreenViewModel,
@@ -91,6 +85,7 @@ class ChartScreenViewModelTest {
 
         assertTrue(chartData.isNotEmpty())
         assertEquals(51000.0, chartData.last().price)
+        viewModel.onCleared()
     }
 
     @Test
@@ -105,6 +100,7 @@ class ChartScreenViewModelTest {
         assertIs<Loadable.Loaded<*>>(state)
         val loaded = state as Loadable.Loaded
         assertIs<Fallible.Failed>(loaded.value)
+        viewModel.onCleared()
     }
 
     @Test
@@ -115,6 +111,7 @@ class ChartScreenViewModelTest {
         val chartData = viewModel.awaitChartData()
 
         assertTrue(chartData.isEmpty())
+        viewModel.onCleared()
     }
 
     @Test
@@ -127,6 +124,7 @@ class ChartScreenViewModelTest {
         viewModel.load(Granularity.M5)
         val data = viewModel.awaitChartData()
         assertTrue(data.isEmpty())
+        viewModel.onCleared()
     }
 
     @Test
@@ -141,6 +139,7 @@ class ChartScreenViewModelTest {
         viewModel.load(Granularity.M1)
         val state = viewModel.state.first { it !is Loadable.Loading }
         assertIs<Loadable.Loaded<*>>(state)
+        viewModel.onCleared()
     }
 
     @Test
@@ -154,6 +153,7 @@ class ChartScreenViewModelTest {
         viewModel.awaitChartData()
 
         assertEquals(50, historicalUseCase.lastLimit)
+        viewModel.onCleared()
     }
 
     @Test
@@ -199,7 +199,7 @@ class ChartScreenViewModelTest {
 
         fakeTradeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(30_000L, 51000.0)))
 
-        val points = waitForPriceStillVisible(viewModel, 52000.0)
+        val points = waitForPriceStillVisible(viewModel)
         assertEquals(52000.0, points.last().price)
         viewModel.onCleared()
     }
@@ -218,6 +218,7 @@ class ChartScreenViewModelTest {
 
         val state = viewModel.state.first()
         assertIs<Loadable.Loaded<*>>(state)
+        viewModel.onCleared()
     }
 
     @Test
@@ -252,6 +253,7 @@ class ChartScreenViewModelTest {
         val flow: Flow<Fallible<List<PricePoint>>> = success.value
         val fallible = flow.first { it is Fallible.Failed }
         assertIs<Fallible.Failed>(fallible)
+        viewModel.onCleared()
     }
 
     @Test
@@ -266,6 +268,7 @@ class ChartScreenViewModelTest {
         assertIs<Loadable.Loaded<*>>(state)
         val loaded = state as Loadable.Loaded
         assertIs<Fallible.Failed>(loaded.value)
+        viewModel.onCleared()
     }
 
     @Test
@@ -279,5 +282,6 @@ class ChartScreenViewModelTest {
         val chartData = viewModel.awaitChartData()
 
         assertEquals(50000.0, chartData.last().price)
+        viewModel.onCleared()
     }
 }

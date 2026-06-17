@@ -7,10 +7,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class FavoriteRepositoryImplTest {
+    private fun createRepo(initial: Set<String> = emptySet()): FavoriteRepositoryImpl =
+        FavoriteRepositoryImpl(FakeFavoriteDataSource(initial = initial))
+
     @Test
     fun `observeFavorites returns empty set by default`() = runTest {
-        val source = FakeFavoriteDataSource()
-        val repo = FavoriteRepositoryImpl(source)
+        val repo = createRepo()
 
         val result = repo.observeFavorites().first()
 
@@ -19,8 +21,7 @@ class FavoriteRepositoryImplTest {
 
     @Test
     fun `toggleFavorite delegates to source`() = runTest {
-        val source = FakeFavoriteDataSource()
-        val repo = FavoriteRepositoryImpl(source)
+        val repo = createRepo()
 
         repo.toggleFavorite("BTCUSDT")
 
@@ -30,8 +31,7 @@ class FavoriteRepositoryImplTest {
 
     @Test
     fun `toggleFavorite removes existing favorite`() = runTest {
-        val source = FakeFavoriteDataSource(initial = setOf("BTCUSDT"))
-        val repo = FavoriteRepositoryImpl(source)
+        val repo = createRepo(initial = setOf("BTCUSDT"))
 
         repo.toggleFavorite("BTCUSDT")
 
@@ -41,8 +41,7 @@ class FavoriteRepositoryImplTest {
 
     @Test
     fun `observeFavorites returns favorites loaded from storage`() = runTest {
-        val source = FakeFavoriteDataSource(initial = setOf("BTCUSDT", "ETHUSDT"))
-        val repo = FavoriteRepositoryImpl(source)
+        val repo = createRepo(initial = setOf("BTCUSDT", "ETHUSDT"))
 
         val result = repo.observeFavorites().first()
 
@@ -51,8 +50,7 @@ class FavoriteRepositoryImplTest {
 
     @Test
     fun `toggleFavorite with empty symbol does not crash`() = runTest {
-        val source = FakeFavoriteDataSource()
-        val repo = FavoriteRepositoryImpl(source)
+        val repo = createRepo()
 
         repo.toggleFavorite("")
 

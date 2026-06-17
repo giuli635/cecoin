@@ -17,4 +17,16 @@ class ObserveFavoritesUseCaseTest {
 
         assertEquals(expected, result.first())
     }
+
+    @Test
+    fun `invoke emits new value after toggle`() = runTest {
+        val repo = FakeFavoriteRepository(initialFavorites = emptySet())
+        val useCase = ObserveFavoritesUseCaseImpl(repo)
+
+        val flow = useCase()
+        repo.toggleFavorite("BTCUSDT")
+        val emitted = flow.first { it == setOf("BTCUSDT") }
+
+        assertEquals(setOf("BTCUSDT"), emitted)
+    }
 }

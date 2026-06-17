@@ -2,7 +2,7 @@ package dyds.crypto.cecoin.domain.news.usecase
 
 import dyds.crypto.cecoin.domain.news.FakeNewsRepository
 import dyds.crypto.cecoin.domain.news.model.NewsArticle
-import dyds.crypto.cecoin.utils.error.ErrorClassifier
+import dyds.crypto.cecoin.utils.error.fakeErrorClassifier
 import dyds.crypto.cecoin.utils.state.Fallible
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -10,9 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class GetCryptoNewsUseCaseTest {
-    private val classifier = object : ErrorClassifier() {
-        override fun isNetworkError(e: Throwable) = false
-    }
+    private val classifier = fakeErrorClassifier()
 
     @Test
     fun `invoke returns articles from repository`() = runTest {
@@ -24,7 +22,7 @@ class GetCryptoNewsUseCaseTest {
 
         val result = useCase()
 
-        val success = result as Fallible.Success
+        val success = assertIs<Fallible.Success<List<NewsArticle>>>(result)
         assertEquals(expected, success.value)
     }
 
@@ -35,7 +33,7 @@ class GetCryptoNewsUseCaseTest {
 
         val result = useCase()
 
-        val success = result as Fallible.Success
+        val success = assertIs<Fallible.Success<List<*>>>(result)
         assertEquals(0, success.value.size)
     }
 

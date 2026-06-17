@@ -1,7 +1,7 @@
 package dyds.crypto.cecoin.domain.search.usecase
 
 import dyds.crypto.cecoin.domain.search.FakeFavoriteRepository
-import dyds.crypto.cecoin.utils.error.ErrorClassifier
+import dyds.crypto.cecoin.utils.error.fakeErrorClassifier
 import dyds.crypto.cecoin.utils.state.Fallible
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -10,9 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class ToggleFavoriteUseCaseTest {
-    private val classifier = object : ErrorClassifier() {
-        override fun isNetworkError(e: Throwable) = false
-    }
+    private val classifier = fakeErrorClassifier()
 
     @Test
     fun `invoke delegates toggle to repository`() = runTest {

@@ -25,11 +25,9 @@ class NewsViewModelTest {
 
         val result = viewModel.asyncNews.first { it !is Loadable.Loading }
 
-        assertIs<Loadable.Loaded<*>>(result)
-        val fallible = (result as Loadable.Loaded).value
-        assertIs<Fallible.Success<*>>(fallible)
-        @Suppress("UNCHECKED_CAST")
-        assertEquals(expected, (fallible as Fallible.Success<*>).value)
+        val loaded = assertIs<Loadable.Loaded<Fallible<List<NewsArticle>>>>(result)
+        val success = assertIs<Fallible.Success<List<NewsArticle>>>(loaded.value)
+        assertEquals(expected, success.value)
     }
 
     @Test
@@ -70,9 +68,9 @@ class NewsViewModelTest {
         viewModel.retryLoadNews()
 
         val result = viewModel.asyncNews.first { it is Loadable.Loaded && it.value is Fallible.Success }
-        @Suppress("UNCHECKED_CAST")
-        val articles = ((result as Loadable.Loaded).value as Fallible.Success<*>).value as List<*>
-        assertEquals(1, articles.size)
+        val loaded = assertIs<Loadable.Loaded<Fallible<List<NewsArticle>>>>(result)
+        val success = assertIs<Fallible.Success<List<NewsArticle>>>(loaded.value)
+        assertEquals(1, success.value.size)
     }
 
     @Test

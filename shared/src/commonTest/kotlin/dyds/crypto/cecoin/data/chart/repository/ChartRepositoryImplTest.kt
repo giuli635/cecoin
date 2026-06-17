@@ -48,7 +48,7 @@ class ChartRepositoryImplTest {
     }
 
     @Test
-    fun `observeTradePrices uses DefaultSymbol for blank input`() {
+    fun `observeTradePrices uses DefaultSymbol for blank input`() = runTest {
         val priceSource = FakeCoinPriceSource(flowOf(btcTrade))
         val repo = ChartRepositoryImpl(priceSource, FakeCoinHistoricalSource())
 

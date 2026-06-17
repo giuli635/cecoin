@@ -3,16 +3,15 @@ package dyds.crypto.cecoin.domain.chart.usecase
 import dyds.crypto.cecoin.domain.chart.FakeTradePriceRepository
 import dyds.crypto.cecoin.domain.chart.model.PricePoint
 import dyds.crypto.cecoin.domain.chart.model.TradePrice
-import dyds.crypto.cecoin.utils.error.ErrorClassifier
+import dyds.crypto.cecoin.utils.error.fakeErrorClassifier
 import dyds.crypto.cecoin.utils.state.Fallible
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 
 class GetHistoricalPricesUseCaseTest {
-    private val classifier = object : ErrorClassifier() {
-        override fun isNetworkError(e: Throwable) = false
-    }
+    private val classifier = fakeErrorClassifier()
 
     @Test
     fun `invoke delegates to repository with correct params`() = runTest {
@@ -22,7 +21,7 @@ class GetHistoricalPricesUseCaseTest {
 
         val result = useCase("BTCUSDT", "5m", 100)
 
-        val success = result as Fallible.Success
+        val success = assertIs<Fallible.Success<List<TradePrice>>>(result)
         assertEquals(expected, success.value)
     }
 
@@ -34,7 +33,7 @@ class GetHistoricalPricesUseCaseTest {
 
         val result = useCase("ETHUSDT")
 
-        val success = result as Fallible.Success
+        val success = assertIs<Fallible.Success<List<TradePrice>>>(result)
         assertEquals(expected, success.value)
     }
 }

@@ -2,7 +2,7 @@ package dyds.crypto.cecoin.domain.search.usecase
 
 import dyds.crypto.cecoin.domain.search.FakeCryptoSymbolRepository
 import dyds.crypto.cecoin.domain.search.model.CryptoSymbol
-import dyds.crypto.cecoin.utils.error.ErrorClassifier
+import dyds.crypto.cecoin.utils.error.fakeErrorClassifier
 import dyds.crypto.cecoin.utils.state.Fallible
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -10,9 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class GetAvailableSymbolsUseCaseTest {
-    private val classifier = object : ErrorClassifier() {
-        override fun isNetworkError(e: Throwable) = false
-    }
+    private val classifier = fakeErrorClassifier()
 
     @Test
     fun `invoke returns symbols from repository`() = runTest {
@@ -22,7 +20,7 @@ class GetAvailableSymbolsUseCaseTest {
 
         val result = useCase()
 
-        val success = result as Fallible.Success
+        val success = assertIs<Fallible.Success<List<CryptoSymbol>>>(result)
         assertEquals(expected, success.value)
     }
 
@@ -33,7 +31,7 @@ class GetAvailableSymbolsUseCaseTest {
 
         val result = useCase()
 
-        val success = result as Fallible.Success
+        val success = assertIs<Fallible.Success<List<*>>>(result)
         assertEquals(0, success.value.size)
     }
 

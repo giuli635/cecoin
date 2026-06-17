@@ -29,13 +29,11 @@ class CoinSearchViewModelTest {
 
         val result = viewModel.filteredCoins.first { it !is Loadable.Loading }
 
-        assertIs<Loadable.Loaded<*>>(result)
-        val fallible = (result as Loadable.Loaded).value
-        assertIs<Fallible.Success<*>>(fallible)
-        @Suppress("UNCHECKED_CAST")
+        val loaded = assertIs<Loadable.Loaded<Fallible<List<String>>>>(result)
+        val success = assertIs<Fallible.Success<List<String>>>(loaded.value)
         assertEquals(
             listOf("BTCUSDT", "ETHUSDT"),
-            ((fallible as Fallible.Success<*>).value as List<String>).sorted(),
+            success.value.sorted(),
         )
     }
 
@@ -233,9 +231,8 @@ class CoinSearchViewModelTest {
     }
 
     private fun extractSymbols(result: Loadable<*>): List<String> {
-        val loaded = result as Loadable.Loaded
-        val success = loaded.value as Fallible.Success<*>
-        @Suppress("UNCHECKED_CAST")
-        return (success.value as List<String>).sorted()
+        val loaded = assertIs<Loadable.Loaded<Fallible<List<String>>>>(result)
+        val success = assertIs<Fallible.Success<List<String>>>(loaded.value)
+        return success.value.sorted()
     }
 }
