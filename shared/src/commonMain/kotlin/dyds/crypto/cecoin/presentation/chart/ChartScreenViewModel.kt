@@ -4,12 +4,12 @@ import dyds.crypto.cecoin.domain.chart.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.presentation.chart.model.ChartData
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.presentation.utils.launchAsync
 import dyds.crypto.cecoin.utils.state.Loadable
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dyds.crypto.cecoin.domain.chart.model.TradePrice
+import dyds.crypto.cecoin.presentation.utils.launchLoadable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -40,7 +40,7 @@ class ChartScreenViewModel(
         controller?.cancel()
         loadJob?.cancel()
         _state.value = Loadable.Loading
-        loadJob = launchAsync(_state) {
+        loadJob = launchLoadable(_state) {
             getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
                 .map { prices ->
                     controllerFactory(g, prices, viewModelScope)
