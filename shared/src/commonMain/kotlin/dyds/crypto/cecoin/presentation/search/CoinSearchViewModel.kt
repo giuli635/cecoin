@@ -2,13 +2,13 @@ package dyds.crypto.cecoin.presentation.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
-import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
-import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
+import dyds.crypto.cecoin.domain.search.usecase.GetAvailableSymbolsUseCase
+import dyds.crypto.cecoin.domain.search.usecase.ObserveFavoritesUseCase
+import dyds.crypto.cecoin.domain.search.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.search.util.filterBy
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.presentation.utils.launchLoadable
-import dyds.crypto.cecoin.utils.Loadable
+import dyds.crypto.cecoin.utils.state.Loadable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

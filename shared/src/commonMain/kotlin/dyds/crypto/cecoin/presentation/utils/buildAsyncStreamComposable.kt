@@ -3,9 +3,9 @@ package dyds.crypto.cecoin.presentation.utils
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import dyds.crypto.cecoin.presentation.Renderer
-import dyds.crypto.cecoin.utils.ErrorClassifier
-import dyds.crypto.cecoin.utils.Fallible
-import dyds.crypto.cecoin.utils.Loadable
+import dyds.crypto.cecoin.utils.error.ErrorClassifier
+import dyds.crypto.cecoin.utils.state.Fallible
+import dyds.crypto.cecoin.utils.state.Loadable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

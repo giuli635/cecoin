@@ -18,7 +18,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dyds.crypto.cecoin.domain.model.NewsArticle
+import dyds.crypto.cecoin.domain.news.model.NewsArticle
 
 @Composable
 fun NewsCard(

@@ -21,14 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import dyds.crypto.cecoin.domain.model.PricePoint
+import dyds.crypto.cecoin.domain.chart.model.PricePoint
 import dyds.crypto.cecoin.presentation.chart.component.GranularitySelector
 import dyds.crypto.cecoin.presentation.chart.component.PriceChart
 import dyds.crypto.cecoin.presentation.chart.util.ChartColors
 import dyds.crypto.cecoin.presentation.utils.buildAsyncStreamComposable
 import dyds.crypto.cecoin.presentation.utils.buildFallibleComposable
-import dyds.crypto.cecoin.utils.ErrorClassifier
-import dyds.crypto.cecoin.utils.priceStr
+import dyds.crypto.cecoin.utils.error.ErrorClassifier
+import dyds.crypto.cecoin.utils.format.priceStr
 
 private const val BACK_BUTTON = "Atrás"
 private const val USD_LABEL = "USD"

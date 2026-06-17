@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.presentation.Renderer
 import dyds.crypto.cecoin.presentation.buildComposableRenderer
-import dyds.crypto.cecoin.utils.Loadable
+import dyds.crypto.cecoin.utils.state.Loadable
 
 private const val CANCELLED_MESSAGE = "Carga cancelada"
 private const val RETRY_BUTTON = "Reintentar"

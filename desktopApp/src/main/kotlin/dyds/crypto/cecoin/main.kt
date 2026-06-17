@@ -4,7 +4,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import dyds.crypto.cecoin.di.CecoinDependencyInjector
-import dyds.crypto.cecoin.utils.ErrorClassifier
+import dyds.crypto.cecoin.utils.error.ErrorClassifier
 import java.io.File
 
 fun main() {

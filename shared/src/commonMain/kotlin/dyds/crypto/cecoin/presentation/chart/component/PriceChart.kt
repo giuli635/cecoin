@@ -14,7 +14,7 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
-import dyds.crypto.cecoin.domain.model.PricePoint
+import dyds.crypto.cecoin.domain.chart.model.PricePoint
 import dyds.crypto.cecoin.presentation.chart.util.VicoChartModelBuilder
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds

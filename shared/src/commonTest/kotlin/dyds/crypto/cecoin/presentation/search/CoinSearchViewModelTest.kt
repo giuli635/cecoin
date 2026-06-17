@@ -1,12 +1,12 @@
 package dyds.crypto.cecoin.presentation.search
 
-import dyds.crypto.cecoin.domain.model.CryptoSymbol
-import dyds.crypto.cecoin.domain.usecase.FakeGetAvailableSymbolsUseCase
-import dyds.crypto.cecoin.domain.usecase.FakeObserveFavoritesUseCase
-import dyds.crypto.cecoin.domain.usecase.FakeToggleFavoriteUseCase
-import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
-import dyds.crypto.cecoin.utils.Fallible
-import dyds.crypto.cecoin.utils.Loadable
+import dyds.crypto.cecoin.domain.search.model.CryptoSymbol
+import dyds.crypto.cecoin.domain.search.usecase.FakeGetAvailableSymbolsUseCase
+import dyds.crypto.cecoin.domain.search.usecase.FakeObserveFavoritesUseCase
+import dyds.crypto.cecoin.domain.search.usecase.FakeToggleFavoriteUseCase
+import dyds.crypto.cecoin.domain.search.usecase.GetAvailableSymbolsUseCase
+import dyds.crypto.cecoin.utils.state.Fallible
+import dyds.crypto.cecoin.utils.state.Loadable
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow

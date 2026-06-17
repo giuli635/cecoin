@@ -2,9 +2,9 @@ package dyds.crypto.cecoin.presentation.utils
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dyds.crypto.cecoin.utils.Fallible
-import dyds.crypto.cecoin.utils.Loadable
-import dyds.crypto.cecoin.utils.loadable
+import dyds.crypto.cecoin.utils.state.Fallible
+import dyds.crypto.cecoin.utils.state.Loadable
+import dyds.crypto.cecoin.utils.state.loadable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch

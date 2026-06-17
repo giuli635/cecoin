@@ -2,7 +2,7 @@ package dyds.crypto.cecoin.presentation.chart.util
 
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
-import dyds.crypto.cecoin.domain.model.PricePoint
+import dyds.crypto.cecoin.domain.chart.model.PricePoint
 
 class VicoChartModelBuilder : ChartModelBuilder {
     override suspend fun buildModel(points: List<PricePoint>, modelProducer: CartesianChartModelProducer) {

@@ -1,11 +1,11 @@
 package dyds.crypto.cecoin.presentation.chart
 
-import dyds.crypto.cecoin.domain.model.PricePoint
-import dyds.crypto.cecoin.domain.model.TradePrice
-import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
+import dyds.crypto.cecoin.domain.chart.model.PricePoint
+import dyds.crypto.cecoin.domain.chart.model.TradePrice
+import dyds.crypto.cecoin.domain.chart.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.presentation.chart.util.PriceAccumulator
-import dyds.crypto.cecoin.utils.AppError
-import dyds.crypto.cecoin.utils.Fallible
+import dyds.crypto.cecoin.utils.error.AppError
+import dyds.crypto.cecoin.utils.state.Fallible
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow

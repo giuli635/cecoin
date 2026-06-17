@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.presentation.Renderer
 import dyds.crypto.cecoin.presentation.buildComposableRenderer
-import dyds.crypto.cecoin.utils.AppError
-import dyds.crypto.cecoin.utils.Fallible
+import dyds.crypto.cecoin.utils.error.AppError
+import dyds.crypto.cecoin.utils.state.Fallible
 
 private const val RETRY_BUTTON = "Reintentar"
 

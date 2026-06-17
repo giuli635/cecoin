@@ -1,7 +1,7 @@
 package dyds.crypto.cecoin.presentation.chart.util
 
-import dyds.crypto.cecoin.domain.model.PricePoint
-import dyds.crypto.cecoin.domain.model.TradePrice
+import dyds.crypto.cecoin.domain.chart.model.PricePoint
+import dyds.crypto.cecoin.domain.chart.model.TradePrice
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
 
 interface PriceAccumulator {

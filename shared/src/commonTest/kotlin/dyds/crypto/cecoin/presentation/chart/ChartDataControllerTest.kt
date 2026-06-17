@@ -1,9 +1,9 @@
 package dyds.crypto.cecoin.presentation.chart
 
-import dyds.crypto.cecoin.domain.model.PricePoint
-import dyds.crypto.cecoin.domain.model.TradePrice
+import dyds.crypto.cecoin.domain.chart.model.PricePoint
+import dyds.crypto.cecoin.domain.chart.model.TradePrice
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
-import dyds.crypto.cecoin.utils.Fallible
+import dyds.crypto.cecoin.utils.state.Fallible
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

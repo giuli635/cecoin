@@ -22,7 +22,7 @@ import dyds.crypto.cecoin.presentation.Renderer
 import dyds.crypto.cecoin.presentation.search.component.CoinItem
 import dyds.crypto.cecoin.presentation.search.component.FilterDropdown
 import dyds.crypto.cecoin.presentation.utils.buildAsyncComposable
-import dyds.crypto.cecoin.utils.Loadable
+import dyds.crypto.cecoin.utils.state.Loadable
 
 private const val SEARCH_TITLE = "Buscar Criptos"
 private const val SEARCH_LABEL = "Buscar símbolo (ej: BTC, ETH)"

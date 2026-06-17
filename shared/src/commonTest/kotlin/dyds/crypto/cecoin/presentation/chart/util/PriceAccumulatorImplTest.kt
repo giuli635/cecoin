@@ -1,6 +1,6 @@
 package dyds.crypto.cecoin.presentation.chart.util
 
-import dyds.crypto.cecoin.domain.model.PricePoint
+import dyds.crypto.cecoin.domain.chart.model.PricePoint
 import dyds.crypto.cecoin.presentation.chart.fakeTradePriceFromPricePoint
 import dyds.crypto.cecoin.presentation.chart.fakeTradePricesFromPricePoints
 import dyds.crypto.cecoin.presentation.chart.model.Granularity

@@ -16,11 +16,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import dyds.crypto.cecoin.domain.model.NewsArticle
+import dyds.crypto.cecoin.domain.news.model.NewsArticle
 import dyds.crypto.cecoin.presentation.Renderer
 import dyds.crypto.cecoin.presentation.news.component.NewsCard
 import dyds.crypto.cecoin.presentation.utils.buildAsyncComposable
-import dyds.crypto.cecoin.utils.Loadable
+import dyds.crypto.cecoin.utils.state.Loadable
 
 private const val NEWS_TITLE = "Noticias Crypto"
 private const val SEARCH_LABEL = "Filtrar noticias..."

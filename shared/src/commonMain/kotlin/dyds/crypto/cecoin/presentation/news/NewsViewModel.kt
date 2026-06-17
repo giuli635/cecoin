@@ -2,11 +2,11 @@ package dyds.crypto.cecoin.presentation.news
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dyds.crypto.cecoin.domain.model.NewsArticle
-import dyds.crypto.cecoin.domain.usecase.GetCryptoNewsUseCase
+import dyds.crypto.cecoin.domain.news.model.NewsArticle
+import dyds.crypto.cecoin.domain.news.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.presentation.utils.launchLoadable
-import dyds.crypto.cecoin.utils.Loadable
+import dyds.crypto.cecoin.utils.state.Loadable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -1,9 +1,9 @@
 package dyds.crypto.cecoin.presentation.chart
 
-import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
+import dyds.crypto.cecoin.domain.chart.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.presentation.chart.model.ChartData
 import dyds.crypto.cecoin.presentation.chart.util.PriceAccumulator
-import dyds.crypto.cecoin.utils.Fallible
+import dyds.crypto.cecoin.utils.state.Fallible
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

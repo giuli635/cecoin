@@ -1,15 +1,15 @@
 package dyds.crypto.cecoin.presentation.chart
 
-import dyds.crypto.cecoin.domain.usecase.GetHistoricalPricesUseCase
+import dyds.crypto.cecoin.domain.chart.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.presentation.chart.model.ChartData
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.utils.Fallible
-import dyds.crypto.cecoin.utils.Loadable
+import dyds.crypto.cecoin.utils.state.Fallible
+import dyds.crypto.cecoin.utils.state.Loadable
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dyds.crypto.cecoin.domain.model.TradePrice
+import dyds.crypto.cecoin.domain.chart.model.TradePrice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow

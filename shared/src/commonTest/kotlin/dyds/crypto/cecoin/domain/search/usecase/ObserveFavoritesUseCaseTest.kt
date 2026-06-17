@@ -1,0 +1,20 @@
+package dyds.crypto.cecoin.domain.search.usecase
+
+import dyds.crypto.cecoin.domain.search.FakeFavoriteRepository
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+class ObserveFavoritesUseCaseTest {
+    @Test
+    fun `invoke returns favorites flow from repository`() = runTest {
+        val expected = setOf("BTCUSDT", "ETHUSDT")
+        val repo = FakeFavoriteRepository(initialFavorites = expected)
+        val useCase = ObserveFavoritesUseCaseImpl(repo)
+
+        val result = useCase()
+
+        assertEquals(expected, result.first())
+    }
+}
