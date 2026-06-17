@@ -2,7 +2,6 @@ package dyds.crypto.cecoin.chart.presentation.util
 
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.presentation.fakeTradePriceFromPricePoint
-import dyds.crypto.cecoin.chart.presentation.fakeTradePricesFromPricePoints
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,7 +25,7 @@ class PriceAccumulatorImplTest {
     fun `accumulate in the same time period replaces price`() {
         val priceAccumulator = PriceAccumulatorImpl(
             Granularity.M1,
-            fakeTradePricesFromPricePoints(PricePoint(0L, 50000.0))
+            listOf(PricePoint(0L, 50000.0))
         )
         val trade = fakeTradePriceFromPricePoint(PricePoint(30_000L, 52000.0))
 
@@ -40,7 +39,7 @@ class PriceAccumulatorImplTest {
     @Test
     fun `accumulate with out of order trade is ignored`() {
         val priceAccumulator = PriceAccumulatorImpl(Granularity.M1,
-            fakeTradePricesFromPricePoints(PricePoint(60_000L, 52000.0))
+            listOf(PricePoint(60_000L, 52000.0))
         )
         val trade = fakeTradePriceFromPricePoint(PricePoint(30_000L, 51000.0))
 

@@ -1,12 +1,13 @@
 package dyds.crypto.cecoin.chart.domain
 
+import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.domain.model.TradePrice
 import dyds.crypto.cecoin.chart.domain.repository.TradePriceRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 internal class FakeTradePriceRepository(
-    var historical: List<TradePrice> = emptyList(),
+    var historical: List<PricePoint> = emptyList(),
     var tradeFlow: Flow<TradePrice> = emptyFlow(),
     var historicalException: Throwable? = null,
 ) : TradePriceRepository {
@@ -16,7 +17,7 @@ internal class FakeTradePriceRepository(
 
     override suspend fun getHistoricalPrices(
         symbol: String, interval: String, limit: Int,
-    ): List<TradePrice> {
+    ): List<PricePoint> {
         lastSymbol = symbol
         lastInterval = interval
         lastLimit = limit

@@ -2,6 +2,7 @@ package dyds.crypto.cecoin.chart.data.repository
 
 import dyds.crypto.cecoin.chart.data.datasource.CoinHistoricalDataSource
 import dyds.crypto.cecoin.chart.data.datasource.CoinPriceDataSource
+import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.domain.model.TradePrice
 import dyds.crypto.cecoin.chart.domain.repository.TradePriceRepository
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +14,7 @@ class ChartRepositoryImpl(
     private val coinHistoricalSource: CoinHistoricalDataSource,
 ) : TradePriceRepository {
 
-    override suspend fun getHistoricalPrices(symbol: String, interval: String, limit: Int): List<TradePrice> =
+    override suspend fun getHistoricalPrices(symbol: String, interval: String, limit: Int): List<PricePoint> =
         coinHistoricalSource.getHistoricalPrices(symbol.normalizeSymbol(), interval, limit)
 
     override fun observeTradePrices(symbol: String): Flow<TradePrice> =

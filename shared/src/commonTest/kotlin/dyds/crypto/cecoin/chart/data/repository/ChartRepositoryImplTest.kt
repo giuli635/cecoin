@@ -12,17 +12,19 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class ChartRepositoryImplTest {
-    private val btcTrade = TradePrice("BTCUSDT", PricePoint(1000L, 50000.0))
-    private val ethTrade = TradePrice("ETHUSDT", PricePoint(2000L, 3000.0))
+    private val btcPricePoint = PricePoint(1000L, 50000.0)
+    private val ethPricePoint = PricePoint(2000L, 3000.0)
+    private val btcTrade = TradePrice("BTCUSDT", btcPricePoint)
+    private val ethTrade = TradePrice("ETHUSDT", ethPricePoint)
 
     @Test
     fun `getHistoricalPrices delegates to historical source with normalized symbol`() = runTest {
-        val historicalSource = FakeCoinHistoricalSource(listOf(btcTrade))
+        val historicalSource = FakeCoinHistoricalSource(listOf(btcPricePoint))
         val repo = ChartRepositoryImpl(FakeCoinPriceSource(), historicalSource)
 
         val result = repo.getHistoricalPrices("  btcusdt  ", "1m", 200)
 
-        assertEquals(listOf(btcTrade), result)
+        assertEquals(listOf(btcPricePoint), result)
         assertEquals("BTCUSDT", historicalSource.lastSymbol)
     }
 
@@ -39,7 +41,7 @@ class ChartRepositoryImplTest {
 
     @Test
     fun `getHistoricalPrices uses DefaultSymbol for blank input`() = runTest {
-        val historicalSource = FakeCoinHistoricalSource(listOf(btcTrade))
+        val historicalSource = FakeCoinHistoricalSource(listOf(btcPricePoint))
         val repo = ChartRepositoryImpl(FakeCoinPriceSource(), historicalSource)
 
         repo.getHistoricalPrices("   ", "1m", 200)

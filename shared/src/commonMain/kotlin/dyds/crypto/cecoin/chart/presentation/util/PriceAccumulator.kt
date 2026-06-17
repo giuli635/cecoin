@@ -13,12 +13,8 @@ interface PriceAccumulator {
     }
 }
 
-class PriceAccumulatorImpl(private val granularity: Granularity, historical: List<TradePrice>): PriceAccumulator {
-    private val points = mutableListOf<PricePoint>()
-
-    init {
-        historical.forEach { accumulate(it) }
-    }
+class PriceAccumulatorImpl(private val granularity: Granularity, historical: List<PricePoint>): PriceAccumulator {
+    private val points = historical.toMutableList()
 
     override fun accumulate(trade: TradePrice) {
         val timestampBucket = (trade.timestamp / granularity.millis) * granularity.millis

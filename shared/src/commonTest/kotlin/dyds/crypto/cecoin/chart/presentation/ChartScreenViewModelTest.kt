@@ -51,7 +51,7 @@ class ChartScreenViewModelTest {
     )
 
     private fun createViewModel(
-        historicalPrices: List<TradePrice> = emptyList(),
+        historicalPrices: List<PricePoint> = emptyList(),
         historicalException: Throwable? = null,
         tradeException: Throwable? = null,
         historicalPointLimit: Int = 200,
@@ -70,8 +70,8 @@ class ChartScreenViewModelTest {
     @Test
     fun `loads historical data and emits success`() = runTest {
         val (viewModel, _, _) = createViewModel(historicalPrices = listOf(
-            TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
-            TradePrice("BTCUSDT", PricePoint(60_000L, 51000.0)),
+            PricePoint(0L, 50000.0),
+            PricePoint(60_000L, 51000.0),
         ))
 
         viewModel.load(Granularity.M1)
@@ -124,7 +124,7 @@ class ChartScreenViewModelTest {
     @Test
     fun `same granularity value does not reload`() = runTest {
         val (viewModel, _, _) = createViewModel(historicalPrices = listOf(
-            TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
+            PricePoint(0L, 50000.0),
         ))
 
         viewModel.load(Granularity.M1)
@@ -153,7 +153,7 @@ class ChartScreenViewModelTest {
     @Test
     fun `live prices update lastPrice`() = runTest {
         val (viewModel, tradeUseCase, _) = createViewModel(historicalPrices = listOf(
-            TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
+            PricePoint(0L, 50000.0),
         ))
 
         viewModel.load(Granularity.M1)
@@ -171,7 +171,7 @@ class ChartScreenViewModelTest {
     fun `out of order trade is ignored`() = runTest {
         val fakeTradeUseCase = FakeObserveTradePricesUseCase()
         val fakeHistorical = FakeGetHistoricalPricesUseCase(prices = listOf(
-            TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
+            PricePoint(0L, 50000.0),
         ))
         val viewModel = ChartScreenViewModel(
             getHistoricalPricesUseCase = fakeHistorical,
@@ -195,7 +195,7 @@ class ChartScreenViewModelTest {
     @Test
     fun `load called twice cancels previous job`() = runTest {
         val (viewModel, _, _) = createViewModel(historicalPrices = listOf(
-            TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
+            PricePoint(0L, 50000.0),
         ))
 
         viewModel.load(Granularity.M1)
@@ -218,7 +218,7 @@ class ChartScreenViewModelTest {
     @Test
     fun `onCleared cancels active job`() = runTest {
         val (viewModel, _, _) = createViewModel(historicalPrices = listOf(
-            TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
+            PricePoint(0L, 50000.0),
         ))
 
         viewModel.load(Granularity.M1)
@@ -230,7 +230,7 @@ class ChartScreenViewModelTest {
     @Test
     fun `live stream retries on failure and emits failed state`() = runTest {
         val (viewModel, _, _) = createViewModel(
-            historicalPrices = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
+            historicalPrices = listOf(PricePoint(0L, 50000.0)),
             tradeException = RuntimeException("Stream error"),
         )
 
@@ -261,7 +261,7 @@ class ChartScreenViewModelTest {
     @Test
     fun `live stream stops retrying on CancellationException`() = runTest {
         val (viewModel, _, _) = createViewModel(
-            historicalPrices = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
+            historicalPrices = listOf(PricePoint(0L, 50000.0)),
             tradeException = CancellationException("Cancelled"),
         )
 

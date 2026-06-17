@@ -21,8 +21,8 @@ class ChartDataControllerTest {
     fun `observe seeds with historical data and emits Success snapshot`() = runTest {
         val controller = ChartDataController(
             getHistoricalPrices = FakeGetHistoricalPricesUseCase(prices = listOf(
-                TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
-                TradePrice("BTCUSDT", PricePoint(60_000L, 51000.0)),
+                PricePoint(0L, 50000.0),
+                PricePoint(60_000L, 51000.0),
             )),
             observeTradePrices = FakeObserveTradePricesUseCase(),
             scope = this,
@@ -82,7 +82,7 @@ class ChartDataControllerTest {
         val fakeUseCase = FakeObserveTradePricesUseCase()
         val controller = ChartDataController(
             getHistoricalPrices = FakeGetHistoricalPricesUseCase(prices = listOf(
-                TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
+                PricePoint(0L, 50000.0),
             )),
             observeTradePrices = fakeUseCase,
             scope = this,
@@ -129,7 +129,7 @@ class ChartDataControllerTest {
     fun `stream stops retrying on CancellationException`() = runTest {
         val controller = ChartDataController(
             getHistoricalPrices = FakeGetHistoricalPricesUseCase(prices = listOf(
-                TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
+                PricePoint(0L, 52000.0),
             )),
             observeTradePrices = FakeObserveTradePricesUseCase(exception = CancellationException("Cancelled")),
             scope = this,
@@ -140,7 +140,7 @@ class ChartDataControllerTest {
         val snapshot = controller.chartData.first<Fallible<List<PricePoint>>> { it is Fallible.Success }
         assertIs<Fallible.Success<List<PricePoint>>>(snapshot)
         val data = (snapshot as Fallible.Success<List<PricePoint>>).value
-        assertEquals(50000.0, data.last().price)
+        assertEquals(52000.0, data.last().price)
         controller.cancel()
     }
 
