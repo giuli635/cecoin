@@ -7,8 +7,8 @@ import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.search.util.filterBy
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
+import dyds.crypto.cecoin.presentation.utils.launchLoadable
 import dyds.crypto.cecoin.utils.Loadable
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,12 +32,10 @@ class CoinSearchViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptySet())
 
     val filteredCoins = combine(_uiState, _asyncAvailableSymbols, favorites) { uiState, asyncSymbols, favs ->
-        when (asyncSymbols) {
-            is Loadable.Loading -> Loadable.Loading
-            is Loadable.Cancelled -> Loadable.Cancelled
-            is Loadable.Loaded -> Loadable.Loaded(
-                asyncSymbols.value.map { it.filterBy(uiState.searchQuery, uiState.filterMode, favs) }
-            )
+        asyncSymbols.map { fallible ->
+            fallible.map { symbols ->
+                symbols.filterBy(uiState.searchQuery, uiState.filterMode, favs)
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, Loadable.Loading)
 
@@ -49,15 +47,9 @@ class CoinSearchViewModel(
 
     fun loadSymbols() {
         loadSymbolsJob?.cancel()
-        loadSymbolsJob = viewModelScope.launch {
-            _asyncAvailableSymbols.value = Loadable.Loading
-            try {
-                val result = getAvailableSymbolsUseCase()
-                    .map { symbols -> symbols.map { it.symbol }.sorted() }
-                _asyncAvailableSymbols.value = Loadable.Loaded(result)
-            } catch (_: CancellationException) {
-                _asyncAvailableSymbols.value = Loadable.Cancelled
-            }
+        loadSymbolsJob = launchLoadable(_asyncAvailableSymbols) {
+            getAvailableSymbolsUseCase()
+                .map { symbols -> symbols.map { it.symbol }.sorted() }
         }
     }
 

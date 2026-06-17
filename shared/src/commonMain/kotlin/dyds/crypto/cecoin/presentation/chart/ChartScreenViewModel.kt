@@ -6,6 +6,7 @@ import dyds.crypto.cecoin.presentation.chart.model.Granularity
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dyds.crypto.cecoin.domain.model.TradePrice
@@ -38,24 +39,21 @@ class ChartScreenViewModel(
 
     fun load(g: Granularity) {
         controller?.cancel()
-        controller = null
         loadJob?.cancel()
         _state.value = Loadable.Loading
 
         loadJob = viewModelScope.launch {
-            when (val result = getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)) {
-                is Fallible.Failed -> {
-                    _state.value = Loadable.Loaded(result)
-                    return@launch
-                }
-                is Fallible.Success -> {
-                    val historical = result.value
-                    val c = controllerFactory(g, historical, viewModelScope)
-                    c.startStream()
-                    controller = c
-                    _state.value = Loadable.Loaded(Fallible.Success(c.chartData))
-                }
-            }
+            _state.value = Loadable.Loaded(
+                getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
+                    .map { prices ->
+                        controllerFactory(g, prices, viewModelScope)
+                            .also { c ->
+                                c.startStream()
+                                controller = c
+                            }
+                            .chartData
+                    }
+            )
         }
     }
 
