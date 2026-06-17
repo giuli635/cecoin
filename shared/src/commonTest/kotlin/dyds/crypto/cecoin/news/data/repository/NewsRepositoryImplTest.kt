@@ -30,4 +30,33 @@ class NewsRepositoryImplTest {
 
         assertTrue(result.isEmpty())
     }
+
+    @Test
+    fun `getCryptoNews handles articles with empty fields`() = runTest {
+        val articles = listOf(
+            NewsArticle("", "", "", null, "", ""),
+            NewsArticle(" ", " ", " ", null, " ", " "),
+        )
+        val dataSource = FakeNewsApiDataSource(articles)
+        val repo = NewsRepositoryImpl(dataSource)
+
+        val result = repo.getCryptoNews()
+
+        assertEquals(articles, result)
+    }
+
+    @Test
+    fun `getCryptoNews handles articles with very long strings`() = runTest {
+        val longStr = "A".repeat(10_000)
+        val articles = listOf(
+            NewsArticle(longStr, longStr, longStr, null, longStr, longStr),
+        )
+        val dataSource = FakeNewsApiDataSource(articles)
+        val repo = NewsRepositoryImpl(dataSource)
+
+        val result = repo.getCryptoNews()
+
+        assertEquals(longStr, result.first().title)
+        assertEquals(longStr, result.first().description)
+    }
 }

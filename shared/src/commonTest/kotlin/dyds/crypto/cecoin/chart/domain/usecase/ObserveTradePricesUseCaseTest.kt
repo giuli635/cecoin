@@ -5,15 +5,20 @@ import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.domain.model.TradePrice
 import dyds.crypto.cecoin.core.utils.error.fakeErrorClassifier
 import dyds.crypto.cecoin.core.utils.state.Fallible
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNull
+import kotlin.time.Duration.Companion.milliseconds
 
 class ObserveTradePricesUseCaseTest {
     private val classifier = fakeErrorClassifier()
@@ -56,5 +61,29 @@ class ObserveTradePricesUseCaseTest {
 
         assertEquals(4, results.size)
         results.forEach { assertIs<Fallible.Failed>(it) }
+    }
+
+    @Test
+    fun `invoke emits nothing when repository flow never emits`() = runTest {
+        val repo = FakeTradePriceRepository(tradeFlow = flow { delay(Long.MAX_VALUE) })
+        val useCase = ObserveTradePricesUseCaseImpl(repo, classifier)
+
+        val result = withTimeoutOrNull(100.milliseconds) {
+            useCase("BTCUSDT").firstOrNull()
+        }
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `invoke handles many emissions without accumulation issues`() = runTest {
+        val trades = (1..100).map { TradePrice("BTCUSDT", PricePoint(it.toLong(), 50000.0 + it)) }
+        val repo = FakeTradePriceRepository(tradeFlow = flow { trades.forEach { emit(it) } })
+        val useCase = ObserveTradePricesUseCaseImpl(repo, classifier)
+
+        val results = useCase("BTCUSDT").take(100).toList()
+
+        assertEquals(100, results.size)
+        results.forEach { assertIs<Fallible.Success<TradePrice>>(it) }
     }
 }
