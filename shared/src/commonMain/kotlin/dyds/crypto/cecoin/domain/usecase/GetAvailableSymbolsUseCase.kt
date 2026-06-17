@@ -4,7 +4,8 @@ import dyds.crypto.cecoin.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.domain.repository.CryptoSymbolRepository
 import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
-import kotlinx.coroutines.CancellationException
+import dyds.crypto.cecoin.utils.runCatchingCancellable
+import dyds.crypto.cecoin.utils.toFallible
 
 interface GetAvailableSymbolsUseCase {
     suspend operator fun invoke(): Fallible<List<CryptoSymbol>>
@@ -15,13 +16,8 @@ class GetAvailableSymbolsUseCaseImpl(
     private val errorClassifier: ErrorClassifier,
 ) : GetAvailableSymbolsUseCase {
     override suspend operator fun invoke(): Fallible<List<CryptoSymbol>> {
-        return try {
-            Fallible.Success(repository.getAvailableSymbols())
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Fallible.Failed(errorClassifier.classify(e, "Error al cargar símbolos"))
-        }
+        return runCatchingCancellable { repository.getAvailableSymbols() }
+            .toFallible(errorClassifier, "Error al cargar símbolos")
     }
 }
 

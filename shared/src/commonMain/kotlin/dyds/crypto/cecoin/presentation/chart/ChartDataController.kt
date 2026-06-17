@@ -32,14 +32,9 @@ class ChartDataController(
         streamJob?.cancel()
         streamJob = scope.launch {
             observeTradePricesUseCase(symbol).collect { fallible ->
-                when (fallible) {
-                    is Fallible.Success -> {
-                        priceAccumulator.accumulate(fallible.value)
-                        _chartData.value = Fallible.Success(priceAccumulator.snapshot())
-                    }
-                    is Fallible.Failed -> {
-                        _chartData.value = fallible
-                    }
+                _chartData.value = fallible.map { trade ->
+                    priceAccumulator.accumulate(trade)
+                    priceAccumulator.snapshot()
                 }
             }
         }

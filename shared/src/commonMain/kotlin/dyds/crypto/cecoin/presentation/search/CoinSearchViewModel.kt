@@ -7,7 +7,6 @@ import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.search.util.filterBy
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -36,15 +35,9 @@ class CoinSearchViewModel(
         when (asyncSymbols) {
             is Loadable.Loading -> Loadable.Loading
             is Loadable.Cancelled -> Loadable.Cancelled
-            is Loadable.Loaded -> {
-                when (val fallibleSymbols = asyncSymbols.value) {
-                    is Fallible.Failed -> Loadable.Loaded(fallibleSymbols)
-                    is Fallible.Success ->
-                        Loadable.Loaded(Fallible.Success(
-                            fallibleSymbols.value.filterBy(uiState.searchQuery, uiState.filterMode, favs)
-                        ))
-                }
-            }
+            is Loadable.Loaded -> Loadable.Loaded(
+                asyncSymbols.value.map { it.filterBy(uiState.searchQuery, uiState.filterMode, favs) }
+            )
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, Loadable.Loading)
 
@@ -59,15 +52,9 @@ class CoinSearchViewModel(
         loadSymbolsJob = viewModelScope.launch {
             _asyncAvailableSymbols.value = Loadable.Loading
             try {
-                when (val result = getAvailableSymbolsUseCase()) {
-                    is Fallible.Success -> {
-                        val symbols = result.value.map { it.symbol }.sorted()
-                        _asyncAvailableSymbols.value = Loadable.Loaded(Fallible.Success(symbols))
-                    }
-                    is Fallible.Failed -> {
-                        _asyncAvailableSymbols.value = Loadable.Loaded(result)
-                    }
-                }
+                val result = getAvailableSymbolsUseCase()
+                    .map { symbols -> symbols.map { it.symbol }.sorted() }
+                _asyncAvailableSymbols.value = Loadable.Loaded(result)
             } catch (_: CancellationException) {
                 _asyncAvailableSymbols.value = Loadable.Cancelled
             }
