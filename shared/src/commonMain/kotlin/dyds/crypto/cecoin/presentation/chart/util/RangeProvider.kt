@@ -3,6 +3,17 @@ package dyds.crypto.cecoin.presentation.chart.util
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import dyds.crypto.cecoin.presentation.chart.model.ChartRange
+import dyds.crypto.cecoin.utils.HOURS_IN_DAY
+import dyds.crypto.cecoin.utils.MILLIS_IN_1_DAY
+import dyds.crypto.cecoin.utils.MILLIS_IN_1_HOUR
+import dyds.crypto.cecoin.utils.MILLIS_IN_30_MIN
+import dyds.crypto.cecoin.utils.MILLIS_IN_15_MIN
+import dyds.crypto.cecoin.utils.MILLIS_IN_5_MIN
+import dyds.crypto.cecoin.utils.MILLIS_IN_6_HOURS
+import dyds.crypto.cecoin.utils.MILLIS_IN_MINUTE
+import dyds.crypto.cecoin.utils.MILLIS_IN_SECOND
+import dyds.crypto.cecoin.utils.SECONDS_IN_HOUR
+import dyds.crypto.cecoin.utils.SECONDS_IN_MINUTE
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.log10
@@ -59,17 +70,6 @@ private const val NICE_STEP_VALUE_2 = 2.0
 private const val NICE_STEP_VALUE_5 = 5.0
 private const val NICE_STEP_VALUE_10 = 10.0
 
-private const val SECONDS_IN_MINUTE = 60
-private const val SECONDS_IN_HOUR = 3600
-private const val MILLIS_IN_MINUTE = 60_000.0
-private const val MILLIS_IN_5_MIN = 300_000.0
-private const val MILLIS_IN_15_MIN = 900_000.0
-private const val MILLIS_IN_30_MIN = 1_800_000.0
-private const val MILLIS_IN_1_HOUR = 3_600_000.0
-private const val MILLIS_IN_6_HOURS = 21_600_000.0
-private const val MILLIS_IN_SECOND = 1000.0
-private const val MILLIS_IN_1_DAY = 86_400_000.0
-
 fun niceStep(range: Double): Double {
     if (range <= 0.0) return NICE_STEP_VALUE_1
     val exponent = floor(log10(range)).toInt()
@@ -91,7 +91,7 @@ private fun niceTimeStep(rangeMs: Double): Double {
         rangeSec < SECONDS_IN_MINUTE * 30 -> MILLIS_IN_15_MIN
         rangeSec < SECONDS_IN_HOUR -> MILLIS_IN_30_MIN
         rangeSec < SECONDS_IN_HOUR * 6 -> MILLIS_IN_1_HOUR
-        rangeSec < SECONDS_IN_HOUR * 24 -> MILLIS_IN_6_HOURS
+        rangeSec < SECONDS_IN_HOUR * HOURS_IN_DAY -> MILLIS_IN_6_HOURS
         else -> MILLIS_IN_1_DAY
-    }
+    }.toDouble()
 }

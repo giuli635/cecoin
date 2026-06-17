@@ -1,13 +1,12 @@
 package dyds.crypto.cecoin.presentation.chart.util
 
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
-import dyds.crypto.cecoin.utils.format.priceStr
+import dyds.crypto.cecoin.utils.HOURS_IN_DAY
+import dyds.crypto.cecoin.utils.MILLIS_IN_SECOND
+import dyds.crypto.cecoin.utils.SECONDS_IN_HOUR
+import dyds.crypto.cecoin.utils.SECONDS_IN_MINUTE
 import dyds.crypto.cecoin.utils.format.pad
-
-private const val MILLIS_IN_SECOND = 1000
-private const val SECONDS_IN_MINUTE = 60
-private const val SECONDS_IN_HOUR = 3600
-private const val HOURS_IN_DAY = 24
+import dyds.crypto.cecoin.utils.format.priceStr
 
 fun priceFormatter(): CartesianValueFormatter =
     CartesianValueFormatter { _, value, _ -> priceStr(value) }
