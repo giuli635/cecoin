@@ -5,7 +5,6 @@ import dyds.crypto.cecoin.domain.model.TradePrice
 import dyds.crypto.cecoin.domain.usecase.FakeGetHistoricalPricesUseCase
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
 import dyds.crypto.cecoin.presentation.chart.util.PriceAccumulatorImpl
-import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.CancellationException
@@ -62,9 +61,6 @@ class ChartScreenViewModelTest {
         tradeException: Throwable? = null,
         historicalPointLimit: Int = 200,
     ): VMScope {
-        val classifier = object : ErrorClassifier() {
-            override fun isNetworkError(e: Throwable) = false
-        }
         val fakeHistorical = FakeGetHistoricalPricesUseCase(prices = historicalPrices, exception = historicalException)
         val fakeTradeUseCase = FakeObserveTradePricesUseCase(exception = tradeException)
         val viewModel = ChartScreenViewModel(
@@ -75,12 +71,9 @@ class ChartScreenViewModelTest {
                     priceAccumulator = PriceAccumulatorImpl(g, historical),
                     symbol = "BTCUSDT",
                     scope = scope,
-                    errorClassifier = classifier,
-                    retryDelayMs = 0,
                 )
             },
             symbol = "BTCUSDT",
-            errorClassifier = classifier,
             historicalPointLimit = historicalPointLimit,
         )
         return VMScope(viewModel, fakeTradeUseCase, fakeHistorical)
@@ -183,9 +176,6 @@ class ChartScreenViewModelTest {
     @Test
     fun `out of order trade is ignored`() = runTest {
         val fakeTradeUseCase = FakeObserveTradePricesUseCase()
-        val classifier = object : ErrorClassifier() {
-            override fun isNetworkError(e: Throwable) = false
-        }
         val viewModel = ChartScreenViewModel(
             getHistoricalPricesUseCase = FakeGetHistoricalPricesUseCase(prices = listOf(
                 TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
@@ -196,12 +186,9 @@ class ChartScreenViewModelTest {
                     priceAccumulator = PriceAccumulatorImpl(g, historical),
                     symbol = "BTCUSDT",
                     scope = scope,
-                    errorClassifier = classifier,
-                    retryDelayMs = 0,
                 )
             },
             symbol = "BTCUSDT",
-            errorClassifier = classifier,
         )
 
         viewModel.load(Granularity.M1)

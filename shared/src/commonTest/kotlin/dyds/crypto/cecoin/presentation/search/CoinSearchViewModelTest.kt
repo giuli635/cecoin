@@ -5,8 +5,6 @@ import dyds.crypto.cecoin.domain.usecase.FakeGetAvailableSymbolsUseCase
 import dyds.crypto.cecoin.domain.usecase.FakeObserveFavoritesUseCase
 import dyds.crypto.cecoin.domain.usecase.FakeToggleFavoriteUseCase
 import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
-import dyds.crypto.cecoin.utils.AppError
-import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.CompletableDeferred
@@ -42,7 +40,7 @@ class CoinSearchViewModelTest {
     }
 
     @Test
-    fun `loadSymbols emits failed when usecase throws`() = runTest {
+    fun `loadSymbols emits failed when usecase fails`() = runTest {
         val symbolsFake = FakeGetAvailableSymbolsUseCase(exception = RuntimeException("API error"))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
 
@@ -51,9 +49,6 @@ class CoinSearchViewModelTest {
         assertIs<Loadable.Loaded<*>>(result)
         val fallible = (result as Loadable.Loaded).value
         assertIs<Fallible.Failed>(fallible)
-        val error = fallible.error
-        assertIs<AppError.GenericError>(error)
-        assertTrue(error.userMessage.contains("Error al cargar símbolos"))
     }
 
     @Test
@@ -160,13 +155,13 @@ class CoinSearchViewModelTest {
     fun `filteredCoins emits Loading initially before data is loaded`() = runTest {
         val symbolsDeferred = CompletableDeferred<List<CryptoSymbol>>()
         val getSymbols = object : GetAvailableSymbolsUseCase {
-            override suspend fun invoke(): List<CryptoSymbol> = symbolsDeferred.await()
+            override suspend fun invoke(): Fallible<List<CryptoSymbol>> =
+                Fallible.Success(symbolsDeferred.await())
         }
         val viewModel = CoinSearchViewModel(
             getAvailableSymbolsUseCase = getSymbols,
             toggleFavoriteUseCase = FakeToggleFavoriteUseCase(),
             observeFavoritesUseCase = FakeObserveFavoritesUseCase(),
-            errorClassifier = fakeClassifier(),
         )
 
         val initial = viewModel.filteredCoins.first()
@@ -194,7 +189,7 @@ class CoinSearchViewModelTest {
     fun `onCancelLoadSymbols emits Cancelled when load is in progress`() = runTest {
         val loadStarted = MutableStateFlow(false)
         val getSymbols = object : GetAvailableSymbolsUseCase {
-            override suspend fun invoke(): List<CryptoSymbol> {
+            override suspend fun invoke(): Fallible<List<CryptoSymbol>> {
                 loadStarted.value = true
                 awaitCancellation()
             }
@@ -203,7 +198,6 @@ class CoinSearchViewModelTest {
             getAvailableSymbolsUseCase = getSymbols,
             toggleFavoriteUseCase = FakeToggleFavoriteUseCase(),
             observeFavoritesUseCase = FakeObserveFavoritesUseCase(),
-            errorClassifier = fakeClassifier(),
         )
 
         loadStarted.first { it }
@@ -235,11 +229,7 @@ class CoinSearchViewModelTest {
         toggleFake: FakeToggleFavoriteUseCase = FakeToggleFavoriteUseCase(),
         observeFake: FakeObserveFavoritesUseCase = FakeObserveFavoritesUseCase(),
     ): CoinSearchViewModel {
-        return CoinSearchViewModel(symbolsFake, toggleFake, observeFake, fakeClassifier())
-    }
-
-    private fun fakeClassifier() = object : ErrorClassifier() {
-        override fun isNetworkError(e: Throwable) = false
+        return CoinSearchViewModel(symbolsFake, toggleFake, observeFake)
     }
 
     private fun extractSymbols(result: Loadable<*>): List<String> {

@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import dyds.crypto.cecoin.domain.model.NewsArticle
 import dyds.crypto.cecoin.domain.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.CancellationException
@@ -15,11 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-private const val FAILED_TO_LOAD_NEWS = "Error al cargar noticias"
-
 class NewsViewModel(
     private val getCryptoNewsUseCase: GetCryptoNewsUseCase,
-    private val errorClassifier: ErrorClassifier,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NewsUiState())
     val uiState: StateFlow<NewsUiState> = _uiState.asStateFlow()
@@ -38,14 +34,16 @@ class NewsViewModel(
         loadNewsJob = viewModelScope.launch {
             _asyncNews.value = Loadable.Loading
             try {
-                val news = getCryptoNewsUseCase()
-                _asyncNews.value = Loadable.Loaded(Fallible.Success(news))
+                when (val result = getCryptoNewsUseCase()) {
+                    is Fallible.Success -> {
+                        _asyncNews.value = Loadable.Loaded(Fallible.Success(result.value))
+                    }
+                    is Fallible.Failed -> {
+                        _asyncNews.value = Loadable.Loaded(result)
+                    }
+                }
             } catch (_: CancellationException) {
                 _asyncNews.value = Loadable.Cancelled
-            } catch (e: Exception) {
-                _asyncNews.value = Loadable.Loaded(
-                    Fallible.Failed(errorClassifier.classify(e, FAILED_TO_LOAD_NEWS))
-                )
             }
         }
     }

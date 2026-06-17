@@ -49,26 +49,29 @@ object CecoinDependencyInjector {
     private val repository = CecoinRepositoryImpl(
         coinPriceSource, coinHistoricalSource, coinListDataSource,
     )
-    private val observeTradePricesUseCase = ObserveTradePricesUseCaseImpl(repository)
-    private val getAvailableSymbolsUseCase = GetAvailableSymbolsUseCaseImpl(repository)
-    private val getHistoricalPricesUseCase = GetHistoricalPricesUseCaseImpl(repository)
+    private val newsApiDataSource = NewsApiRestDataSource(httpClient)
+    private val newsRepository = NewsRepositoryImpl(newsApiDataSource)
 
-    private lateinit var favoriteSource: DataStoreFavoriteDataSource
-    private lateinit var favoriteRepository: FavoriteRepositoryImpl
+    private lateinit var observeTradePricesUseCase: ObserveTradePricesUseCaseImpl
+    private lateinit var getAvailableSymbolsUseCase: GetAvailableSymbolsUseCase
+    private lateinit var getHistoricalPricesUseCase: GetHistoricalPricesUseCase
+    private lateinit var getCryptoNewsUseCase: GetCryptoNewsUseCase
     private lateinit var toggleFavoriteUseCase: ToggleFavoriteUseCase
     private lateinit var observeFavoritesUseCase: ObserveFavoritesUseCase
+    private lateinit var favoriteSource: DataStoreFavoriteDataSource
+    private lateinit var favoriteRepository: FavoriteRepositoryImpl
 
     fun configure(dataStore: DataStore<Preferences>, classifier: ErrorClassifier) {
         errorClassifier = classifier
         favoriteSource = DataStoreFavoriteDataSource(dataStore)
         favoriteRepository = FavoriteRepositoryImpl(favoriteSource)
-        toggleFavoriteUseCase = ToggleFavoriteUseCaseImpl(favoriteRepository)
+        observeTradePricesUseCase = ObserveTradePricesUseCaseImpl(repository, classifier)
+        getAvailableSymbolsUseCase = GetAvailableSymbolsUseCaseImpl(repository, classifier)
+        getHistoricalPricesUseCase = GetHistoricalPricesUseCaseImpl(repository, classifier)
+        getCryptoNewsUseCase = GetCryptoNewsUseCaseImpl(newsRepository, classifier)
+        toggleFavoriteUseCase = ToggleFavoriteUseCaseImpl(favoriteRepository, classifier)
         observeFavoritesUseCase = ObserveFavoritesUseCaseImpl(favoriteRepository)
     }
-
-    private val newsApiDataSource = NewsApiRestDataSource(httpClient)
-    private val newsRepository = NewsRepositoryImpl(newsApiDataSource)
-    private val getCryptoNewsUseCase = GetCryptoNewsUseCaseImpl(newsRepository)
 
     fun dispose() {
         httpClient.close()
@@ -81,7 +84,6 @@ object CecoinDependencyInjector {
                 getAvailableSymbolsUseCase = getAvailableSymbolsUseCase,
                 toggleFavoriteUseCase = toggleFavoriteUseCase,
                 observeFavoritesUseCase = observeFavoritesUseCase,
-                errorClassifier = errorClassifier,
             )
         }
     }
@@ -104,11 +106,9 @@ object CecoinDependencyInjector {
                         priceAccumulator = PriceAccumulatorImpl(granularity, historical),
                         scope = scope,
                         symbol = symbol,
-                        errorClassifier = errorClassifier,
                     )
                 },
                 symbol = symbol,
-                errorClassifier = errorClassifier,
             )
         }
     }
@@ -118,7 +118,6 @@ object CecoinDependencyInjector {
         return viewModel {
             NewsViewModel(
                 getCryptoNewsUseCase = getCryptoNewsUseCase,
-                errorClassifier = errorClassifier,
             )
         }
     }

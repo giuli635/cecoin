@@ -4,6 +4,9 @@ import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.domain.model.TradePrice
 import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.presentation.chart.util.PriceAccumulator
+import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.utils.Fallible
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
@@ -23,11 +26,15 @@ class FakeObserveTradePricesUseCase(
     private val _channel = Channel<TradePrice>(Channel.UNLIMITED)
     val emitted: Channel<TradePrice> get() = _channel
 
-    override fun invoke(symbol: String): Flow<TradePrice> {
-        if (exception != null) return flow { throw exception }
+    override fun invoke(symbol: String): Flow<Fallible<TradePrice>> {
+        if (exception is CancellationException) return flow { throw exception }
         return channelFlow {
-            for (trade in _channel) {
-                send(trade)
+            if (exception != null) {
+                send(Fallible.Failed(AppError.GenericError(exception, "La transmisión en vivo falló")))
+            } else {
+                for (trade in _channel) {
+                    send(Fallible.Success(trade))
+                }
             }
         }
     }

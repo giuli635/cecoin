@@ -7,7 +7,6 @@ import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.search.util.filterBy
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.CancellationException
@@ -20,13 +19,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-private const val FAILED_TO_LOAD_SYMBOLS = "Error al cargar símbolos"
-
 class CoinSearchViewModel(
     private val getAvailableSymbolsUseCase: GetAvailableSymbolsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     observeFavoritesUseCase: ObserveFavoritesUseCase,
-    private val errorClassifier: ErrorClassifier,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CoinSearchUiState())
     val uiState: StateFlow<CoinSearchUiState> = _uiState.asStateFlow()
@@ -63,16 +59,17 @@ class CoinSearchViewModel(
         loadSymbolsJob = viewModelScope.launch {
             _asyncAvailableSymbols.value = Loadable.Loading
             try {
-                val symbols = getAvailableSymbolsUseCase()
-                    .map { it.symbol }
-                    .sorted()
-                _asyncAvailableSymbols.value = Loadable.Loaded(Fallible.Success(symbols))
+                when (val result = getAvailableSymbolsUseCase()) {
+                    is Fallible.Success -> {
+                        val symbols = result.value.map { it.symbol }.sorted()
+                        _asyncAvailableSymbols.value = Loadable.Loaded(Fallible.Success(symbols))
+                    }
+                    is Fallible.Failed -> {
+                        _asyncAvailableSymbols.value = Loadable.Loaded(result)
+                    }
+                }
             } catch (_: CancellationException) {
                 _asyncAvailableSymbols.value = Loadable.Cancelled
-            } catch (e: Exception) {
-                _asyncAvailableSymbols.value = Loadable.Loaded(
-                    Fallible.Failed(errorClassifier.classify(e, FAILED_TO_LOAD_SYMBOLS))
-                )
             }
         }
     }

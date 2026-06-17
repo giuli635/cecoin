@@ -3,7 +3,6 @@ package dyds.crypto.cecoin.presentation.chart
 import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.domain.model.TradePrice
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
-import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
@@ -15,10 +14,6 @@ import kotlin.test.assertTrue
 
 class ChartDataControllerTest {
 
-    private val classifier = object : ErrorClassifier() {
-        override fun isNetworkError(e: Throwable) = false
-    }
-
     @Test
     fun `seed with historical data emits Success snapshot`() = runTest {
         val controller = ChartDataController(
@@ -28,8 +23,6 @@ class ChartDataControllerTest {
             )),
             symbol = "BTCUSDT",
             scope = this,
-            errorClassifier = classifier,
-            retryDelayMs = 0,
         )
         controller.startStream()
 
@@ -49,8 +42,6 @@ class ChartDataControllerTest {
             symbol = "BTCUSDT",
             scope = this,
             priceAccumulator = FakePriceAccumulator(),
-            errorClassifier = classifier,
-            retryDelayMs = 0,
         )
         controller.startStream()
         fakeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
@@ -71,8 +62,6 @@ class ChartDataControllerTest {
             symbol = "BTCUSDT",
             scope = this,
             priceAccumulator = FakePriceAccumulator(),
-            errorClassifier = classifier,
-            retryDelayMs = 0,
         )
         controller.startStream()
         controller.cancel()
@@ -92,8 +81,6 @@ class ChartDataControllerTest {
             symbol = "BTCUSDT",
             scope = this,
             priceAccumulator = FakePriceAccumulator(historical = fakeTradePricesFromPricePoints(PricePoint(0L, 50000.0))),
-            errorClassifier = classifier,
-            retryDelayMs = 0,
         )
         controller.startStream()
         controller.startStream()
@@ -113,8 +100,6 @@ class ChartDataControllerTest {
             symbol = "BTCUSDT",
             scope = this,
             priceAccumulator = FakePriceAccumulator(),
-            errorClassifier = classifier,
-            retryDelayMs = 0,
         )
         controller.startStream()
 
@@ -130,8 +115,6 @@ class ChartDataControllerTest {
             symbol = "BTCUSDT",
             scope = this,
             priceAccumulator = FakePriceAccumulator(),
-            errorClassifier = classifier,
-            retryDelayMs = 0,
         )
         controller.cancel()
     }
@@ -143,8 +126,6 @@ class ChartDataControllerTest {
             symbol = "BTCUSDT",
             scope = this,
             priceAccumulator = FakePriceAccumulator(historical = fakeTradePricesFromPricePoints(PricePoint(0L, 50000.0))),
-            errorClassifier = classifier,
-            retryDelayMs = 0,
         )
         controller.startStream()
 

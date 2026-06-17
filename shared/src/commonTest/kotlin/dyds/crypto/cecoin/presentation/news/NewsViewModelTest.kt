@@ -3,9 +3,7 @@ package dyds.crypto.cecoin.presentation.news
 import dyds.crypto.cecoin.domain.model.NewsArticle
 import dyds.crypto.cecoin.domain.usecase.FakeGetCryptoNewsUseCase
 import dyds.crypto.cecoin.domain.usecase.GetCryptoNewsUseCase
-import dyds.crypto.cecoin.utils.AppError
 import kotlinx.coroutines.awaitCancellation
-import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +12,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlin.test.assertTrue
 
 class NewsViewModelTest {
 
@@ -36,7 +33,7 @@ class NewsViewModelTest {
     }
 
     @Test
-    fun `loadNews emits failed when use case throws`() = runTest {
+    fun `loadNews emits failed when use case fails`() = runTest {
         val fake = FakeGetCryptoNewsUseCase(exception = RuntimeException("API error"))
         val viewModel = createViewModel(fake)
 
@@ -45,9 +42,6 @@ class NewsViewModelTest {
         assertIs<Loadable.Loaded<*>>(result)
         val fallible = (result as Loadable.Loaded).value
         assertIs<Fallible.Failed>(fallible)
-        val error = (fallible as Fallible.Failed).error
-        assertIs<AppError.GenericError>(error)
-        assertTrue(error.userMessage.contains("Error al cargar noticias"))
     }
 
     @Test
@@ -97,14 +91,12 @@ class NewsViewModelTest {
     fun `onCancelLoadNews emits Cancelled when load is in progress`() = runTest {
         val loadStarted = MutableStateFlow(false)
         val useCase = object : GetCryptoNewsUseCase {
-            override suspend fun invoke(): List<NewsArticle> {
+            override suspend fun invoke(): Fallible<List<NewsArticle>> {
                 loadStarted.value = true
                 awaitCancellation()
             }
         }
-        val viewModel = NewsViewModel(useCase, object : ErrorClassifier() {
-            override fun isNetworkError(e: Throwable) = false
-        })
+        val viewModel = NewsViewModel(useCase)
 
         loadStarted.first { it }
 
@@ -128,8 +120,6 @@ class NewsViewModelTest {
     }
 
     private fun createViewModel(fake: FakeGetCryptoNewsUseCase = FakeGetCryptoNewsUseCase()): NewsViewModel {
-        return NewsViewModel(fake, object : ErrorClassifier() {
-            override fun isNetworkError(e: Throwable) = false
-        })
+        return NewsViewModel(fake)
     }
 }
