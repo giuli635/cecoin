@@ -1,16 +1,17 @@
 package dyds.crypto.cecoin.search.presentation.util
 
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.search.presentation.FilterMode
 
-internal fun List<String>.filterBy(
+internal fun List<CryptoSymbol>.filterBy(
     query: String,
     filterMode: FilterMode,
-    favorites: Set<String>,
-): List<String> {
+    favorites: Set<CryptoSymbol>,
+): List<CryptoSymbol> {
     val filtered = when (filterMode) {
         FilterMode.ALL -> this
         FilterMode.FAVORITES -> filter { it in favorites }
     }
     return if (query.isEmpty()) filtered
-    else filtered.filter { it.contains(query, ignoreCase = true) }
+    else filtered.filter { it.symbol.contains(query, ignoreCase = true) }
 }

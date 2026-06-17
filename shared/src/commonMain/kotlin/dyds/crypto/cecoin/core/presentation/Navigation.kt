@@ -15,6 +15,7 @@ import dyds.crypto.cecoin.core.di.CecoinDependencyInjector.getCoinDetailsViewMod
 import dyds.crypto.cecoin.core.di.CecoinDependencyInjector.getGranularityStateHolder
 import dyds.crypto.cecoin.core.di.CecoinDependencyInjector.getNewsViewModel
 import dyds.crypto.cecoin.core.di.CecoinDependencyInjector.getSearchViewModel
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.chart.presentation.ChartScreen
 import dyds.crypto.cecoin.core.presentation.component.TabHeader
 import dyds.crypto.cecoin.core.utils.CoreStrings
@@ -33,7 +34,9 @@ object News : Tab {
 }
 
 @Serializable
-data class Detail(val symbol: String)
+data class Detail(val symbol: String) {
+    fun toCryptoSymbol() = CryptoSymbol(symbol)
+}
 
 private val tabs = listOf(Home, News)
 
@@ -74,7 +77,7 @@ private fun NavGraphBuilder.homeDestination(navController: NavHostController) {
             CoinSearchScreen(
                 viewModel = getSearchViewModel(),
                 onCoinSelected = {
-                    navController.navigate(Detail(symbol = it))
+                    navController.navigate(Detail(symbol = it.symbol))
                 }
             )
         }
@@ -95,7 +98,7 @@ private fun NavGraphBuilder.detailDestination(navController: NavHostController) 
         val granularityHolder = getGranularityStateHolder()
         ChartScreen(
             granularityHolder = granularityHolder,
-            viewModel = getCoinDetailsViewModel(detail.symbol),
+            viewModel = getCoinDetailsViewModel(detail.toCryptoSymbol()),
             errorClassifier = CecoinDependencyInjector.errorClassifier,
             onBack = { navController.popBackStack() }
         )

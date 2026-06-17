@@ -1,6 +1,8 @@
 package dyds.crypto.cecoin.search.data.datasource
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import java.io.File
@@ -27,16 +29,16 @@ class DataStoreFavoriteDataSourceTest {
     @Test
     fun `toggle adds new symbol`() = runTest {
         val source = createSource()
-        source.toggle("BTCUSDT")
+        source.toggle(fakeBtcSymbol)
         val result = source.favorites.first()
-        assertEquals(setOf("BTCUSDT"), result)
+        assertEquals(setOf(fakeBtcSymbol), result)
     }
 
     @Test
     fun `toggle removes existing symbol`() = runTest {
         val source = createSource()
-        source.toggle("BTCUSDT")
-        source.toggle("BTCUSDT")
+        source.toggle(fakeBtcSymbol)
+        source.toggle(fakeBtcSymbol)
         val result = source.favorites.first()
         assertTrue(result.isEmpty())
     }
@@ -44,27 +46,27 @@ class DataStoreFavoriteDataSourceTest {
     @Test
     fun `multiple toggles work correctly`() = runTest {
         val source = createSource()
-        source.toggle("A")
-        source.toggle("B")
-        source.toggle("A")
+        source.toggle(CryptoSymbol("A"))
+        source.toggle(CryptoSymbol("B"))
+        source.toggle(CryptoSymbol("A"))
         val result = source.favorites.first()
-        assertEquals(setOf("B"), result)
+        assertEquals(setOf(CryptoSymbol("B")), result)
     }
 
     @Test
     fun `toggle with spaces in symbol works without crashing`() = runTest {
         val source = createSource()
-        source.toggle("  BTC  ")
+        source.toggle(CryptoSymbol("  BTC  "))
         val result = source.favorites.first()
-        assertEquals(setOf("  BTC  "), result)
+        assertEquals(setOf(CryptoSymbol("  BTC  ")), result)
     }
 
     @Test
     fun `toggle with empty symbol does not crash`() = runTest {
         val source = createSource()
-        source.toggle("")
+        source.toggle(CryptoSymbol(""))
         val result = source.favorites.first()
-        assertEquals(setOf(""), result)
+        assertEquals(setOf(CryptoSymbol("")), result)
     }
 
     private fun createSource(): DataStoreFavoriteDataSource {

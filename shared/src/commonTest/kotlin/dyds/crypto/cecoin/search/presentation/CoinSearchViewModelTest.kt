@@ -1,6 +1,9 @@
 package dyds.crypto.cecoin.search.presentation
 
-import dyds.crypto.cecoin.search.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
+import dyds.crypto.cecoin.core.utils.fakeEthSymbol
+import dyds.crypto.cecoin.core.utils.fakeBnbSymbol
 import dyds.crypto.cecoin.search.domain.usecase.FakeGetAvailableSymbolsUseCase
 import dyds.crypto.cecoin.search.domain.usecase.FakeObserveFavoritesUseCase
 import dyds.crypto.cecoin.search.domain.usecase.FakeToggleFavoriteUseCase
@@ -22,17 +25,17 @@ class CoinSearchViewModelTest {
     @Test
     fun `init loads symbols and emits success`() = runTest {
         val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
-            CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
-            CryptoSymbol("ETHUSDT", "ETH", "USDT", "TRADING"),
+            fakeBtcSymbol,
+            fakeEthSymbol,
         ))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
 
         val result = viewModel.filteredCoins.first { it !is Loadable.Loading }
 
-        val loaded = assertIs<Loadable.Loaded<Fallible<List<String>>>>(result)
-        val success = assertIs<Fallible.Success<List<String>>>(loaded.value)
+        val loaded = assertIs<Loadable.Loaded<Fallible<List<CryptoSymbol>>>>(result)
+        val success = assertIs<Fallible.Success<List<CryptoSymbol>>>(loaded.value)
         assertEquals(
-            listOf("BTCUSDT", "ETHUSDT"),
+            listOf(fakeBtcSymbol, fakeEthSymbol),
             success.value.sorted(),
         )
     }
@@ -62,9 +65,9 @@ class CoinSearchViewModelTest {
     @Test
     fun `onSearchQueryChange filters coins`() = runTest {
         val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
-            CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
-            CryptoSymbol("ETHUSDT", "ETH", "USDT", "TRADING"),
-            CryptoSymbol("BNBUSDT", "BNB", "USDT", "TRADING"),
+            fakeBtcSymbol,
+            fakeEthSymbol,
+            fakeBnbSymbol,
         ))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
 
@@ -72,63 +75,63 @@ class CoinSearchViewModelTest {
 
         viewModel.onSearchQueryChange("btc")
 
-        val result = viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf("BTCUSDT") }
+        val result = viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf(fakeBtcSymbol) }
         val symbols = extractSymbols(result)
-        assertEquals(listOf("BTCUSDT"), symbols)
+        assertEquals(listOf(fakeBtcSymbol), symbols)
     }
 
     @Test
     fun `setFilterMode to FAVORITES shows only favorites`() = runTest {
         val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
-            CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
-            CryptoSymbol("ETHUSDT", "ETH", "USDT", "TRADING"),
+            fakeBtcSymbol,
+            fakeEthSymbol,
         ))
-        val observeFake = FakeObserveFavoritesUseCase(initial = setOf("ETHUSDT"))
+        val observeFake = FakeObserveFavoritesUseCase(initial = setOf(fakeEthSymbol))
         val viewModel = createViewModel(symbolsFake = symbolsFake, observeFake = observeFake)
 
         viewModel.filteredCoins.first { it !is Loadable.Loading }
         viewModel.setFilterMode(FilterMode.FAVORITES)
 
-        val result = viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf("ETHUSDT") }
+        val result = viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf(fakeEthSymbol) }
         val symbols = extractSymbols(result)
-        assertEquals(listOf("ETHUSDT"), symbols)
+        assertEquals(listOf(fakeEthSymbol), symbols)
     }
 
     @Test
     fun `setFilterMode to ALL shows all symbols`() = runTest {
         val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
-            CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
-            CryptoSymbol("ETHUSDT", "ETH", "USDT", "TRADING"),
+            fakeBtcSymbol,
+            fakeEthSymbol,
         ))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
 
         viewModel.filteredCoins.first { it !is Loadable.Loading }
         viewModel.setFilterMode(FilterMode.FAVORITES)
-        viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == emptyList<String>() }
+        viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == emptyList<CryptoSymbol>() }
         viewModel.setFilterMode(FilterMode.ALL)
 
-        val result = viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf("BTCUSDT", "ETHUSDT") }
+        val result = viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf(fakeBtcSymbol, fakeEthSymbol) }
         val symbols = extractSymbols(result)
         assertEquals(2, symbols.size)
     }
 
     @Test
     fun `toggleFavorite delegates to use case`() = runTest {
-        val sharedFavorites = MutableStateFlow(emptySet<String>())
+        val sharedFavorites = MutableStateFlow(emptySet<CryptoSymbol>())
         val toggleFake = FakeToggleFavoriteUseCase(favorites = sharedFavorites)
         val observeFake = FakeObserveFavoritesUseCase(flow = sharedFavorites)
         val viewModel = createViewModel(toggleFake = toggleFake, observeFake = observeFake)
 
-        viewModel.toggleFavorite("BTCUSDT")
+        viewModel.toggleFavorite(fakeBtcSymbol)
 
-        assertTrue("BTCUSDT" in viewModel.favorites.first { "BTCUSDT" in it })
-        assertEquals("BTCUSDT", toggleFake.lastToggled)
+        assertTrue(fakeBtcSymbol in viewModel.favorites.first { fakeBtcSymbol in it })
+        assertEquals(fakeBtcSymbol, toggleFake.lastToggled)
     }
 
     @Test
     fun `onCancelLoadSymbols cancels active job`() = runTest {
         val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
-            CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
+            fakeBtcSymbol,
         ))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
 
@@ -165,7 +168,7 @@ class CoinSearchViewModelTest {
         val initial = viewModel.filteredCoins.first()
         assertIs<Loadable.Loading>(initial)
 
-        symbolsDeferred.complete(listOf(CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING")))
+        symbolsDeferred.complete(listOf(fakeBtcSymbol))
 
         val loaded = viewModel.filteredCoins.first { it !is Loadable.Loading }
         assertIs<Loadable.Loaded<*>>(loaded)
@@ -174,7 +177,7 @@ class CoinSearchViewModelTest {
     @Test
     fun `onCancelLoadSymbols handles both null and non-null job`() = runTest {
         val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
-            CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
+            fakeBtcSymbol,
         ))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
 
@@ -213,13 +216,13 @@ class CoinSearchViewModelTest {
         viewModel.filteredCoins.first { it !is Loadable.Loading }
 
         symbolsFake.exception = null
-        symbolsFake.symbols = listOf(CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"))
+        symbolsFake.symbols = listOf(fakeBtcSymbol)
 
         viewModel.retryLoadSymbols()
 
-        val result = viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf("BTCUSDT") }
+        val result = viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf(fakeBtcSymbol) }
         val symbols = extractSymbols(result)
-        assertEquals(listOf("BTCUSDT"), symbols)
+        assertEquals(listOf(fakeBtcSymbol), symbols)
     }
 
     private fun createViewModel(
@@ -230,9 +233,9 @@ class CoinSearchViewModelTest {
         return CoinSearchViewModel(symbolsFake, toggleFake, observeFake)
     }
 
-    private fun extractSymbols(result: Loadable<*>): List<String> {
-        val loaded = assertIs<Loadable.Loaded<Fallible<List<String>>>>(result)
-        val success = assertIs<Fallible.Success<List<String>>>(loaded.value)
+    private fun extractSymbols(result: Loadable<*>): List<CryptoSymbol> {
+        val loaded = assertIs<Loadable.Loaded<Fallible<List<CryptoSymbol>>>>(result)
+        val success = assertIs<Fallible.Success<List<CryptoSymbol>>>(loaded.value)
         return success.value.sorted()
     }
 }

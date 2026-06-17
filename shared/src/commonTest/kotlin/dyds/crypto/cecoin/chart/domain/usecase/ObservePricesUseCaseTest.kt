@@ -2,6 +2,8 @@ package dyds.crypto.cecoin.chart.domain.usecase
 
 import dyds.crypto.cecoin.chart.domain.FakePriceRepository
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import dyds.crypto.cecoin.core.utils.error.fakeErrorClassifier
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import kotlinx.coroutines.delay
@@ -28,7 +30,7 @@ class ObservePricesUseCaseTest {
         val repo = FakePriceRepository(tradeFlow = flowOf(expected))
         val useCase = ObservePricesUseCaseImpl(repo, classifier)
 
-        val result = useCase("BTCUSDT")
+        val result = useCase(fakeBtcSymbol)
 
         val fallible = result.first()
         val success = fallible as Fallible.Success
@@ -42,7 +44,7 @@ class ObservePricesUseCaseTest {
         val repo = FakePriceRepository(tradeFlow = flow { emit(p1); emit(p2) })
         val useCase = ObservePricesUseCaseImpl(repo, classifier)
 
-        val results = useCase("BTCUSDT").take(2).toList()
+        val results = useCase(fakeBtcSymbol).take(2).toList()
 
         assertEquals(2, results.size)
         val s1 = assertIs<Fallible.Success<PricePoint>>(results[0])
@@ -56,7 +58,7 @@ class ObservePricesUseCaseTest {
         val repo = FakePriceRepository(tradeFlow = flow { throw RuntimeException("stream fail") })
         val useCase = ObservePricesUseCaseImpl(repo, classifier, retryDelayMs = 1L, maxRetries = 3)
 
-        val results = useCase("BTCUSDT").toList()
+        val results = useCase(fakeBtcSymbol).toList()
 
         assertEquals(4, results.size)
         results.forEach { assertIs<Fallible.Failed>(it) }
@@ -68,7 +70,7 @@ class ObservePricesUseCaseTest {
         val useCase = ObservePricesUseCaseImpl(repo, classifier)
 
         val result = withTimeoutOrNull(100.milliseconds) {
-            useCase("BTCUSDT").firstOrNull()
+            useCase(fakeBtcSymbol).firstOrNull()
         }
 
         assertNull(result)
@@ -80,7 +82,7 @@ class ObservePricesUseCaseTest {
         val repo = FakePriceRepository(tradeFlow = flow { points.forEach { emit(it) } })
         val useCase = ObservePricesUseCaseImpl(repo, classifier)
 
-        val results = useCase("BTCUSDT").take(100).toList()
+        val results = useCase(fakeBtcSymbol).take(100).toList()
 
         assertEquals(100, results.size)
         results.forEach { assertIs<Fallible.Success<PricePoint>>(it) }

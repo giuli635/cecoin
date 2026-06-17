@@ -1,5 +1,8 @@
 package dyds.crypto.cecoin.search.data.repository
 
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
+import dyds.crypto.cecoin.core.utils.fakeEthSymbol
 import dyds.crypto.cecoin.search.data.FakeFavoriteDataSource
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -7,7 +10,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class FavoriteRepositoryImplTest {
-    private fun createRepo(initial: Set<String> = emptySet()): FavoriteRepositoryImpl =
+    private fun createRepo(initial: Set<CryptoSymbol> = emptySet()): FavoriteRepositoryImpl =
         FavoriteRepositoryImpl(FakeFavoriteDataSource(initial = initial))
 
     @Test
@@ -23,17 +26,17 @@ class FavoriteRepositoryImplTest {
     fun `toggleFavorite delegates to source`() = runTest {
         val repo = createRepo()
 
-        repo.toggleFavorite("BTCUSDT")
+        repo.toggleFavorite(fakeBtcSymbol)
 
         val result = repo.observeFavorites().first()
-        assertEquals(setOf("BTCUSDT"), result)
+        assertEquals(setOf(fakeBtcSymbol), result)
     }
 
     @Test
     fun `toggleFavorite removes existing favorite`() = runTest {
-        val repo = createRepo(initial = setOf("BTCUSDT"))
+        val repo = createRepo(initial = setOf(fakeBtcSymbol))
 
-        repo.toggleFavorite("BTCUSDT")
+        repo.toggleFavorite(fakeBtcSymbol)
 
         val result = repo.observeFavorites().first()
         assertEquals(emptySet(), result)
@@ -41,20 +44,20 @@ class FavoriteRepositoryImplTest {
 
     @Test
     fun `observeFavorites returns favorites loaded from storage`() = runTest {
-        val repo = createRepo(initial = setOf("BTCUSDT", "ETHUSDT"))
+        val repo = createRepo(initial = setOf(fakeBtcSymbol, fakeEthSymbol))
 
         val result = repo.observeFavorites().first()
 
-        assertEquals(setOf("BTCUSDT", "ETHUSDT"), result)
+        assertEquals(setOf(fakeBtcSymbol, fakeEthSymbol), result)
     }
 
     @Test
     fun `toggleFavorite with empty symbol does not crash`() = runTest {
         val repo = createRepo()
 
-        repo.toggleFavorite("")
+        repo.toggleFavorite(CryptoSymbol(""))
 
         val result = repo.observeFavorites().first()
-        assertEquals(setOf(""), result)
+        assertEquals(setOf(CryptoSymbol("")), result)
     }
 }

@@ -2,6 +2,7 @@ package dyds.crypto.cecoin.search.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.search.domain.usecase.GetAvailableSymbolsUseCase
 import dyds.crypto.cecoin.search.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.search.domain.usecase.ToggleFavoriteUseCase
@@ -26,9 +27,9 @@ class CoinSearchViewModel(
     private val _uiState = MutableStateFlow(CoinSearchUiState())
     val uiState: StateFlow<CoinSearchUiState> = _uiState.asStateFlow()
 
-    private val _asyncAvailableSymbols = MutableStateFlow<AsyncResult<List<String>>>(Loadable.Loading)
+    private val _asyncAvailableSymbols = MutableStateFlow<AsyncResult<List<CryptoSymbol>>>(Loadable.Loading)
 
-    val favorites: StateFlow<Set<String>> = observeFavoritesUseCase()
+    val favorites: StateFlow<Set<CryptoSymbol>> = observeFavoritesUseCase()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptySet())
 
     val filteredCoins = combine(_uiState, _asyncAvailableSymbols, favorites) { uiState, asyncSymbols, favs ->
@@ -49,7 +50,6 @@ class CoinSearchViewModel(
         loadSymbolsJob?.cancel()
         loadSymbolsJob = launchLoadable(_asyncAvailableSymbols) {
             getAvailableSymbolsUseCase()
-                .map { symbols -> symbols.map { it.symbol }.sorted() }
         }
     }
 
@@ -71,7 +71,7 @@ class CoinSearchViewModel(
         _uiState.value = _uiState.value.copy(filterMode = mode)
     }
 
-    fun toggleFavorite(symbol: String) {
+    fun toggleFavorite(symbol: CryptoSymbol) {
         viewModelScope.launch {
             toggleFavoriteUseCase(symbol)
         }

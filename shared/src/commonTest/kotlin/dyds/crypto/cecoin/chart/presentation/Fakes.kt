@@ -2,6 +2,7 @@ package dyds.crypto.cecoin.chart.presentation
 
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.domain.usecase.ObservePricesUseCase
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulator
 import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorFactory
 import dyds.crypto.cecoin.core.utils.error.AppError
@@ -18,7 +19,7 @@ class FakeObservePricesUseCase(
     private val _channel = Channel<PricePoint>(Channel.UNLIMITED)
     val emitted: Channel<PricePoint> get() = _channel
 
-    override fun invoke(symbol: String): Flow<Fallible<PricePoint>> {
+    override fun invoke(symbol: CryptoSymbol): Flow<Fallible<PricePoint>> {
         if (exception is CancellationException) return flow { throw exception }
         return channelFlow {
             if (exception != null) {

@@ -90,7 +90,7 @@ fun ChartScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = viewModel.symbol,
+                text = viewModel.symbol.symbol,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )

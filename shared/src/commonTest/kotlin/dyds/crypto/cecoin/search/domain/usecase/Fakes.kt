@@ -1,6 +1,6 @@
 package dyds.crypto.cecoin.search.domain.usecase
 
-import dyds.crypto.cecoin.search.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.search.domain.usecase.GetAvailableSymbolsUseCase
 import dyds.crypto.cecoin.search.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.search.domain.usecase.ToggleFavoriteUseCase
@@ -20,18 +20,18 @@ class FakeGetAvailableSymbolsUseCase(
 }
 
 class FakeObserveFavoritesUseCase(
-    initial: Set<String> = emptySet(),
-    private val flow: MutableStateFlow<Set<String>> = MutableStateFlow(initial),
+    initial: Set<CryptoSymbol> = emptySet(),
+    private val flow: MutableStateFlow<Set<CryptoSymbol>> = MutableStateFlow(initial),
 ) : ObserveFavoritesUseCase {
-    override fun invoke(): Flow<Set<String>> = flow
+    override fun invoke(): Flow<Set<CryptoSymbol>> = flow
 }
 
 class FakeToggleFavoriteUseCase(
-    val favorites: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet()),
+    val favorites: MutableStateFlow<Set<CryptoSymbol>> = MutableStateFlow(emptySet()),
 ) : ToggleFavoriteUseCase {
-    var lastToggled: String? = null
+    var lastToggled: CryptoSymbol? = null
 
-    override suspend fun invoke(symbol: String): Fallible<Unit> {
+    override suspend fun invoke(symbol: CryptoSymbol): Fallible<Unit> {
         lastToggled = symbol
         favorites.value = if (symbol in favorites.value) {
             favorites.value - symbol

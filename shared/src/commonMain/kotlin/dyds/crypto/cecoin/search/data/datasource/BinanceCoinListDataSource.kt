@@ -1,6 +1,6 @@
 package dyds.crypto.cecoin.search.data.datasource
 
-import dyds.crypto.cecoin.search.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -15,6 +15,7 @@ private const val TRADING_STATUS = "TRADING"
 private const val SYMBOLS_FIELD = "symbols"
 private const val STATUS_FIELD = "status"
 private const val QUOTE_ASSET_FIELD = "quoteAsset"
+@Suppress("unused")
 private const val BASE_ASSET_FIELD = "baseAsset"
 private const val SYMBOL_FIELD = "symbol"
 
@@ -43,12 +44,7 @@ class BinanceCoinListDataSource(
             val status = obj[STATUS_FIELD]?.jsonPrimitive?.content ?: return@runCatching null
             val quoteAsset = obj[QUOTE_ASSET_FIELD]?.jsonPrimitive?.content ?: return@runCatching null
             if (status != TRADING_STATUS || quoteAsset != QUOTE_ASSET_FILTER) return@runCatching null
-            CryptoSymbol(
-                symbol = obj[SYMBOL_FIELD]!!.jsonPrimitive.content,
-                baseAsset = obj[BASE_ASSET_FIELD]!!.jsonPrimitive.content,
-                quoteAsset = quoteAsset,
-                status = status
-            )
+            CryptoSymbol(obj[SYMBOL_FIELD]!!.jsonPrimitive.content)
         }.getOrNull()
     }
 }

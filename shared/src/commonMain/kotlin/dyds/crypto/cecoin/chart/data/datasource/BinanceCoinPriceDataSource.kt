@@ -1,6 +1,7 @@
 package dyds.crypto.cecoin.chart.data.datasource
 
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.websocket.Frame
@@ -24,8 +25,8 @@ class BinanceCoinPriceDataSource(
 ) : CoinPriceDataSource {
     private val json = Json { ignoreUnknownKeys = true }
 
-    override fun observePrices(symbol: String): Flow<PricePoint> = flow {
-        val stream = "${symbol.trim().lowercase()}$STREAM_SUFFIX"
+    override fun observePrices(symbol: CryptoSymbol): Flow<PricePoint> = flow {
+        val stream = "${symbol.symbol.trim().lowercase()}$STREAM_SUFFIX"
         var lastError: Throwable? = null
 
         for (baseUrl in BASE_URLS) {

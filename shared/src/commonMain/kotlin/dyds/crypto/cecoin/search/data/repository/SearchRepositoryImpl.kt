@@ -1,7 +1,7 @@
 package dyds.crypto.cecoin.search.data.repository
 
 import dyds.crypto.cecoin.search.data.datasource.CoinListDataSource
-import dyds.crypto.cecoin.search.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.search.domain.repository.CryptoSymbolRepository
 
 class SearchRepositoryImpl(

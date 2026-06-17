@@ -1,8 +1,8 @@
 package dyds.crypto.cecoin.search.data
 
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.search.data.datasource.CoinListDataSource
 import dyds.crypto.cecoin.search.data.datasource.FavoriteDataSource
-import dyds.crypto.cecoin.search.domain.model.CryptoSymbol
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -13,13 +13,13 @@ internal class FakeCoinListDataSource(
 }
 
 internal class FakeFavoriteDataSource(
-    initial: Set<String> = emptySet(),
+    initial: Set<CryptoSymbol> = emptySet(),
 ) : FavoriteDataSource {
     private val _favorites = MutableStateFlow(initial)
 
-    override val favorites: Flow<Set<String>> = _favorites
+    override val favorites: Flow<Set<CryptoSymbol>> = _favorites
 
-    override suspend fun toggle(symbol: String) {
+    override suspend fun toggle(symbol: CryptoSymbol) {
         _favorites.value = if (symbol in _favorites.value) {
             _favorites.value - symbol
         } else {

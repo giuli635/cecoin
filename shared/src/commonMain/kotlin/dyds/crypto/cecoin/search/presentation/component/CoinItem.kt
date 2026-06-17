@@ -14,10 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 
 @Composable
 fun CoinItem(
-    coin: String,
+    coin: CryptoSymbol,
     isFavorite: Boolean,
     onClick: () -> Unit,
     onFavoriteClick: () -> Unit,
@@ -35,7 +36,7 @@ fun CoinItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = coin,
+            text = coin.symbol,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.weight(1f),

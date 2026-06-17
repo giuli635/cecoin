@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.chart.data.datasource.BinanceCoinHistoricalDataSource
 import dyds.crypto.cecoin.chart.data.datasource.BinanceCoinPriceDataSource
 import dyds.crypto.cecoin.chart.data.repository.ChartRepositoryImpl
@@ -97,7 +98,7 @@ object CecoinDependencyInjector {
 
     @Composable
     fun getCoinDetailsViewModel(
-        symbol: String,
+        symbol: CryptoSymbol,
     ): ChartScreenViewModel {
         return viewModel {
             ChartScreenViewModel(

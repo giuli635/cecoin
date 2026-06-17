@@ -3,6 +3,8 @@ package dyds.crypto.cecoin.chart.data.repository
 import dyds.crypto.cecoin.chart.data.FakeCoinHistoricalSource
 import dyds.crypto.cecoin.chart.data.FakeCoinPriceSource
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -19,10 +21,10 @@ class ChartRepositoryImplTest {
         val historicalSource = FakeCoinHistoricalSource(listOf(btcPricePoint))
         val repo = ChartRepositoryImpl(FakeCoinPriceSource(), historicalSource)
 
-        val result = repo.getHistoricalPrices("  btcusdt  ", "1m", 200)
+        val result = repo.getHistoricalPrices(CryptoSymbol("  btcusdt  "), "1m", 200)
 
         assertEquals(listOf(btcPricePoint), result)
-        assertEquals("BTCUSDT", historicalSource.lastSymbol)
+        assertEquals(fakeBtcSymbol, historicalSource.lastSymbol)
     }
 
     @Test
@@ -30,10 +32,10 @@ class ChartRepositoryImplTest {
         val priceSource = FakeCoinPriceSource(flowOf(btcPricePoint))
         val repo = ChartRepositoryImpl(priceSource, FakeCoinHistoricalSource())
 
-        val result = repo.observePrices("  ETHUSDT  ").first()
+        val result = repo.observePrices(CryptoSymbol("  ETHUSDT  ")).first()
 
         assertEquals(btcPricePoint, result)
-        assertEquals("ETHUSDT", priceSource.lastSymbol)
+        assertEquals(CryptoSymbol("ETHUSDT"), priceSource.lastSymbol)
     }
 
     @Test
@@ -41,9 +43,9 @@ class ChartRepositoryImplTest {
         val historicalSource = FakeCoinHistoricalSource(listOf(btcPricePoint))
         val repo = ChartRepositoryImpl(FakeCoinPriceSource(), historicalSource)
 
-        repo.getHistoricalPrices("   ", "1m", 200)
+        repo.getHistoricalPrices(CryptoSymbol("   "), "1m", 200)
 
-        assertEquals("BTCUSDT", historicalSource.lastSymbol)
+        assertEquals(fakeBtcSymbol, historicalSource.lastSymbol)
     }
 
     @Test
@@ -51,9 +53,9 @@ class ChartRepositoryImplTest {
         val priceSource = FakeCoinPriceSource(flowOf(btcPricePoint))
         val repo = ChartRepositoryImpl(priceSource, FakeCoinHistoricalSource())
 
-        repo.observePrices("   ")
+        repo.observePrices(CryptoSymbol("   "))
 
-        assertEquals("BTCUSDT", priceSource.lastSymbol)
+        assertEquals(fakeBtcSymbol, priceSource.lastSymbol)
     }
 
     @Test
@@ -62,7 +64,7 @@ class ChartRepositoryImplTest {
         val repo = ChartRepositoryImpl(FakeCoinPriceSource(), historicalSource)
 
         assertFailsWith<RuntimeException> {
-            repo.getHistoricalPrices("BTCUSDT", "1m", 200)
+            repo.getHistoricalPrices(fakeBtcSymbol, "1m", 200)
         }
     }
 }

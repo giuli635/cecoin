@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.search.presentation.component.CoinItem
 import dyds.crypto.cecoin.search.presentation.component.FilterDropdown
@@ -29,7 +30,7 @@ import dyds.crypto.cecoin.core.utils.state.Loadable
 fun CoinSearchScreen(
     modifier: Modifier = Modifier,
     viewModel: CoinSearchViewModel,
-    onCoinSelected: (String) -> Unit,
+    onCoinSelected: (CryptoSymbol) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val asyncFilteredCoins by viewModel.filteredCoins.collectAsState()
@@ -84,9 +85,9 @@ fun CoinSearchScreen(
 private fun coinsListRenderer(
     searchQuery: String,
     viewModel: CoinSearchViewModel,
-    onCoinSelected: (String) -> Unit,
-    favorites: Set<String>,
-): Renderer<List<String>> = { coins, modifier ->
+    onCoinSelected: (CryptoSymbol) -> Unit,
+    favorites: Set<CryptoSymbol>,
+): Renderer<List<CryptoSymbol>> = { coins, modifier ->
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),

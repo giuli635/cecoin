@@ -1,5 +1,8 @@
 package dyds.crypto.cecoin.search.domain.usecase
 
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
+import dyds.crypto.cecoin.core.utils.fakeEthSymbol
 import dyds.crypto.cecoin.search.domain.FakeFavoriteRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -10,7 +13,7 @@ import kotlin.test.assertTrue
 class ObserveFavoritesUseCaseTest {
     @Test
     fun `invoke returns favorites flow from repository`() = runTest {
-        val expected = setOf("BTCUSDT", "ETHUSDT")
+        val expected = setOf(fakeBtcSymbol, fakeEthSymbol)
         val repo = FakeFavoriteRepository(initialFavorites = expected)
         val useCase = ObserveFavoritesUseCaseImpl(repo)
 
@@ -25,10 +28,10 @@ class ObserveFavoritesUseCaseTest {
         val useCase = ObserveFavoritesUseCaseImpl(repo)
 
         val flow = useCase()
-        repo.toggleFavorite("BTCUSDT")
-        val emitted = flow.first { it == setOf("BTCUSDT") }
+        repo.toggleFavorite(fakeBtcSymbol)
+        val emitted = flow.first { it == setOf(fakeBtcSymbol) }
 
-        assertEquals(setOf("BTCUSDT"), emitted)
+        assertEquals(setOf(fakeBtcSymbol), emitted)
     }
 
     @Test
@@ -47,13 +50,13 @@ class ObserveFavoritesUseCaseTest {
 
         assertEquals(emptySet(), flow.first())
 
-        repo.toggleFavorite("BTCUSDT")
-        assertEquals(setOf("BTCUSDT"), flow.first { it == setOf("BTCUSDT") })
+        repo.toggleFavorite(fakeBtcSymbol)
+        assertEquals(setOf(fakeBtcSymbol), flow.first { it == setOf(fakeBtcSymbol) })
 
-        repo.toggleFavorite("ETHUSDT")
-        assertEquals(setOf("BTCUSDT", "ETHUSDT"), flow.first { it == setOf("BTCUSDT", "ETHUSDT") })
+        repo.toggleFavorite(fakeEthSymbol)
+        assertEquals(setOf(fakeBtcSymbol, fakeEthSymbol), flow.first { it == setOf(fakeBtcSymbol, fakeEthSymbol) })
 
-        repo.toggleFavorite("BTCUSDT")
-        assertEquals(setOf("ETHUSDT"), flow.first { it == setOf("ETHUSDT") })
+        repo.toggleFavorite(fakeBtcSymbol)
+        assertEquals(setOf(fakeEthSymbol), flow.first { it == setOf(fakeEthSymbol) })
     }
 }

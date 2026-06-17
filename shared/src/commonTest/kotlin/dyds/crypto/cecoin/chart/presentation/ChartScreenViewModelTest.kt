@@ -2,6 +2,8 @@ package dyds.crypto.cecoin.chart.presentation
 
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.domain.usecase.FakeGetHistoricalPricesUseCase
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import dyds.crypto.cecoin.core.utils.state.Loadable
@@ -60,7 +62,7 @@ class ChartScreenViewModelTest {
         val viewModel = ChartScreenViewModel(
             getHistoricalPricesUseCase = fakeHistorical,
             observePricesUseCase = fakeTradeUseCase,
-            symbol = "BTCUSDT",
+            symbol = fakeBtcSymbol,
             historicalPointLimit = historicalPointLimit,
             priceAccumulatorFactory = fakePriceAccumulatorFactory(),
         )

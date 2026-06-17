@@ -1,6 +1,6 @@
 package dyds.crypto.cecoin.search.domain
 
-import dyds.crypto.cecoin.search.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.search.domain.repository.CryptoSymbolRepository
 import dyds.crypto.cecoin.search.domain.repository.FavoriteRepository
 import kotlinx.coroutines.flow.Flow
@@ -18,14 +18,14 @@ internal class FakeCryptoSymbolRepository(
 }
 
 internal class FakeFavoriteRepository(
-    initialFavorites: Set<String> = emptySet(),
+    initialFavorites: Set<CryptoSymbol> = emptySet(),
 ) : FavoriteRepository {
     private val favoritesFlow = MutableStateFlow(initialFavorites)
-    var toggledSymbol: String? = null
+    var toggledSymbol: CryptoSymbol? = null
 
-    override fun observeFavorites(): Flow<Set<String>> = favoritesFlow
+    override fun observeFavorites(): Flow<Set<CryptoSymbol>> = favoritesFlow
 
-    override suspend fun toggleFavorite(symbol: String) {
+    override suspend fun toggleFavorite(symbol: CryptoSymbol) {
         toggledSymbol = symbol
         favoritesFlow.value = if (symbol in favoritesFlow.value) {
             favoritesFlow.value - symbol

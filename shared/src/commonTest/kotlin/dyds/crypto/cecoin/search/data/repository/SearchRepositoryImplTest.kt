@@ -1,14 +1,15 @@
 package dyds.crypto.cecoin.search.data.repository
 
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import dyds.crypto.cecoin.search.data.FakeCoinListDataSource
-import dyds.crypto.cecoin.search.domain.model.CryptoSymbol
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class SearchRepositoryImplTest {
-    private val btcSymbol = CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING")
+    private val btcSymbol = fakeBtcSymbol
 
     @Test
     fun `getAvailableSymbols delegates to list data source`() = runTest {

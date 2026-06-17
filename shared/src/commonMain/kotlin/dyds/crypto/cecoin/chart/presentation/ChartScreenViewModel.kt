@@ -5,6 +5,7 @@ import dyds.crypto.cecoin.chart.domain.usecase.ObservePricesUseCase
 import dyds.crypto.cecoin.chart.presentation.model.ChartData
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorFactory
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import dyds.crypto.cecoin.core.utils.state.Loadable
@@ -22,7 +23,7 @@ private const val DEFAULT_HISTORICAL_LIMIT = 200
 class ChartScreenViewModel(
     private val getHistoricalPricesUseCase: GetHistoricalPricesUseCase,
     private val observePricesUseCase: ObservePricesUseCase,
-    val symbol: String,
+    val symbol: CryptoSymbol,
     private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
     private val priceAccumulatorFactory: PriceAccumulatorFactory,
 ) : ViewModel() {

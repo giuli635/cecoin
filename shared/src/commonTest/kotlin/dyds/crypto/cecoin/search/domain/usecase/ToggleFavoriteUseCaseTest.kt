@@ -1,5 +1,7 @@
 package dyds.crypto.cecoin.search.domain.usecase
 
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import dyds.crypto.cecoin.search.domain.FakeFavoriteRepository
 import dyds.crypto.cecoin.core.utils.error.fakeErrorClassifier
 import dyds.crypto.cecoin.core.utils.state.Fallible
@@ -17,10 +19,10 @@ class ToggleFavoriteUseCaseTest {
         val repo = FakeFavoriteRepository()
         val useCase = ToggleFavoriteUseCaseImpl(repo, classifier)
 
-        val result = useCase("BTCUSDT")
+        val result = useCase(fakeBtcSymbol)
 
         assertIs<Fallible.Success<*>>(result)
-        assertEquals("BTCUSDT", repo.toggledSymbol)
+        assertEquals(fakeBtcSymbol, repo.toggledSymbol)
     }
 
     @Test
@@ -28,8 +30,8 @@ class ToggleFavoriteUseCaseTest {
         val repo = FakeFavoriteRepository()
         val useCase = ToggleFavoriteUseCaseImpl(repo, classifier)
 
-        useCase("BTCUSDT")
-        useCase("BTCUSDT")
+        useCase(fakeBtcSymbol)
+        useCase(fakeBtcSymbol)
 
         val result = repo.observeFavorites().first()
         assertEquals(emptySet(), result)

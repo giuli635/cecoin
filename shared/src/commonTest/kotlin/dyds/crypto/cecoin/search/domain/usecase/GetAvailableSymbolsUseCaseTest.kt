@@ -1,7 +1,8 @@
 package dyds.crypto.cecoin.search.domain.usecase
 
+import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
+import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import dyds.crypto.cecoin.search.domain.FakeCryptoSymbolRepository
-import dyds.crypto.cecoin.search.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.utils.error.fakeErrorClassifier
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import kotlinx.coroutines.test.runTest
@@ -14,7 +15,7 @@ class GetAvailableSymbolsUseCaseTest {
 
     @Test
     fun `invoke returns symbols from repository`() = runTest {
-        val expected = listOf(CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"))
+        val expected = listOf(fakeBtcSymbol)
         val repo = FakeCryptoSymbolRepository(expected)
         val useCase = GetAvailableSymbolsUseCaseImpl(repo, classifier)
 
