@@ -1,8 +1,11 @@
 package dyds.crypto.cecoin.presentation.theme
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 object NordColors {
@@ -54,8 +57,11 @@ private val NordColorScheme = darkColorScheme(
 
 @Composable
 fun NordTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = NordColorScheme,
-        content = content,
-    )
+    MaterialTheme(colorScheme = NordColorScheme) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background,
+            content = content,
+        )
+    }
 }
