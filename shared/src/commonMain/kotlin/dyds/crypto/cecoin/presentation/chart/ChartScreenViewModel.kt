@@ -4,7 +4,7 @@ import dyds.crypto.cecoin.domain.chart.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.presentation.chart.model.ChartData
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.utils.state.Fallible
+import dyds.crypto.cecoin.presentation.utils.launchAsync
 import dyds.crypto.cecoin.utils.state.Loadable
 
 import androidx.lifecycle.ViewModel
@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 private const val DEFAULT_HISTORICAL_LIMIT = 200
 
@@ -41,19 +40,16 @@ class ChartScreenViewModel(
         controller?.cancel()
         loadJob?.cancel()
         _state.value = Loadable.Loading
-
-        loadJob = viewModelScope.launch {
-            _state.value = Loadable.Loaded(
-                getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
-                    .map { prices ->
-                        controllerFactory(g, prices, viewModelScope)
-                            .also { c ->
-                                c.startStream()
-                                controller = c
-                            }
-                            .chartData
-                    }
-            )
+        loadJob = launchAsync(_state) {
+            getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
+                .map { prices ->
+                    controllerFactory(g, prices, viewModelScope)
+                        .also { c ->
+                            c.startStream()
+                            controller = c
+                        }
+                        .chartData
+                }
         }
     }
 
