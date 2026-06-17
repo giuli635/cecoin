@@ -1,9 +1,9 @@
 package dyds.crypto.cecoin.chart.data.datasource
 
-import dyds.crypto.cecoin.chart.domain.model.TradePrice
+import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import kotlinx.coroutines.flow.Flow
 
 interface CoinPriceDataSource {
-    fun tradePrices(symbol: String): Flow<TradePrice>
+    fun observePrices(symbol: String): Flow<PricePoint>
 }
 

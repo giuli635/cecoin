@@ -1,6 +1,6 @@
 package dyds.crypto.cecoin.chart.domain.usecase
 
-import dyds.crypto.cecoin.chart.domain.FakeTradePriceRepository
+import dyds.crypto.cecoin.chart.domain.FakePriceRepository
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.core.utils.error.fakeErrorClassifier
 import dyds.crypto.cecoin.core.utils.state.Fallible
@@ -15,7 +15,7 @@ class GetHistoricalPricesUseCaseTest {
     @Test
     fun `invoke delegates to repository with correct params`() = runTest {
         val expected = listOf(PricePoint(1000L, 50000.0))
-        val repo = FakeTradePriceRepository(historical = expected)
+        val repo = FakePriceRepository(historical = expected)
         val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier)
 
         val result = useCase("BTCUSDT", "5m", 100)
@@ -27,7 +27,7 @@ class GetHistoricalPricesUseCaseTest {
     @Test
     fun `invoke uses default interval and limit`() = runTest {
         val expected = listOf(PricePoint(2000L, 3000.0))
-        val repo = FakeTradePriceRepository(historical = expected)
+        val repo = FakePriceRepository(historical = expected)
         val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier)
 
         val result = useCase("ETHUSDT")

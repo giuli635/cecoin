@@ -3,7 +3,6 @@ package dyds.crypto.cecoin.chart.data.repository
 import dyds.crypto.cecoin.chart.data.FakeCoinHistoricalSource
 import dyds.crypto.cecoin.chart.data.FakeCoinPriceSource
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
-import dyds.crypto.cecoin.chart.domain.model.TradePrice
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -14,8 +13,6 @@ import kotlin.test.assertFailsWith
 class ChartRepositoryImplTest {
     private val btcPricePoint = PricePoint(1000L, 50000.0)
     private val ethPricePoint = PricePoint(2000L, 3000.0)
-    private val btcTrade = TradePrice("BTCUSDT", btcPricePoint)
-    private val ethTrade = TradePrice("ETHUSDT", ethPricePoint)
 
     @Test
     fun `getHistoricalPrices delegates to historical source with normalized symbol`() = runTest {
@@ -29,13 +26,13 @@ class ChartRepositoryImplTest {
     }
 
     @Test
-    fun `observeTradePrices delegates to price source with normalized symbol`() = runTest {
-        val priceSource = FakeCoinPriceSource(flowOf(btcTrade))
+    fun `observePrices delegates to price source with normalized symbol`() = runTest {
+        val priceSource = FakeCoinPriceSource(flowOf(btcPricePoint))
         val repo = ChartRepositoryImpl(priceSource, FakeCoinHistoricalSource())
 
-        val result = repo.observeTradePrices("  ETHUSDT  ").first()
+        val result = repo.observePrices("  ETHUSDT  ").first()
 
-        assertEquals(btcTrade, result)
+        assertEquals(btcPricePoint, result)
         assertEquals("ETHUSDT", priceSource.lastSymbol)
     }
 
@@ -50,11 +47,11 @@ class ChartRepositoryImplTest {
     }
 
     @Test
-    fun `observeTradePrices uses DefaultSymbol for blank input`() = runTest {
-        val priceSource = FakeCoinPriceSource(flowOf(btcTrade))
+    fun `observePrices uses DefaultSymbol for blank input`() = runTest {
+        val priceSource = FakeCoinPriceSource(flowOf(btcPricePoint))
         val repo = ChartRepositoryImpl(priceSource, FakeCoinHistoricalSource())
 
-        repo.observeTradePrices("   ")
+        repo.observePrices("   ")
 
         assertEquals("BTCUSDT", priceSource.lastSymbol)
     }

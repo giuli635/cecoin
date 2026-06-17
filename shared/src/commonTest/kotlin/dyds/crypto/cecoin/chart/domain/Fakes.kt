@@ -1,16 +1,15 @@
 package dyds.crypto.cecoin.chart.domain
 
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
-import dyds.crypto.cecoin.chart.domain.model.TradePrice
-import dyds.crypto.cecoin.chart.domain.repository.TradePriceRepository
+import dyds.crypto.cecoin.chart.domain.repository.PriceRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
-internal class FakeTradePriceRepository(
+internal class FakePriceRepository(
     var historical: List<PricePoint> = emptyList(),
-    var tradeFlow: Flow<TradePrice> = emptyFlow(),
+    var tradeFlow: Flow<PricePoint> = emptyFlow(),
     var historicalException: Throwable? = null,
-) : TradePriceRepository {
+) : PriceRepository {
     var lastSymbol: String = ""
     var lastInterval: String = ""
     var lastLimit: Int = 0
@@ -25,7 +24,7 @@ internal class FakeTradePriceRepository(
         return historical
     }
 
-    override fun observeTradePrices(symbol: String): Flow<TradePrice> {
+    override fun observePrices(symbol: String): Flow<PricePoint> {
         lastSymbol = symbol
         return tradeFlow
     }

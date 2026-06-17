@@ -1,7 +1,7 @@
 package dyds.crypto.cecoin.chart.domain.usecase
 
-import dyds.crypto.cecoin.chart.domain.model.TradePrice
-import dyds.crypto.cecoin.chart.domain.repository.TradePriceRepository
+import dyds.crypto.cecoin.chart.domain.model.PricePoint
+import dyds.crypto.cecoin.chart.domain.repository.PriceRepository
 import dyds.crypto.cecoin.core.utils.ErrorStrings
 import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
 import dyds.crypto.cecoin.core.utils.state.Fallible
@@ -11,22 +11,22 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlin.time.Duration.Companion.milliseconds
 
-interface ObserveTradePricesUseCase {
-    operator fun invoke(symbol: String): Flow<Fallible<TradePrice>>
+interface ObservePricesUseCase {
+    operator fun invoke(symbol: String): Flow<Fallible<PricePoint>>
 }
 
-class ObserveTradePricesUseCaseImpl(
-    private val repository: TradePriceRepository,
+class ObservePricesUseCaseImpl(
+    private val repository: PriceRepository,
     private val errorClassifier: ErrorClassifier,
     private val retryDelayMs: Long = 1_000L,
     private val maxRetries: Int = 3,
-) : ObserveTradePricesUseCase {
-    override fun invoke(symbol: String): Flow<Fallible<TradePrice>> = channelFlow {
+) : ObservePricesUseCase {
+    override fun invoke(symbol: String): Flow<Fallible<PricePoint>> = channelFlow {
         var retryCount = 0
         while (retryCount <= maxRetries) {
             try {
-                repository.observeTradePrices(symbol).collect { trade ->
-                    send(Fallible.Success(trade))
+                repository.observePrices(symbol).collect { point ->
+                    send(Fallible.Success(point))
                 }
             } catch (e: CancellationException) {
                 throw e

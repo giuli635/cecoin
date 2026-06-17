@@ -1,7 +1,6 @@
 package dyds.crypto.cecoin.chart.data.datasource
 
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
-import dyds.crypto.cecoin.chart.domain.model.TradePrice
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.websocket.Frame
@@ -25,7 +24,7 @@ class BinanceCoinPriceDataSource(
 ) : CoinPriceDataSource {
     private val json = Json { ignoreUnknownKeys = true }
 
-    override fun tradePrices(symbol: String): Flow<TradePrice> = flow {
+    override fun observePrices(symbol: String): Flow<PricePoint> = flow {
         val stream = "${symbol.trim().lowercase()}$STREAM_SUFFIX"
         var lastError: Throwable? = null
 
@@ -35,8 +34,8 @@ class BinanceCoinPriceDataSource(
                 http.webSocket(urlString = url) {
                     for (frame in incoming) {
                         val text = (frame as? Frame.Text)?.readText() ?: continue
-                        val trade = parseTrade(text) ?: continue
-                        emit(TradePrice(trade.symbol, PricePoint(trade.timestamp, trade.price)))
+                        val point = parseTrade(text) ?: continue
+                        emit(point)
                     }
                 }
                 return@flow
@@ -48,13 +47,11 @@ class BinanceCoinPriceDataSource(
         throw lastError ?: IllegalStateException(ErrorStrings.WEBSOCKET_CONNECT)
     }
 
-    private fun parseTrade(message: String): TradePrice? =
+    private fun parseTrade(message: String): PricePoint? =
         runCatching {
             val root = json.parseToJsonElement(message).jsonObject
             val price = root["p"]?.jsonPrimitive?.content?.toDouble() ?: return@runCatching null
             val timestamp = root["T"]?.jsonPrimitive?.content?.toLong() ?: return@runCatching null
-            val symbol = root["s"]?.jsonPrimitive?.content ?: return@runCatching null
-            TradePrice(symbol, PricePoint(timestamp, price))
+            PricePoint(timestamp, price)
         }.getOrNull()
-
 }

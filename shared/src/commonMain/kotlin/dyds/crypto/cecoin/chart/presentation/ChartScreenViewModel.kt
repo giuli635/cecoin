@@ -1,7 +1,7 @@
 package dyds.crypto.cecoin.chart.presentation
 
 import dyds.crypto.cecoin.chart.domain.usecase.GetHistoricalPricesUseCase
-import dyds.crypto.cecoin.chart.domain.usecase.ObserveTradePricesUseCase
+import dyds.crypto.cecoin.chart.domain.usecase.ObservePricesUseCase
 import dyds.crypto.cecoin.chart.presentation.model.ChartData
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorImpl
@@ -21,7 +21,7 @@ private const val DEFAULT_HISTORICAL_LIMIT = 200
 
 class ChartScreenViewModel(
     private val getHistoricalPricesUseCase: GetHistoricalPricesUseCase,
-    private val observeTradePricesUseCase: ObserveTradePricesUseCase,
+    private val observePricesUseCase: ObservePricesUseCase,
     val symbol: String,
     private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
 ) : ViewModel() {
@@ -47,7 +47,7 @@ class ChartScreenViewModel(
                     val accumulator = PriceAccumulatorImpl(g, result.value)
                     _chartData.value = Fallible.Success(accumulator.snapshot())
                     _state.value = Loadable.Loaded(Fallible.Success(_chartData.asStateFlow()))
-                    observeTradePricesUseCase(symbol).collect { f ->
+                    observePricesUseCase(symbol).collect { f ->
                         _chartData.value = f.map { accumulator.accumulateAndSnapshot(it) }
                     }
                 }

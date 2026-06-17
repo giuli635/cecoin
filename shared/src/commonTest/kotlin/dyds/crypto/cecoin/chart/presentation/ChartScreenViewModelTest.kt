@@ -1,7 +1,6 @@
 package dyds.crypto.cecoin.chart.presentation
 
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
-import dyds.crypto.cecoin.chart.domain.model.TradePrice
 import dyds.crypto.cecoin.chart.domain.usecase.FakeGetHistoricalPricesUseCase
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import dyds.crypto.cecoin.core.utils.state.Fallible
@@ -46,7 +45,7 @@ class ChartScreenViewModelTest {
 
     private data class VMScope(
         val viewModel: ChartScreenViewModel,
-        val tradeUseCase: FakeObserveTradePricesUseCase,
+        val tradeUseCase: FakeObservePricesUseCase,
         val historicalUseCase: FakeGetHistoricalPricesUseCase,
     )
 
@@ -57,10 +56,10 @@ class ChartScreenViewModelTest {
         historicalPointLimit: Int = 200,
     ): VMScope {
         val fakeHistorical = FakeGetHistoricalPricesUseCase(prices = historicalPrices, exception = historicalException)
-        val fakeTradeUseCase = FakeObserveTradePricesUseCase(exception = tradeException)
+        val fakeTradeUseCase = FakeObservePricesUseCase(exception = tradeException)
         val viewModel = ChartScreenViewModel(
             getHistoricalPricesUseCase = fakeHistorical,
-            observeTradePricesUseCase = fakeTradeUseCase,
+            observePricesUseCase = fakeTradeUseCase,
             symbol = "BTCUSDT",
             historicalPointLimit = historicalPointLimit,
         )
@@ -160,7 +159,7 @@ class ChartScreenViewModelTest {
         val initialData = viewModel.awaitChartData()
         assertEquals(50000.0, initialData.last().price)
 
-        tradeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(1000L, 52000.0)))
+        tradeUseCase.emitted.send(PricePoint(1000L, 52000.0))
 
         val points = viewModel.waitForPoints(52000.0)
         assertEquals(52000.0, points.last().price)
@@ -169,23 +168,23 @@ class ChartScreenViewModelTest {
 
     @Test
     fun `out of order trade is ignored`() = runTest {
-        val fakeTradeUseCase = FakeObserveTradePricesUseCase()
+        val fakeTradeUseCase = FakeObservePricesUseCase()
         val fakeHistorical = FakeGetHistoricalPricesUseCase(prices = listOf(
             PricePoint(0L, 50000.0),
         ))
         val viewModel = ChartScreenViewModel(
             getHistoricalPricesUseCase = fakeHistorical,
-            observeTradePricesUseCase = fakeTradeUseCase,
+            observePricesUseCase = fakeTradeUseCase,
             symbol = "BTCUSDT",
         )
 
         viewModel.load(Granularity.M1)
         viewModel.awaitChartData()
 
-        fakeTradeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(100_000L, 52000.0)))
+        fakeTradeUseCase.emitted.send(PricePoint(100_000L, 52000.0))
         viewModel.waitForPoints(52000.0)
 
-        fakeTradeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(30_000L, 51000.0)))
+        fakeTradeUseCase.emitted.send(PricePoint(30_000L, 51000.0))
 
         val points = waitForPriceStillVisible(viewModel)
         assertEquals(52000.0, points.last().price)
@@ -281,7 +280,7 @@ class ChartScreenViewModelTest {
         viewModel.load(Granularity.M1)
         viewModel.awaitChartData()
 
-        tradeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
+        tradeUseCase.emitted.send(PricePoint(60_000L, 52000.0))
 
         val snapshot = viewModel.chartData.first {
             it is Fallible.Success && it.value.any { p -> p.price == 52000.0 }
@@ -301,7 +300,7 @@ class ChartScreenViewModelTest {
 
         viewModel.cancel()
 
-        tradeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
+        tradeUseCase.emitted.send(PricePoint(60_000L, 52000.0))
 
         val snapshot = viewModel.chartData.value
         assertIs<Fallible.Success<List<PricePoint>>>(snapshot)
@@ -322,7 +321,7 @@ class ChartScreenViewModelTest {
         viewModel.load(Granularity.M5)
         viewModel.awaitChartData()
 
-        tradeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
+        tradeUseCase.emitted.send(PricePoint(60_000L, 52000.0))
 
         val snapshot = viewModel.chartData.first {
             it is Fallible.Success && it.value.any { p -> p.price == 52000.0 }

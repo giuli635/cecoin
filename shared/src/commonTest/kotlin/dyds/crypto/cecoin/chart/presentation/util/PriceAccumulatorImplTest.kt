@@ -1,7 +1,6 @@
 package dyds.crypto.cecoin.chart.presentation.util
 
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
-import dyds.crypto.cecoin.chart.presentation.fakeTradePriceFromPricePoint
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -10,9 +9,9 @@ class PriceAccumulatorImplTest {
     @Test
     fun `accumulate into empty list adds bucketed point`() {
         val priceAccumulator = PriceAccumulatorImpl(Granularity.M1, listOf())
-        val trade = fakeTradePriceFromPricePoint(PricePoint(100_000L, 52000.0))
+        val point = PricePoint(100_000L, 52000.0)
 
-        priceAccumulator.accumulate(trade)
+        priceAccumulator.accumulate(point)
 
         val points = priceAccumulator.snapshot()
         val expectedTimestamp = (100_000L / 60_000L) * 60_000L
@@ -27,9 +26,9 @@ class PriceAccumulatorImplTest {
             Granularity.M1,
             listOf(PricePoint(0L, 50000.0))
         )
-        val trade = fakeTradePriceFromPricePoint(PricePoint(30_000L, 52000.0))
+        val point = PricePoint(30_000L, 52000.0)
 
-        priceAccumulator.accumulate(trade)
+        priceAccumulator.accumulate(point)
 
         val points = priceAccumulator.snapshot()
         assertEquals(1, points.size)
@@ -41,9 +40,9 @@ class PriceAccumulatorImplTest {
         val priceAccumulator = PriceAccumulatorImpl(Granularity.M1,
             listOf(PricePoint(60_000L, 52000.0))
         )
-        val trade = fakeTradePriceFromPricePoint(PricePoint(30_000L, 51000.0))
+        val point = PricePoint(30_000L, 51000.0)
 
-        priceAccumulator.accumulate(trade)
+        priceAccumulator.accumulate(point)
 
         val points = priceAccumulator.snapshot()
         assertEquals(1, points.size)

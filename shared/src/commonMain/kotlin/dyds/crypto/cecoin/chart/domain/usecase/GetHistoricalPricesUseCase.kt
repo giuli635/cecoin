@@ -1,7 +1,7 @@
 package dyds.crypto.cecoin.chart.domain.usecase
 
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
-import dyds.crypto.cecoin.chart.domain.repository.TradePriceRepository
+import dyds.crypto.cecoin.chart.domain.repository.PriceRepository
 import dyds.crypto.cecoin.core.utils.ErrorStrings
 import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
 import dyds.crypto.cecoin.core.utils.state.Fallible
@@ -13,7 +13,7 @@ interface GetHistoricalPricesUseCase {
 }
 
 class GetHistoricalPricesUseCaseImpl(
-    private val repository: TradePriceRepository,
+    private val repository: PriceRepository,
     private val errorClassifier: ErrorClassifier,
 ) : GetHistoricalPricesUseCase {
     override suspend operator fun invoke(symbol: String, interval: String, limit: Int): Fallible<List<PricePoint>> {

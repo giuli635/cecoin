@@ -16,7 +16,7 @@ import dyds.crypto.cecoin.search.data.repository.FavoriteRepositoryImpl
 import dyds.crypto.cecoin.search.data.repository.SearchRepositoryImpl
 import dyds.crypto.cecoin.chart.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.chart.domain.usecase.GetHistoricalPricesUseCaseImpl
-import dyds.crypto.cecoin.chart.domain.usecase.ObserveTradePricesUseCaseImpl
+import dyds.crypto.cecoin.chart.domain.usecase.ObservePricesUseCaseImpl
 import dyds.crypto.cecoin.news.domain.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.news.domain.usecase.GetCryptoNewsUseCaseImpl
 import dyds.crypto.cecoin.search.domain.usecase.GetAvailableSymbolsUseCase
@@ -50,7 +50,7 @@ object CecoinDependencyInjector {
     private val newsApiDataSource = NewsApiRestDataSource(httpClient)
     private val newsRepository = NewsRepositoryImpl(newsApiDataSource)
 
-    private lateinit var observeTradePricesUseCase: ObserveTradePricesUseCaseImpl
+    private lateinit var observePricesUseCase: ObservePricesUseCaseImpl
     private lateinit var getAvailableSymbolsUseCase: GetAvailableSymbolsUseCase
     private lateinit var getHistoricalPricesUseCase: GetHistoricalPricesUseCase
     private lateinit var getCryptoNewsUseCase: GetCryptoNewsUseCase
@@ -63,7 +63,7 @@ object CecoinDependencyInjector {
         errorClassifier = classifier
         favoriteSource = DataStoreFavoriteDataSource(dataStore)
         favoriteRepository = FavoriteRepositoryImpl(favoriteSource)
-        observeTradePricesUseCase = ObserveTradePricesUseCaseImpl(chartRepository, classifier)
+        observePricesUseCase = ObservePricesUseCaseImpl(chartRepository, classifier)
         getAvailableSymbolsUseCase = GetAvailableSymbolsUseCaseImpl(searchRepository, classifier)
         getHistoricalPricesUseCase = GetHistoricalPricesUseCaseImpl(chartRepository, classifier)
         getCryptoNewsUseCase = GetCryptoNewsUseCaseImpl(newsRepository, classifier)
@@ -98,7 +98,7 @@ object CecoinDependencyInjector {
         return viewModel {
             ChartScreenViewModel(
                 getHistoricalPricesUseCase = getHistoricalPricesUseCase,
-                observeTradePricesUseCase = observeTradePricesUseCase,
+                observePricesUseCase = observePricesUseCase,
                 symbol = symbol,
             )
         }

@@ -3,7 +3,6 @@ package dyds.crypto.cecoin.chart.data
 import dyds.crypto.cecoin.chart.data.datasource.CoinHistoricalDataSource
 import dyds.crypto.cecoin.chart.data.datasource.CoinPriceDataSource
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
-import dyds.crypto.cecoin.chart.domain.model.TradePrice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -27,11 +26,11 @@ internal class FakeCoinHistoricalSource(
 }
 
 internal class FakeCoinPriceSource(
-    private val flow: Flow<TradePrice> = emptyFlow(),
+    private val flow: Flow<PricePoint> = emptyFlow(),
 ) : CoinPriceDataSource {
     var lastSymbol: String = ""
 
-    override fun tradePrices(symbol: String): Flow<TradePrice> {
+    override fun observePrices(symbol: String): Flow<PricePoint> {
         lastSymbol = symbol
         return flow
     }
