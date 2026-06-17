@@ -30,3 +30,7 @@ class PriceAccumulatorImpl(private val granularity: Granularity, historical: Lis
     override fun snapshot(): List<PricePoint> = points.toList()
 }
 
+fun interface PriceAccumulatorFactory {
+    operator fun invoke(granularity: Granularity, historical: List<PricePoint>): PriceAccumulator
+}
+

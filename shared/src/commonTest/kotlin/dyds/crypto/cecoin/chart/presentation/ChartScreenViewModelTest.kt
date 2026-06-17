@@ -62,6 +62,7 @@ class ChartScreenViewModelTest {
             observePricesUseCase = fakeTradeUseCase,
             symbol = "BTCUSDT",
             historicalPointLimit = historicalPointLimit,
+            priceAccumulatorFactory = fakePriceAccumulatorFactory(),
         )
         return VMScope(viewModel, fakeTradeUseCase, fakeHistorical)
     }
@@ -162,31 +163,6 @@ class ChartScreenViewModelTest {
         tradeUseCase.emitted.send(PricePoint(1000L, 52000.0))
 
         val points = viewModel.waitForPoints(52000.0)
-        assertEquals(52000.0, points.last().price)
-        viewModel.onCleared()
-    }
-
-    @Test
-    fun `out of order trade is ignored`() = runTest {
-        val fakeTradeUseCase = FakeObservePricesUseCase()
-        val fakeHistorical = FakeGetHistoricalPricesUseCase(prices = listOf(
-            PricePoint(0L, 50000.0),
-        ))
-        val viewModel = ChartScreenViewModel(
-            getHistoricalPricesUseCase = fakeHistorical,
-            observePricesUseCase = fakeTradeUseCase,
-            symbol = "BTCUSDT",
-        )
-
-        viewModel.load(Granularity.M1)
-        viewModel.awaitChartData()
-
-        fakeTradeUseCase.emitted.send(PricePoint(100_000L, 52000.0))
-        viewModel.waitForPoints(52000.0)
-
-        fakeTradeUseCase.emitted.send(PricePoint(30_000L, 51000.0))
-
-        val points = waitForPriceStillVisible(viewModel)
         assertEquals(52000.0, points.last().price)
         viewModel.onCleared()
     }

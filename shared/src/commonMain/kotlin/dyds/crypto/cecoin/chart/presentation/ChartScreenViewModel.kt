@@ -4,7 +4,7 @@ import dyds.crypto.cecoin.chart.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.chart.domain.usecase.ObservePricesUseCase
 import dyds.crypto.cecoin.chart.presentation.model.ChartData
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
-import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorImpl
+import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorFactory
 import dyds.crypto.cecoin.core.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import dyds.crypto.cecoin.core.utils.state.Loadable
@@ -24,6 +24,7 @@ class ChartScreenViewModel(
     private val observePricesUseCase: ObservePricesUseCase,
     val symbol: String,
     private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
+    private val priceAccumulatorFactory: PriceAccumulatorFactory,
 ) : ViewModel() {
     private val _chartData = MutableStateFlow<ChartData>(Fallible.Success(emptyList()))
     val chartData: StateFlow<ChartData> = _chartData.asStateFlow()
@@ -44,7 +45,7 @@ class ChartScreenViewModel(
             _state.value = Loadable.Loading
             when (val result = getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)) {
                 is Fallible.Success -> {
-                    val accumulator = PriceAccumulatorImpl(g, result.value)
+                    val accumulator = priceAccumulatorFactory(g, result.value)
                     _chartData.value = Fallible.Success(accumulator.snapshot())
                     _state.value = Loadable.Loaded(Fallible.Success(_chartData.asStateFlow()))
                     observePricesUseCase(symbol).collect { f ->

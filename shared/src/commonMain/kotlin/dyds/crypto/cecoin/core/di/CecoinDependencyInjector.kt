@@ -17,6 +17,8 @@ import dyds.crypto.cecoin.search.data.repository.SearchRepositoryImpl
 import dyds.crypto.cecoin.chart.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.chart.domain.usecase.GetHistoricalPricesUseCaseImpl
 import dyds.crypto.cecoin.chart.domain.usecase.ObservePricesUseCaseImpl
+import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorFactory
+import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorImpl
 import dyds.crypto.cecoin.news.domain.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.news.domain.usecase.GetCryptoNewsUseCaseImpl
 import dyds.crypto.cecoin.search.domain.usecase.GetAvailableSymbolsUseCase
@@ -50,6 +52,7 @@ object CecoinDependencyInjector {
     private val newsApiDataSource = NewsApiRestDataSource(httpClient)
     private val newsRepository = NewsRepositoryImpl(newsApiDataSource)
 
+    private lateinit var priceAccumulatorFactory: PriceAccumulatorFactory
     private lateinit var observePricesUseCase: ObservePricesUseCaseImpl
     private lateinit var getAvailableSymbolsUseCase: GetAvailableSymbolsUseCase
     private lateinit var getHistoricalPricesUseCase: GetHistoricalPricesUseCase
@@ -63,6 +66,7 @@ object CecoinDependencyInjector {
         errorClassifier = classifier
         favoriteSource = DataStoreFavoriteDataSource(dataStore)
         favoriteRepository = FavoriteRepositoryImpl(favoriteSource)
+        priceAccumulatorFactory = { g, h -> PriceAccumulatorImpl(g, h) }
         observePricesUseCase = ObservePricesUseCaseImpl(chartRepository, classifier)
         getAvailableSymbolsUseCase = GetAvailableSymbolsUseCaseImpl(searchRepository, classifier)
         getHistoricalPricesUseCase = GetHistoricalPricesUseCaseImpl(chartRepository, classifier)
@@ -100,6 +104,7 @@ object CecoinDependencyInjector {
                 getHistoricalPricesUseCase = getHistoricalPricesUseCase,
                 observePricesUseCase = observePricesUseCase,
                 symbol = symbol,
+                priceAccumulatorFactory = priceAccumulatorFactory,
             )
         }
     }

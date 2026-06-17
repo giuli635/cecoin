@@ -3,6 +3,7 @@ package dyds.crypto.cecoin.chart.presentation
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.domain.usecase.ObservePricesUseCase
 import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulator
+import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorFactory
 import dyds.crypto.cecoin.core.utils.error.AppError
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import kotlinx.coroutines.CancellationException
@@ -30,6 +31,9 @@ class FakeObservePricesUseCase(
         }
     }
 }
+
+fun fakePriceAccumulatorFactory(): PriceAccumulatorFactory =
+    PriceAccumulatorFactory { _, historical -> FakePriceAccumulator(historical) }
 
 class FakePriceAccumulator(historical: List<PricePoint> = emptyList()): PriceAccumulator {
     private val points = mutableListOf<PricePoint>()
