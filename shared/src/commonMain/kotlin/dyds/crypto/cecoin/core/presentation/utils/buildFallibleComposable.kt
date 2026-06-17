@@ -15,10 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.core.presentation.buildComposableRenderer
+import dyds.crypto.cecoin.core.utils.CoreStrings
 import dyds.crypto.cecoin.core.utils.error.AppError
 import dyds.crypto.cecoin.core.utils.state.Fallible
-
-private const val RETRY_BUTTON = "Reintentar"
 
 fun <T> buildFallibleComposable(
     inner: Renderer<T>,
@@ -48,7 +47,7 @@ private fun ErrorContent(error: AppError, modifier: Modifier, onCancel: () -> Un
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onRetry) {
-                    Text(text = RETRY_BUTTON)
+                    Text(text = CoreStrings.RETRY)
                 }
             }
         },

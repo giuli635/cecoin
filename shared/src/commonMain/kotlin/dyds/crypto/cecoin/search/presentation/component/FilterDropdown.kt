@@ -10,10 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dyds.crypto.cecoin.core.utils.SearchStrings
 import dyds.crypto.cecoin.search.presentation.FilterMode
-
-private const val ALL_COINS_LABEL = "Todas"
-private const val FAVORITES_LABEL = "Favoritas"
 
 @Composable
 fun FilterDropdown(
@@ -26,8 +24,8 @@ fun FilterDropdown(
         OutlinedButton(onClick = { expanded = true }) {
             Text(
                 text = when (currentMode) {
-                    FilterMode.ALL -> ALL_COINS_LABEL
-                    FilterMode.FAVORITES -> FAVORITES_LABEL
+                    FilterMode.ALL -> SearchStrings.ALL_COINS
+                    FilterMode.FAVORITES -> SearchStrings.FAVORITES
                 },
             )
         }
@@ -37,14 +35,14 @@ fun FilterDropdown(
             onDismissRequest = { expanded = false },
         ) {
             DropdownMenuItem(
-                text = { Text(ALL_COINS_LABEL) },
+                text = { Text(SearchStrings.ALL_COINS) },
                 onClick = {
                     onModeSelected(FilterMode.ALL)
                     expanded = false
                 },
             )
             DropdownMenuItem(
-                text = { Text(FAVORITES_LABEL) },
+                text = { Text(SearchStrings.FAVORITES) },
                 onClick = {
                     onModeSelected(FilterMode.FAVORITES)
                     expanded = false

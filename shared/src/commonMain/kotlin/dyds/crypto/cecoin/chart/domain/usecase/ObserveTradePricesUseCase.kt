@@ -2,6 +2,7 @@ package dyds.crypto.cecoin.chart.domain.usecase
 
 import dyds.crypto.cecoin.chart.domain.model.TradePrice
 import dyds.crypto.cecoin.chart.domain.repository.TradePriceRepository
+import dyds.crypto.cecoin.core.utils.ErrorStrings
 import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import kotlinx.coroutines.CancellationException
@@ -30,7 +31,7 @@ class ObserveTradePricesUseCaseImpl(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                send(Fallible.Failed(errorClassifier.classify(e, "La transmisión en vivo falló")))
+                send(Fallible.Failed(errorClassifier.classify(e, ErrorStrings.LIVE_STREAM_FAILED)))
                 if (++retryCount > maxRetries) break
                 delay(retryDelayMs.milliseconds)
             }

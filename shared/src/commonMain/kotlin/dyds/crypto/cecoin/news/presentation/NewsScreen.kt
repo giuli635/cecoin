@@ -20,12 +20,8 @@ import dyds.crypto.cecoin.news.domain.model.NewsArticle
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.news.presentation.component.NewsCard
 import dyds.crypto.cecoin.core.presentation.utils.buildAsyncComposable
+import dyds.crypto.cecoin.core.utils.NewsStrings
 import dyds.crypto.cecoin.core.utils.state.Loadable
-
-private const val NEWS_TITLE = "Noticias Crypto"
-private const val SEARCH_LABEL = "Filtrar noticias..."
-private const val NO_NEWS_FOUND = "No se encontraron noticias con '"
-private const val NO_NEWS_AVAILABLE = "No hay noticias disponibles"
 
 @Composable
 fun NewsScreen(
@@ -42,7 +38,7 @@ fun NewsScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            text = NEWS_TITLE,
+            text = NewsStrings.TITLE,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
         )
@@ -50,7 +46,7 @@ fun NewsScreen(
         OutlinedTextField(
             value = uiState.searchQuery,
             onValueChange = viewModel::onSearchQueryChange,
-            label = { Text(SEARCH_LABEL) },
+            label = { Text(NewsStrings.SEARCH_LABEL) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             enabled = asyncNews !is Loadable.Loading,
@@ -83,8 +79,8 @@ private fun newsListRenderer(
         }
         if (filtered.isEmpty()) {
             item {
-                val message = if (searchQuery.isNotEmpty()) "$NO_NEWS_FOUND$searchQuery'"
-                else NO_NEWS_AVAILABLE
+                val message = if (searchQuery.isNotEmpty()) "${NewsStrings.NO_NEWS_FOUND}$searchQuery'"
+                else NewsStrings.NO_NEWS_AVAILABLE
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodyMedium,

@@ -2,6 +2,7 @@ package dyds.crypto.cecoin.search.domain.usecase
 
 import dyds.crypto.cecoin.search.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.search.domain.repository.CryptoSymbolRepository
+import dyds.crypto.cecoin.core.utils.ErrorStrings
 import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import dyds.crypto.cecoin.core.utils.state.runCatchingCancellable
@@ -17,7 +18,7 @@ class GetAvailableSymbolsUseCaseImpl(
 ) : GetAvailableSymbolsUseCase {
     override suspend operator fun invoke(): Fallible<List<CryptoSymbol>> {
         return runCatchingCancellable { repository.getAvailableSymbols() }
-            .toFallible(errorClassifier, "Error al cargar símbolos")
+            .toFallible(errorClassifier, ErrorStrings.LOAD_SYMBOLS)
     }
 }
 

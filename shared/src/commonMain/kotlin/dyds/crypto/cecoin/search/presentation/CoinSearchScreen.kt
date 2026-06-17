@@ -22,13 +22,8 @@ import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.search.presentation.component.CoinItem
 import dyds.crypto.cecoin.search.presentation.component.FilterDropdown
 import dyds.crypto.cecoin.core.presentation.utils.buildAsyncComposable
+import dyds.crypto.cecoin.core.utils.SearchStrings
 import dyds.crypto.cecoin.core.utils.state.Loadable
-
-private const val SEARCH_TITLE = "Buscar Criptos"
-private const val SEARCH_LABEL = "Buscar símbolo (ej: BTC, ETH)"
-private const val AVAILABLE_COINS_LABEL = "Criptos disponibles"
-private const val NO_COINS_FOUND = "No se encontraron criptos con '"
-private const val NO_COINS_AVAILABLE = "No hay criptomonedas disponibles"
 
 @Composable
 fun CoinSearchScreen(
@@ -47,7 +42,7 @@ fun CoinSearchScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            text = SEARCH_TITLE,
+            text = SearchStrings.TITLE,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
         )
@@ -60,7 +55,7 @@ fun CoinSearchScreen(
             OutlinedTextField(
                 value = uiState.searchQuery,
                 onValueChange = viewModel::onSearchQueryChange,
-                label = { Text(SEARCH_LABEL) },
+                label = { Text(SearchStrings.SEARCH_LABEL) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
                 enabled = asyncFilteredCoins !is Loadable.Loading,
@@ -73,7 +68,7 @@ fun CoinSearchScreen(
         }
 
         Text(
-            text = AVAILABLE_COINS_LABEL,
+            text = SearchStrings.AVAILABLE_COINS,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
         )
@@ -110,7 +105,7 @@ private fun coinsListRenderer(
         if (coins.isEmpty() && searchQuery.isNotEmpty()) {
             item {
                 Text(
-                    text = "$NO_COINS_FOUND$searchQuery'",
+                    text = "${SearchStrings.NO_COINS_FOUND}$searchQuery'",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp),
                 )
@@ -118,7 +113,7 @@ private fun coinsListRenderer(
         } else if (coins.isEmpty()) {
             item {
                 Text(
-                    text = NO_COINS_AVAILABLE,
+                    text = SearchStrings.NO_COINS_AVAILABLE,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp),
                 )

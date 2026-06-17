@@ -15,10 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.core.presentation.buildComposableRenderer
+import dyds.crypto.cecoin.core.utils.CoreStrings
 import dyds.crypto.cecoin.core.utils.state.Loadable
-
-private const val CANCELLED_MESSAGE = "Carga cancelada"
-private const val RETRY_BUTTON = "Reintentar"
 
 fun <T> buildLoadableComposable(onCancel: () -> Unit, onRetry: () -> Unit, inner: Renderer<T>): Renderer<Loadable<T>> =
     { value, modifier -> when (value) {
@@ -43,12 +41,12 @@ fun <T> buildLoadableComposable(onCancel: () -> Unit, onRetry: () -> Unit, inner
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = CANCELLED_MESSAGE,
+                        text = CoreStrings.CANCELLED_MESSAGE,
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedButton(onClick = onRetry) {
-                        Text(text = RETRY_BUTTON)
+                        Text(text = CoreStrings.RETRY)
                     }
                 }
             }

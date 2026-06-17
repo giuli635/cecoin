@@ -27,11 +27,9 @@ import dyds.crypto.cecoin.chart.presentation.component.PriceChart
 import dyds.crypto.cecoin.chart.presentation.util.ChartColors
 import dyds.crypto.cecoin.core.presentation.utils.buildAsyncStreamComposable
 import dyds.crypto.cecoin.core.presentation.utils.buildFallibleComposable
+import dyds.crypto.cecoin.core.utils.ChartStrings
 import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
 import dyds.crypto.cecoin.core.utils.format.priceStr
-
-private const val BACK_BUTTON = "Atrás"
-private const val USD_LABEL = "USD"
 
 @Composable
 private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) {
@@ -53,7 +51,7 @@ private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) 
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = USD_LABEL,
+                    text = ChartStrings.USD,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 4.dp),
@@ -96,7 +94,7 @@ fun ChartScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
-            Button(onClick = onBack) { Text(BACK_BUTTON) }
+            Button(onClick = onBack) { Text(ChartStrings.BACK) }
         }
 
         GranularitySelector(

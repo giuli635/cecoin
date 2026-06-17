@@ -3,6 +3,7 @@ package dyds.crypto.cecoin.core.presentation.utils
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import dyds.crypto.cecoin.core.presentation.Renderer
+import dyds.crypto.cecoin.core.utils.StreamStrings
 import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import dyds.crypto.cecoin.core.utils.state.Loadable
@@ -37,7 +38,7 @@ fun <T> buildAsyncStreamComposable(
                         }
                     } catch (e: Exception) {
                         value = Loadable.Loaded(Fallible.Failed(
-                            errorClassifier.classify(e, "La transmisión de datos falló")
+                            errorClassifier.classify(e, StreamStrings.DATA_FAILED)
                         ))
                     }
                 }
@@ -49,7 +50,7 @@ fun <T> buildAsyncStreamComposable(
                     value = Loadable.Loaded(Fallible.Failed(
                         errorClassifier.classify(
                             RuntimeException("Timeout"),
-                            "La transmisión de datos no respondió. Intente nuevamente."
+                            StreamStrings.TIMEOUT
                         )
                     ))
                 }

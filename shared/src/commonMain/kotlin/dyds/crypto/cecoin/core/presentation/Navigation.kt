@@ -17,18 +17,19 @@ import dyds.crypto.cecoin.core.di.CecoinDependencyInjector.getNewsViewModel
 import dyds.crypto.cecoin.core.di.CecoinDependencyInjector.getSearchViewModel
 import dyds.crypto.cecoin.chart.presentation.ChartScreen
 import dyds.crypto.cecoin.core.presentation.component.TabHeader
+import dyds.crypto.cecoin.core.utils.CoreStrings
 import dyds.crypto.cecoin.news.presentation.NewsScreen
 import dyds.crypto.cecoin.search.presentation.CoinSearchScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
 object Home : Tab {
-    override val label = "Buscar"
+    override val label = CoreStrings.TAB_SEARCH
 }
 
 @Serializable
 object News : Tab {
-    override val label = "Noticias"
+    override val label = CoreStrings.TAB_NEWS
 }
 
 @Serializable

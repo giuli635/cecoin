@@ -12,13 +12,13 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import dyds.crypto.cecoin.core.utils.ErrorStrings
 
 private val BASE_URLS = listOf(
     "wss://stream.binance.com:9443",
     "wss://stream.binance.com:443",
     "wss://data-stream.binance.vision",
 )
-private const val WEBSOCKET_CONNECT_ERROR = "No se pudo abrir el WebSocket de Binance"
 private const val STREAM_SUFFIX = "@trade"
 
 class BinanceCoinPriceDataSource(
@@ -46,7 +46,7 @@ class BinanceCoinPriceDataSource(
             }
         }
 
-        throw lastError ?: IllegalStateException(WEBSOCKET_CONNECT_ERROR)
+        throw lastError ?: IllegalStateException(ErrorStrings.WEBSOCKET_CONNECT)
     }
 
     private fun parseTrade(message: String): TradePrice? =

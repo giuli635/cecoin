@@ -11,8 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.core.presentation.Renderer
-
-private const val CANCEL_BUTTON = "Cancelar"
+import dyds.crypto.cecoin.core.utils.CoreStrings
 
 fun <T> buildCancellableComposable(onCancel: () -> Unit, inner: Renderer<T>): Renderer<T> =
     { value, modifier ->
@@ -26,7 +25,7 @@ fun <T> buildCancellableComposable(onCancel: () -> Unit, inner: Renderer<T>): Re
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedButton(onClick = onCancel) {
-                Text(text = CANCEL_BUTTON)
+                Text(text = CoreStrings.CANCEL)
             }
         }
     }

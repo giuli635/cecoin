@@ -1,6 +1,7 @@
 package dyds.crypto.cecoin.search.domain.usecase
 
 import dyds.crypto.cecoin.search.domain.repository.FavoriteRepository
+import dyds.crypto.cecoin.core.utils.ErrorStrings
 import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import dyds.crypto.cecoin.core.utils.state.runCatchingCancellable
@@ -16,6 +17,6 @@ class ToggleFavoriteUseCaseImpl(
 ) : ToggleFavoriteUseCase {
     override suspend operator fun invoke(symbol: String): Fallible<Unit> {
         return runCatchingCancellable { repository.toggleFavorite(symbol) }
-            .toFallible(errorClassifier, "Error al cambiar favorito")
+            .toFallible(errorClassifier, ErrorStrings.TOGGLE_FAVORITE)
     }
 }
