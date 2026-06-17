@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dyds.crypto.cecoin.domain.news.model.NewsArticle
 import dyds.crypto.cecoin.domain.news.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.presentation.utils.launchAsync
+import dyds.crypto.cecoin.presentation.utils.launchLoadable
 import dyds.crypto.cecoin.utils.state.Loadable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +29,7 @@ class NewsViewModel(
 
     fun loadNews() {
         loadNewsJob?.cancel()
-        loadNewsJob = launchAsync(_asyncNews) {
+        loadNewsJob = launchLoadable(_asyncNews) {
             getCryptoNewsUseCase()
         }
     }
