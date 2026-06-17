@@ -7,7 +7,7 @@ import dyds.crypto.cecoin.domain.search.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.domain.search.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.presentation.search.util.filterBy
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.presentation.utils.launchLoadable
+import dyds.crypto.cecoin.presentation.utils.launchAsync
 import dyds.crypto.cecoin.utils.state.Loadable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +47,7 @@ class CoinSearchViewModel(
 
     fun loadSymbols() {
         loadSymbolsJob?.cancel()
-        loadSymbolsJob = launchLoadable(_asyncAvailableSymbols) {
+        loadSymbolsJob = launchAsync(_asyncAvailableSymbols) {
             getAvailableSymbolsUseCase()
                 .map { symbols -> symbols.map { it.symbol }.sorted() }
         }
