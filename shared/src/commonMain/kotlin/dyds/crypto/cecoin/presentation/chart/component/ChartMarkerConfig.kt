@@ -2,9 +2,9 @@ package dyds.crypto.cecoin.presentation.chart.component
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,7 +52,7 @@ fun rememberChartMarker(): DefaultCartesianMarker {
             }
         },
         guideline = rememberLineComponent(
-            fill = Fill(Color(0xFF9E9E9E)),
+            fill = Fill(MaterialTheme.colorScheme.outlineVariant),
             thickness = 0.5.dp,
         ),
         indicator = { markerIndicator },
