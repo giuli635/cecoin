@@ -39,6 +39,7 @@ class NewsViewModel(
 
     fun onCancelLoadNews() {
         loadNewsJob?.cancel()
+        _asyncNews.value = Loadable.Cancelled
         loadNewsJob = null
     }
 

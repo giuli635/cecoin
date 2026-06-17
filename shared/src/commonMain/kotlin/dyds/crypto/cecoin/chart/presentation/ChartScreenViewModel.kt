@@ -4,8 +4,9 @@ import dyds.crypto.cecoin.chart.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.chart.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.chart.presentation.model.ChartData
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
+import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorImpl
 import dyds.crypto.cecoin.core.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.core.presentation.utils.launchLoadable
+import dyds.crypto.cecoin.core.utils.state.Fallible
 import dyds.crypto.cecoin.core.utils.state.Loadable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 private const val DEFAULT_HISTORICAL_LIMIT = 200
 
@@ -23,11 +25,9 @@ class ChartScreenViewModel(
     val symbol: String,
     private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
 ) : ViewModel() {
-    private val controller = ChartDataController(
-        getHistoricalPricesUseCase,
-        observeTradePricesUseCase,
-        viewModelScope,
-    )
+    private val _chartData = MutableStateFlow<ChartData>(Fallible.Success(emptyList()))
+    val chartData: StateFlow<ChartData> = _chartData.asStateFlow()
+
     private val _state = MutableStateFlow<AsyncResult<Flow<ChartData>>>(Loadable.Loading)
     val state: StateFlow<AsyncResult<Flow<ChartData>>> = _state.asStateFlow()
 
@@ -35,13 +35,24 @@ class ChartScreenViewModel(
 
     fun cancel() {
         loadJob?.cancel()
-        controller.cancel()
+        _state.value = Loadable.Cancelled
     }
 
     fun load(g: Granularity) {
         loadJob?.cancel()
-        loadJob = launchLoadable(_state) {
-            controller.observe(symbol, g, historicalPointLimit)
+        loadJob = viewModelScope.launch {
+            _state.value = Loadable.Loading
+            when (val result = getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)) {
+                is Fallible.Success -> {
+                    val accumulator = PriceAccumulatorImpl(g, result.value)
+                    _chartData.value = Fallible.Success(accumulator.snapshot())
+                    _state.value = Loadable.Loaded(Fallible.Success(_chartData.asStateFlow()))
+                    observeTradePricesUseCase(symbol).collect { f ->
+                        _chartData.value = f.map { accumulator.accumulateAndSnapshot(it) }
+                    }
+                }
+                is Fallible.Failed -> _state.value = Loadable.Loaded(result)
+            }
         }
     }
 
