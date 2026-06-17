@@ -1,17 +1,15 @@
 package dyds.crypto.cecoin.presentation.chart
 
-import dyds.crypto.cecoin.domain.model.PricePoint
-import dyds.crypto.cecoin.domain.model.toPricePoints
 import dyds.crypto.cecoin.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.presentation.chart.model.ChartData
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
 import dyds.crypto.cecoin.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dyds.crypto.cecoin.domain.model.TradePrice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +23,7 @@ private const val HISTORICAL_FAILED = "Error al cargar datos históricos"
 
 class ChartScreenViewModel(
     private val getHistoricalPricesUseCase: GetHistoricalPricesUseCase,
-    private val controllerFactory: (Granularity, List<PricePoint>, CoroutineScope) -> ChartDataController,
+    private val controllerFactory: (Granularity, List<TradePrice>, CoroutineScope) -> ChartDataController,
     val symbol: String,
     private val errorClassifier: ErrorClassifier,
     private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
@@ -50,7 +48,6 @@ class ChartScreenViewModel(
         loadJob = viewModelScope.launch {
             val historical = try {
                 getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)
-                    .toPricePoints(g.millis)
             } catch (e: Exception) {
                 _state.value = Loadable.Loaded(Fallible.Failed(errorClassifier.classify(e, HISTORICAL_FAILED)))
                 return@launch

@@ -3,9 +3,13 @@ package dyds.crypto.cecoin.domain.usecase
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.domain.repository.CryptoSymbolRepository
 
-class GetAvailableSymbolsUseCase(
+interface GetAvailableSymbolsUseCase {
+    suspend operator fun invoke(): List<CryptoSymbol>
+}
+
+class GetAvailableSymbolsUseCaseImpl(
     private val repository: CryptoSymbolRepository,
-) {
-    suspend operator fun invoke(): List<CryptoSymbol> = repository.getAvailableSymbols()
+) : GetAvailableSymbolsUseCase {
+    override suspend operator fun invoke(): List<CryptoSymbol> = repository.getAvailableSymbols()
 }
 

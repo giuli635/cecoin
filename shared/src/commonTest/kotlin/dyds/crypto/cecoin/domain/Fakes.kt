@@ -12,10 +12,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 
 internal class FakeCryptoSymbolRepository(
-    symbols: List<CryptoSymbol> = emptyList(),
+    var symbols: List<CryptoSymbol> = emptyList(),
     var exception: Throwable? = null,
 ) : CryptoSymbolRepository {
-    var symbols: List<CryptoSymbol> = symbols
 
     override suspend fun getAvailableSymbols(): List<CryptoSymbol> {
         exception?.let { throw it }
@@ -24,12 +23,10 @@ internal class FakeCryptoSymbolRepository(
 }
 
 internal class FakeTradePriceRepository(
-    historical: List<TradePrice> = emptyList(),
-    tradeFlow: Flow<TradePrice> = emptyFlow(),
+    var historical: List<TradePrice> = emptyList(),
+    var tradeFlow: Flow<TradePrice> = emptyFlow(),
     var historicalException: Throwable? = null,
 ) : TradePriceRepository {
-    var historical: List<TradePrice> = historical
-    var tradeFlow: Flow<TradePrice> = tradeFlow
     var lastSymbol: String = ""
     var lastInterval: String = ""
     var lastLimit: Int = 0
@@ -51,10 +48,9 @@ internal class FakeTradePriceRepository(
 }
 
 internal class FakeNewsRepository(
-    articles: List<NewsArticle> = emptyList(),
+    var articles: List<NewsArticle> = emptyList(),
     var exception: Throwable? = null,
 ) : NewsRepository {
-    var articles: List<NewsArticle> = articles
 
     override suspend fun getCryptoNews(): List<NewsArticle> {
         exception?.let { throw it }

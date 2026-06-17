@@ -3,8 +3,12 @@ package dyds.crypto.cecoin.domain.usecase
 import dyds.crypto.cecoin.domain.repository.FavoriteRepository
 import kotlinx.coroutines.flow.Flow
 
-class ObserveFavoritesUseCase(
+interface ObserveFavoritesUseCase {
+    operator fun invoke(): Flow<Set<String>>
+}
+
+class ObserveFavoritesUseCaseImpl(
     private val repository: FavoriteRepository,
-) {
-    operator fun invoke(): Flow<Set<String>> = repository.observeFavorites()
+) : ObserveFavoritesUseCase {
+    override operator fun invoke(): Flow<Set<String>> = repository.observeFavorites()
 }

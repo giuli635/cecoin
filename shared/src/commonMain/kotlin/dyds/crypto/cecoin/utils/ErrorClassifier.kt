@@ -3,11 +3,11 @@ package dyds.crypto.cecoin.utils
 abstract class ErrorClassifier {
     protected abstract fun isNetworkError(exception: Throwable): Boolean
 
-    fun classify(exception: Throwable, userMessage: String): AppError {
-        return if (isNetworkError(exception)) {
+    fun classify(e: Throwable, userMessage: String): AppError {
+        return if (isNetworkError(e)) {
             AppError.NetworkError(userMessage)
         } else {
-            AppError.GenericError(exception, userMessage)
+            AppError.GenericError(e, userMessage)
         }
     }
 }

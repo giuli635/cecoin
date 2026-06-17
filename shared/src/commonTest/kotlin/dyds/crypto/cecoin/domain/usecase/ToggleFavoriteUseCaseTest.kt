@@ -10,7 +10,7 @@ class ToggleFavoriteUseCaseTest {
     @Test
     fun `invoke delegates toggle to repository`() = runTest {
         val repo = FakeFavoriteRepository()
-        val useCase = ToggleFavoriteUseCase(repo)
+        val useCase = ToggleFavoriteUseCaseImpl(repo)
 
         useCase("BTCUSDT")
 
@@ -20,7 +20,7 @@ class ToggleFavoriteUseCaseTest {
     @Test
     fun `double toggle restores original state`() = runTest {
         val repo = FakeFavoriteRepository()
-        val useCase = ToggleFavoriteUseCase(repo)
+        val useCase = ToggleFavoriteUseCaseImpl(repo)
 
         useCase("BTCUSDT")
         useCase("BTCUSDT")

@@ -12,7 +12,7 @@ class GetAvailableSymbolsUseCaseTest {
     fun `invoke returns symbols from repository`() = runTest {
         val expected = listOf(CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"))
         val repo = FakeCryptoSymbolRepository(expected)
-        val useCase = GetAvailableSymbolsUseCase(repo)
+        val useCase = GetAvailableSymbolsUseCaseImpl(repo)
 
         val result = useCase()
 
@@ -22,7 +22,7 @@ class GetAvailableSymbolsUseCaseTest {
     @Test
     fun `invoke returns empty list when repository returns empty`() = runTest {
         val repo = FakeCryptoSymbolRepository(emptyList())
-        val useCase = GetAvailableSymbolsUseCase(repo)
+        val useCase = GetAvailableSymbolsUseCaseImpl(repo)
 
         val result = useCase()
 
@@ -32,7 +32,7 @@ class GetAvailableSymbolsUseCaseTest {
     @Test
     fun `invoke propagates repository exception`() = runTest {
         val repo = FakeCryptoSymbolRepository(exception = RuntimeException("repo fail"))
-        val useCase = GetAvailableSymbolsUseCase(repo)
+        val useCase = GetAvailableSymbolsUseCaseImpl(repo)
 
         assertFailsWith<RuntimeException> {
             useCase()

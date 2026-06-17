@@ -14,7 +14,7 @@ class ObserveTradePricesUseCaseTest {
     fun `invoke returns flow from repository`() = runTest {
         val expected = TradePrice("BTCUSDT", PricePoint(1000L, 50000.0))
         val repo = FakeTradePriceRepository(tradeFlow = flowOf(expected))
-        val useCase = ObserveTradePricesUseCase(repo)
+        val useCase = ObserveTradePricesUseCaseImpl(repo)
 
         val result = useCase("BTCUSDT")
 

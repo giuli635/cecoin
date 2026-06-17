@@ -12,7 +12,7 @@ class GetHistoricalPricesUseCaseTest {
     fun `invoke delegates to repository with correct params`() = runTest {
         val expected = listOf(TradePrice("BTCUSDT", PricePoint(1000L, 50000.0)))
         val repo = FakeTradePriceRepository(historical = expected)
-        val useCase = GetHistoricalPricesUseCase(repo)
+        val useCase = GetHistoricalPricesUseCaseImpl(repo)
 
         val result = useCase("BTCUSDT", "5m", 100)
 
@@ -23,7 +23,7 @@ class GetHistoricalPricesUseCaseTest {
     fun `invoke uses default interval and limit`() = runTest {
         val expected = listOf(TradePrice("ETHUSDT", PricePoint(2000L, 3000.0)))
         val repo = FakeTradePriceRepository(historical = expected)
-        val useCase = GetHistoricalPricesUseCase(repo)
+        val useCase = GetHistoricalPricesUseCaseImpl(repo)
 
         val result = useCase("ETHUSDT")
 

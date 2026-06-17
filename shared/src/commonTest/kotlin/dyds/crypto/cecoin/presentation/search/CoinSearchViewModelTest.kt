@@ -1,20 +1,18 @@
 package dyds.crypto.cecoin.presentation.search
 
-import dyds.crypto.cecoin.domain.FakeCryptoSymbolRepository
-import dyds.crypto.cecoin.domain.FakeFavoriteRepository
 import dyds.crypto.cecoin.domain.model.CryptoSymbol
-import dyds.crypto.cecoin.domain.repository.CryptoSymbolRepository
+import dyds.crypto.cecoin.domain.usecase.FakeGetAvailableSymbolsUseCase
+import dyds.crypto.cecoin.domain.usecase.FakeObserveFavoritesUseCase
+import dyds.crypto.cecoin.domain.usecase.FakeToggleFavoriteUseCase
 import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
-import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
-import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
-import dyds.crypto.cecoin.presentation.search.CoinSearchViewModel
-import dyds.crypto.cecoin.presentation.search.FilterMode
 import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import dyds.crypto.cecoin.utils.Loadable
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,11 +23,11 @@ class CoinSearchViewModelTest {
 
     @Test
     fun `init loads symbols and emits success`() = runTest {
-        val repo = FakeCryptoSymbolRepository(listOf(
+        val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
             CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
             CryptoSymbol("ETHUSDT", "ETH", "USDT", "TRADING"),
         ))
-        val viewModel = createViewModel(symbolRepo = repo)
+        val viewModel = createViewModel(symbolsFake = symbolsFake)
 
         val result = viewModel.filteredCoins.first { it !is Loadable.Loading }
 
@@ -44,9 +42,9 @@ class CoinSearchViewModelTest {
     }
 
     @Test
-    fun `loadSymbols emits failed when repository throws`() = runTest {
-        val repo = FakeCryptoSymbolRepository(exception = RuntimeException("API error"))
-        val viewModel = createViewModel(symbolRepo = repo)
+    fun `loadSymbols emits failed when usecase throws`() = runTest {
+        val symbolsFake = FakeGetAvailableSymbolsUseCase(exception = RuntimeException("API error"))
+        val viewModel = createViewModel(symbolsFake = symbolsFake)
 
         val result = viewModel.filteredCoins.first { it !is Loadable.Loading }
 
@@ -70,12 +68,12 @@ class CoinSearchViewModelTest {
 
     @Test
     fun `onSearchQueryChange filters coins`() = runTest {
-        val repo = FakeCryptoSymbolRepository(listOf(
+        val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
             CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
             CryptoSymbol("ETHUSDT", "ETH", "USDT", "TRADING"),
             CryptoSymbol("BNBUSDT", "BNB", "USDT", "TRADING"),
         ))
-        val viewModel = createViewModel(symbolRepo = repo)
+        val viewModel = createViewModel(symbolsFake = symbolsFake)
 
         viewModel.filteredCoins.first { it !is Loadable.Loading }
 
@@ -88,15 +86,14 @@ class CoinSearchViewModelTest {
 
     @Test
     fun `setFilterMode to FAVORITES shows only favorites`() = runTest {
-        val repo = FakeCryptoSymbolRepository(listOf(
+        val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
             CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
             CryptoSymbol("ETHUSDT", "ETH", "USDT", "TRADING"),
         ))
-        val favRepo = createFakeFavoriteRepository(initialFavorites = setOf("ETHUSDT"))
-        val viewModel = createViewModel(symbolRepo = repo, favRepo = favRepo)
+        val observeFake = FakeObserveFavoritesUseCase(initial = setOf("ETHUSDT"))
+        val viewModel = createViewModel(symbolsFake = symbolsFake, observeFake = observeFake)
 
         viewModel.filteredCoins.first { it !is Loadable.Loading }
-
         viewModel.setFilterMode(FilterMode.FAVORITES)
 
         val result = viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf("ETHUSDT") }
@@ -106,11 +103,11 @@ class CoinSearchViewModelTest {
 
     @Test
     fun `setFilterMode to ALL shows all symbols`() = runTest {
-        val repo = FakeCryptoSymbolRepository(listOf(
+        val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
             CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
             CryptoSymbol("ETHUSDT", "ETH", "USDT", "TRADING"),
         ))
-        val viewModel = createViewModel(symbolRepo = repo)
+        val viewModel = createViewModel(symbolsFake = symbolsFake)
 
         viewModel.filteredCoins.first { it !is Loadable.Loading }
         viewModel.setFilterMode(FilterMode.FAVORITES)
@@ -124,20 +121,23 @@ class CoinSearchViewModelTest {
 
     @Test
     fun `toggleFavorite delegates to use case`() = runTest {
-        val favRepo = createFakeFavoriteRepository()
-        val viewModel = createViewModel(favRepo = favRepo)
+        val sharedFavorites = MutableStateFlow(emptySet<String>())
+        val toggleFake = FakeToggleFavoriteUseCase(favorites = sharedFavorites)
+        val observeFake = FakeObserveFavoritesUseCase(flow = sharedFavorites)
+        val viewModel = createViewModel(toggleFake = toggleFake, observeFake = observeFake)
 
         viewModel.toggleFavorite("BTCUSDT")
 
         assertTrue("BTCUSDT" in viewModel.favorites.first { "BTCUSDT" in it })
+        assertEquals("BTCUSDT", toggleFake.lastToggled)
     }
 
     @Test
     fun `onCancelLoadSymbols cancels active job`() = runTest {
-        val repo = FakeCryptoSymbolRepository(
-            symbols = listOf(CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING")),
-        )
-        val viewModel = createViewModel(symbolRepo = repo)
+        val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
+            CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
+        ))
+        val viewModel = createViewModel(symbolsFake = symbolsFake)
 
         viewModel.filteredCoins.first { it !is Loadable.Loading }
         viewModel.onCancelLoadSymbols()
@@ -159,16 +159,13 @@ class CoinSearchViewModelTest {
     @Test
     fun `filteredCoins emits Loading initially before data is loaded`() = runTest {
         val symbolsDeferred = CompletableDeferred<List<CryptoSymbol>>()
-        val repo = object : CryptoSymbolRepository {
-            override suspend fun getAvailableSymbols(): List<CryptoSymbol> {
-                return symbolsDeferred.await()
-            }
+        val getSymbols = object : GetAvailableSymbolsUseCase {
+            override suspend fun invoke(): List<CryptoSymbol> = symbolsDeferred.await()
         }
-        val favRepo = createFakeFavoriteRepository()
         val viewModel = CoinSearchViewModel(
-            getAvailableSymbolsUseCase = GetAvailableSymbolsUseCase(repo),
-            toggleFavoriteUseCase = ToggleFavoriteUseCase(favRepo),
-            observeFavoritesUseCase = ObserveFavoritesUseCase(favRepo),
+            getAvailableSymbolsUseCase = getSymbols,
+            toggleFavoriteUseCase = FakeToggleFavoriteUseCase(),
+            observeFavoritesUseCase = FakeObserveFavoritesUseCase(),
             errorClassifier = fakeClassifier(),
         )
 
@@ -183,35 +180,33 @@ class CoinSearchViewModelTest {
 
     @Test
     fun `onCancelLoadSymbols handles both null and non-null job`() = runTest {
-        val repo = FakeCryptoSymbolRepository(symbols = listOf(
+        val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
             CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"),
         ))
-        val viewModel = createViewModel(symbolRepo = repo)
+        val viewModel = createViewModel(symbolsFake = symbolsFake)
 
         viewModel.filteredCoins.first { it !is Loadable.Loading }
-
         viewModel.onCancelLoadSymbols()
         viewModel.onCancelLoadSymbols()
     }
 
     @Test
     fun `onCancelLoadSymbols emits Cancelled when load is in progress`() = runTest {
-        val symbolsDeferred = CompletableDeferred<List<CryptoSymbol>>()
-        val repo = object : CryptoSymbolRepository {
-            override suspend fun getAvailableSymbols(): List<CryptoSymbol> {
-                return symbolsDeferred.await()
+        val loadStarted = MutableStateFlow(false)
+        val getSymbols = object : GetAvailableSymbolsUseCase {
+            override suspend fun invoke(): List<CryptoSymbol> {
+                loadStarted.value = true
+                awaitCancellation()
             }
         }
         val viewModel = CoinSearchViewModel(
-            getAvailableSymbolsUseCase = GetAvailableSymbolsUseCase(repo),
-            toggleFavoriteUseCase = ToggleFavoriteUseCase(FakeFavoriteRepository()),
-            observeFavoritesUseCase = ObserveFavoritesUseCase(FakeFavoriteRepository()),
+            getAvailableSymbolsUseCase = getSymbols,
+            toggleFavoriteUseCase = FakeToggleFavoriteUseCase(),
+            observeFavoritesUseCase = FakeObserveFavoritesUseCase(),
             errorClassifier = fakeClassifier(),
         )
 
-        val loading = viewModel.filteredCoins.first { it is Loadable.Loading }
-        assertIs<Loadable.Loading>(loading)
-
+        loadStarted.first { it }
         viewModel.onCancelLoadSymbols()
 
         val cancelled = viewModel.filteredCoins.first { it is Loadable.Cancelled }
@@ -220,13 +215,13 @@ class CoinSearchViewModelTest {
 
     @Test
     fun `retryLoadSymbols reloads after failure`() = runTest {
-        val repo = FakeCryptoSymbolRepository(exception = RuntimeException("fail"))
-        val viewModel = createViewModel(symbolRepo = repo)
+        val symbolsFake = FakeGetAvailableSymbolsUseCase(exception = RuntimeException("fail"))
+        val viewModel = createViewModel(symbolsFake = symbolsFake)
 
         viewModel.filteredCoins.first { it !is Loadable.Loading }
 
-        repo.exception = null
-        repo.symbols = listOf(CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"))
+        symbolsFake.exception = null
+        symbolsFake.symbols = listOf(CryptoSymbol("BTCUSDT", "BTC", "USDT", "TRADING"))
 
         viewModel.retryLoadSymbols()
 
@@ -236,17 +231,11 @@ class CoinSearchViewModelTest {
     }
 
     private fun createViewModel(
-        symbolRepo: FakeCryptoSymbolRepository = FakeCryptoSymbolRepository(),
-        favRepo: FakeFavoriteRepository = createFakeFavoriteRepository(),
+        symbolsFake: FakeGetAvailableSymbolsUseCase = FakeGetAvailableSymbolsUseCase(),
+        toggleFake: FakeToggleFavoriteUseCase = FakeToggleFavoriteUseCase(),
+        observeFake: FakeObserveFavoritesUseCase = FakeObserveFavoritesUseCase(),
     ): CoinSearchViewModel {
-        val getSymbols = GetAvailableSymbolsUseCase(symbolRepo)
-        val toggleFav = ToggleFavoriteUseCase(favRepo)
-        val observeFav = ObserveFavoritesUseCase(favRepo)
-        return CoinSearchViewModel(getSymbols, toggleFav, observeFav, fakeClassifier())
-    }
-
-    private fun createFakeFavoriteRepository(initialFavorites: Set<String> = emptySet()): FakeFavoriteRepository {
-        return FakeFavoriteRepository(initialFavorites = initialFavorites)
+        return CoinSearchViewModel(symbolsFake, toggleFake, observeFake, fakeClassifier())
     }
 
     private fun fakeClassifier() = object : ErrorClassifier() {

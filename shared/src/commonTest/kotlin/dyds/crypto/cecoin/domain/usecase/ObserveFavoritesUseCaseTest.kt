@@ -11,7 +11,7 @@ class ObserveFavoritesUseCaseTest {
     fun `invoke returns favorites flow from repository`() = runTest {
         val expected = setOf("BTCUSDT", "ETHUSDT")
         val repo = FakeFavoriteRepository(initialFavorites = expected)
-        val useCase = ObserveFavoritesUseCase(repo)
+        val useCase = ObserveFavoritesUseCaseImpl(repo)
 
         val result = useCase()
 

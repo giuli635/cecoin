@@ -1,11 +1,8 @@
 package dyds.crypto.cecoin.presentation.chart
 
-import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
 import dyds.crypto.cecoin.presentation.chart.model.ChartData
-import dyds.crypto.cecoin.presentation.chart.model.Granularity
-import dyds.crypto.cecoin.presentation.chart.util.foldTradePrice
-import dyds.crypto.cecoin.utils.AppError
+import dyds.crypto.cecoin.presentation.chart.util.PriceAccumulator
 import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import kotlinx.coroutines.CancellationException
@@ -26,10 +23,9 @@ private const val STREAM_FAILED = "La transmisión en vivo falló"
 
 class ChartDataController(
     private val observeTradePricesUseCase: ObserveTradePricesUseCase,
-    private var granularity: Granularity,
+    private val priceAccumulator: PriceAccumulator,
     private val scope: CoroutineScope,
     val symbol: String,
-    historical: List<PricePoint>,
     private val errorClassifier: ErrorClassifier,
     private val retryDelayMs: Long = RETRY_DELAY_MS,
     private val maxRetries: Int = MAX_STREAM_RETRIES,
@@ -39,13 +35,10 @@ class ChartDataController(
     )
     val chartData: StateFlow<ChartData> = _chartData.asStateFlow()
 
-    private val points = mutableListOf<PricePoint>()
     private var streamJob: Job? = null
 
     init {
-        points.clear()
-        points.addAll(historical)
-        _chartData.value = Fallible.Success(points.toList())
+        _chartData.value = Fallible.Success(priceAccumulator.snapshot())
     }
 
     fun startStream() {
@@ -66,8 +59,8 @@ class ChartDataController(
                     _chartData.value = Fallible.Failed(errorClassifier.classify(e, STREAM_FAILED))
                 }
                 .collect { trade ->
-                    points.foldTradePrice(trade, granularity)
-                    _chartData.value = Fallible.Success(points.toList())
+                    priceAccumulator.accumulate(trade)
+                    _chartData.value = Fallible.Success(priceAccumulator.snapshot())
                 }
         }
     }

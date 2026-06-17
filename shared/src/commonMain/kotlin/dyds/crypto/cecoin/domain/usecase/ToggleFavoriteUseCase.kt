@@ -2,8 +2,12 @@ package dyds.crypto.cecoin.domain.usecase
 
 import dyds.crypto.cecoin.domain.repository.FavoriteRepository
 
-class ToggleFavoriteUseCase(
+interface ToggleFavoriteUseCase {
+    suspend operator fun invoke(symbol: String)
+}
+
+class ToggleFavoriteUseCaseImpl(
     private val repository: FavoriteRepository,
-) {
-    suspend operator fun invoke(symbol: String) = repository.toggleFavorite(symbol)
+) : ToggleFavoriteUseCase {
+    override suspend operator fun invoke(symbol: String) = repository.toggleFavorite(symbol)
 }

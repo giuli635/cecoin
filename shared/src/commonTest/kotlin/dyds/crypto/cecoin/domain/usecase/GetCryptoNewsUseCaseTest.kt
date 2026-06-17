@@ -14,7 +14,7 @@ class GetCryptoNewsUseCaseTest {
             NewsArticle("Title", "Desc", "url", null, "Source", "2024-01-01"),
         )
         val repo = FakeNewsRepository(articles = expected)
-        val useCase = GetCryptoNewsUseCase(repo)
+        val useCase = GetCryptoNewsUseCaseImpl(repo)
 
         val result = useCase()
 
@@ -24,7 +24,7 @@ class GetCryptoNewsUseCaseTest {
     @Test
     fun `invoke returns empty list when repository returns empty`() = runTest {
         val repo = FakeNewsRepository()
-        val useCase = GetCryptoNewsUseCase(repo)
+        val useCase = GetCryptoNewsUseCaseImpl(repo)
 
         val result = useCase()
 
@@ -34,7 +34,7 @@ class GetCryptoNewsUseCaseTest {
     @Test
     fun `invoke propagates repository exception`() = runTest {
         val repo = FakeNewsRepository(exception = RuntimeException("repo fail"))
-        val useCase = GetCryptoNewsUseCase(repo)
+        val useCase = GetCryptoNewsUseCaseImpl(repo)
 
         assertFailsWith<RuntimeException> {
             useCase()

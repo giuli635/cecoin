@@ -19,13 +19,19 @@ import dyds.crypto.cecoin.data.repository.NewsRepositoryImpl
 import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCase
 import dyds.crypto.cecoin.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCase
-import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
+import dyds.crypto.cecoin.domain.usecase.ObserveFavoritesUseCaseImpl
 import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCase
+import dyds.crypto.cecoin.domain.usecase.ToggleFavoriteUseCaseImpl
+import dyds.crypto.cecoin.domain.usecase.GetAvailableSymbolsUseCaseImpl
+import dyds.crypto.cecoin.domain.usecase.GetHistoricalPricesUseCaseImpl
 import dyds.crypto.cecoin.domain.usecase.GetCryptoNewsUseCase
+import dyds.crypto.cecoin.domain.usecase.GetCryptoNewsUseCaseImpl
+import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCaseImpl
 import dyds.crypto.cecoin.presentation.news.NewsViewModel
 import dyds.crypto.cecoin.presentation.chart.ChartDataController
 import dyds.crypto.cecoin.presentation.chart.ChartScreenViewModel
 import dyds.crypto.cecoin.presentation.chart.GranularityStateHolder
+import dyds.crypto.cecoin.presentation.chart.util.PriceAccumulatorImpl
 import dyds.crypto.cecoin.presentation.search.CoinSearchViewModel
 
 object CecoinDependencyInjector {
@@ -43,9 +49,9 @@ object CecoinDependencyInjector {
     private val repository = CecoinRepositoryImpl(
         coinPriceSource, coinHistoricalSource, coinListDataSource,
     )
-    private val observeTradePricesUseCase = ObserveTradePricesUseCase(repository)
-    private val getAvailableSymbolsUseCase = GetAvailableSymbolsUseCase(repository)
-    private val getHistoricalPricesUseCase = GetHistoricalPricesUseCase(repository)
+    private val observeTradePricesUseCase = ObserveTradePricesUseCaseImpl(repository)
+    private val getAvailableSymbolsUseCase = GetAvailableSymbolsUseCaseImpl(repository)
+    private val getHistoricalPricesUseCase = GetHistoricalPricesUseCaseImpl(repository)
 
     private lateinit var favoriteSource: DataStoreFavoriteDataSource
     private lateinit var favoriteRepository: FavoriteRepositoryImpl
@@ -56,13 +62,13 @@ object CecoinDependencyInjector {
         errorClassifier = classifier
         favoriteSource = DataStoreFavoriteDataSource(dataStore)
         favoriteRepository = FavoriteRepositoryImpl(favoriteSource)
-        toggleFavoriteUseCase = ToggleFavoriteUseCase(favoriteRepository)
-        observeFavoritesUseCase = ObserveFavoritesUseCase(favoriteRepository)
+        toggleFavoriteUseCase = ToggleFavoriteUseCaseImpl(favoriteRepository)
+        observeFavoritesUseCase = ObserveFavoritesUseCaseImpl(favoriteRepository)
     }
 
     private val newsApiDataSource = NewsApiRestDataSource(httpClient)
     private val newsRepository = NewsRepositoryImpl(newsApiDataSource)
-    private val getCryptoNewsUseCase = GetCryptoNewsUseCase(newsRepository)
+    private val getCryptoNewsUseCase = GetCryptoNewsUseCaseImpl(newsRepository)
 
     fun dispose() {
         httpClient.close()
@@ -92,13 +98,12 @@ object CecoinDependencyInjector {
         return viewModel {
             ChartScreenViewModel(
                 getHistoricalPricesUseCase = getHistoricalPricesUseCase,
-                controllerFactory = { g, historical, scope ->
+                controllerFactory = { granularity, historical, scope ->
                     ChartDataController(
                         observeTradePricesUseCase = observeTradePricesUseCase,
-                        granularity = g,
+                        priceAccumulator = PriceAccumulatorImpl(granularity, historical),
                         scope = scope,
                         symbol = symbol,
-                        historical = historical,
                         errorClassifier = errorClassifier,
                     )
                 },

@@ -1,41 +1,34 @@
 package dyds.crypto.cecoin.presentation.chart
 
-import dyds.crypto.cecoin.domain.FakeTradePriceRepository
 import dyds.crypto.cecoin.domain.model.PricePoint
 import dyds.crypto.cecoin.domain.model.TradePrice
-import dyds.crypto.cecoin.domain.usecase.ObserveTradePricesUseCase
-import dyds.crypto.cecoin.presentation.chart.ChartDataController
 import dyds.crypto.cecoin.presentation.chart.model.Granularity
-import dyds.crypto.cecoin.utils.AppError
 import dyds.crypto.cecoin.utils.ErrorClassifier
 import dyds.crypto.cecoin.utils.Fallible
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class ChartDataControllerTest {
+
+    private val classifier = object : ErrorClassifier() {
+        override fun isNetworkError(e: Throwable) = false
+    }
 
     @Test
     fun `seed with historical data emits Success snapshot`() = runTest {
-        val tradeFlow = MutableSharedFlow<TradePrice>(extraBufferCapacity = 1)
-        val priceSource = FakeTradePriceRepository(tradeFlow = tradeFlow)
         val controller = ChartDataController(
-            observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
+            observeTradePricesUseCase = FakeObserveTradePricesUseCase(),
+            priceAccumulator = FakePriceAccumulator(historical = fakeTradePricesFromPricePoints(
+                PricePoint(0L, 50000.0), PricePoint(60_000L, 51000.0),
+            )),
             symbol = "BTCUSDT",
             scope = this,
-            historical = listOf(PricePoint(0L, 50000.0), PricePoint(60_000L, 51000.0)),
-            granularity = Granularity.M1,
-            errorClassifier = object : ErrorClassifier() {
-            override fun isNetworkError(e: Throwable) = false
-        },
+            errorClassifier = classifier,
             retryDelayMs = 0,
         )
         controller.startStream()
@@ -46,30 +39,21 @@ class ChartDataControllerTest {
         assertEquals(2, data.size)
         assertEquals(51000.0, data.last().price)
         controller.cancel()
-
     }
 
     @Test
     fun `trade updates snapshot after seed`() = runTest {
-        val tradeFlow = MutableSharedFlow<TradePrice>(extraBufferCapacity = 1)
-        val priceSource = FakeTradePriceRepository(
-            historical = emptyList(),
-            tradeFlow = tradeFlow,
-        )
+        val fakeUseCase = FakeObserveTradePricesUseCase()
         val controller = ChartDataController(
-            observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
+            observeTradePricesUseCase = fakeUseCase,
             symbol = "BTCUSDT",
             scope = this,
-            historical = emptyList(),
-            granularity = Granularity.M1,
-            errorClassifier = object : ErrorClassifier() {
-            override fun isNetworkError(e: Throwable) = false
-        },
+            priceAccumulator = FakePriceAccumulator(),
+            errorClassifier = classifier,
             retryDelayMs = 0,
         )
         controller.startStream()
-
-        tradeFlow.emit(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
+        fakeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
 
         val snapshot = controller.chartData.first {
             it is Fallible.Success && it.value.any { p -> p.price == 52000.0 }
@@ -77,83 +61,59 @@ class ChartDataControllerTest {
         val data = (snapshot as Fallible.Success).value
         assertTrue(data.any { it.price == 52000.0 })
         controller.cancel()
-        advanceUntilIdle()
     }
 
     @Test
     fun `cancel stops stream processing`() = runTest {
-        val tradeFlow = MutableSharedFlow<TradePrice>(extraBufferCapacity = 1)
-        val priceSource = FakeTradePriceRepository(
-            historical = emptyList(),
-            tradeFlow = tradeFlow,
-        )
+        val fakeUseCase = FakeObserveTradePricesUseCase()
         val controller = ChartDataController(
-            observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
+            observeTradePricesUseCase = fakeUseCase,
             symbol = "BTCUSDT",
             scope = this,
-            historical = emptyList(),
-            granularity = Granularity.M1,
-            errorClassifier = object : ErrorClassifier() {
-            override fun isNetworkError(e: Throwable) = false
-        },
+            priceAccumulator = FakePriceAccumulator(),
+            errorClassifier = classifier,
             retryDelayMs = 0,
         )
         controller.startStream()
-
         controller.cancel()
 
-        tradeFlow.emit(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
+        fakeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
 
         val afterCancel = controller.chartData.value
         val success = afterCancel as Fallible.Success
         assertTrue(success.value.isEmpty())
-
     }
 
     @Test
     fun `startStream cancels previous stream when called twice`() = runTest {
-        val tradeFlow = MutableSharedFlow<TradePrice>(extraBufferCapacity = 1)
-        val priceSource = FakeTradePriceRepository(tradeFlow = tradeFlow)
+        val fakeUseCase = FakeObserveTradePricesUseCase()
         val controller = ChartDataController(
-            observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
+            observeTradePricesUseCase = fakeUseCase,
             symbol = "BTCUSDT",
             scope = this,
-            historical = listOf(PricePoint(0L, 50000.0)),
-            granularity = Granularity.M1,
-            errorClassifier = object : ErrorClassifier() {
-            override fun isNetworkError(e: Throwable) = false
-        },
+            priceAccumulator = FakePriceAccumulator(historical = fakeTradePricesFromPricePoints(PricePoint(0L, 50000.0))),
+            errorClassifier = classifier,
             retryDelayMs = 0,
         )
         controller.startStream()
         controller.startStream()
-
-        tradeFlow.emit(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
+        fakeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
 
         val snapshot = controller.chartData.first {
             it is Fallible.Success && it.value.any { p -> p.price == 52000.0 }
         }
         assertTrue((snapshot as Fallible.Success).value.any { it.price == 52000.0 })
         controller.cancel()
-        advanceUntilIdle()
     }
 
     @Test
     fun `stream emits Failed on error`() = runTest {
-        val tradeFlow = flow<Nothing> { throw RuntimeException("Stream crash") }
-        val priceSource = FakeTradePriceRepository(
-            historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
-            tradeFlow = tradeFlow,
-        )
         val controller = ChartDataController(
-            observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
+            observeTradePricesUseCase = FakeObserveTradePricesUseCase(exception = RuntimeException("Stream crash")),
             symbol = "BTCUSDT",
             scope = this,
-            historical = emptyList(),
-            granularity = Granularity.M1,
-            errorClassifier = object : ErrorClassifier() {
-            override fun isNetworkError(e: Throwable) = false
-        },
+            priceAccumulator = FakePriceAccumulator(),
+            errorClassifier = classifier,
             retryDelayMs = 0,
         )
         controller.startStream()
@@ -161,42 +121,29 @@ class ChartDataControllerTest {
         val failed = controller.chartData.first { it is Fallible.Failed }
         assertIs<Fallible.Failed>(failed)
         controller.cancel()
-
     }
 
     @Test
     fun `cancel when streamJob is null does nothing`() = runTest {
         val controller = ChartDataController(
-            observeTradePricesUseCase = ObserveTradePricesUseCase(FakeTradePriceRepository()),
+            observeTradePricesUseCase = FakeObserveTradePricesUseCase(),
             symbol = "BTCUSDT",
             scope = this,
-            historical = emptyList(),
-            granularity = Granularity.M1,
-            errorClassifier = object : ErrorClassifier() {
-            override fun isNetworkError(e: Throwable) = false
-        },
+            priceAccumulator = FakePriceAccumulator(),
+            errorClassifier = classifier,
             retryDelayMs = 0,
         )
         controller.cancel()
-
     }
 
     @Test
     fun `stream stops retrying on CancellationException`() = runTest {
-        val tradeFlow = flow<Nothing> { throw CancellationException("Cancelled") }
-        val priceSource = FakeTradePriceRepository(
-            historical = listOf(TradePrice("BTCUSDT", PricePoint(0L, 50000.0))),
-            tradeFlow = tradeFlow,
-        )
         val controller = ChartDataController(
-            observeTradePricesUseCase = ObserveTradePricesUseCase(priceSource),
+            observeTradePricesUseCase = FakeObserveTradePricesUseCase(exception = CancellationException("Cancelled")),
             symbol = "BTCUSDT",
             scope = this,
-            historical = listOf(PricePoint(0L, 50000.0)),
-            granularity = Granularity.M1,
-            errorClassifier = object : ErrorClassifier() {
-            override fun isNetworkError(e: Throwable) = false
-        },
+            priceAccumulator = FakePriceAccumulator(historical = fakeTradePricesFromPricePoints(PricePoint(0L, 50000.0))),
+            errorClassifier = classifier,
             retryDelayMs = 0,
         )
         controller.startStream()
@@ -205,6 +152,5 @@ class ChartDataControllerTest {
         val data = (snapshot as Fallible.Success).value
         assertEquals(50000.0, data.last().price)
         controller.cancel()
-
     }
 }

@@ -4,10 +4,14 @@ import dyds.crypto.cecoin.domain.model.TradePrice
 import dyds.crypto.cecoin.domain.repository.TradePriceRepository
 import kotlinx.coroutines.flow.Flow
 
-class ObserveTradePricesUseCase(
+interface ObserveTradePricesUseCase {
+    operator fun invoke(symbol: String): Flow<TradePrice>
+}
+
+class ObserveTradePricesUseCaseImpl(
     private val repository: TradePriceRepository,
-) {
-    operator fun invoke(symbol: String): Flow<TradePrice> = repository.observeTradePrices(symbol)
+): ObserveTradePricesUseCase {
+    override fun invoke(symbol: String): Flow<TradePrice> = repository.observeTradePrices(symbol)
 }
 
 

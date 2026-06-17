@@ -1,5 +1,6 @@
 package dyds.crypto.cecoin.presentation.chart.util
 
+import dyds.crypto.cecoin.utils.priceStr
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
