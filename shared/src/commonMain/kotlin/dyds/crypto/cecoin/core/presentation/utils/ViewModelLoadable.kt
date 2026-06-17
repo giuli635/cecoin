@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import dyds.crypto.cecoin.core.utils.state.Loadable
-import dyds.crypto.cecoin.core.utils.state.loadable
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -12,7 +12,13 @@ import kotlinx.coroutines.launch
 fun <T> ViewModel.launchLoadable(
     state: MutableStateFlow<Loadable<Fallible<T>>>,
     block: suspend () -> Fallible<T>,
-): Job = viewModelScope.launch {
+): Job {
     state.value = Loadable.Loading
-    state.value = loadable(block)
+    return viewModelScope.launch {
+        state.value = try {
+            Loadable.Loaded(block())
+        } catch (_: CancellationException) {
+            Loadable.Cancelled
+        }
+    }
 }

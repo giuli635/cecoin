@@ -4,19 +4,20 @@ import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.domain.model.TradePrice
 import dyds.crypto.cecoin.chart.domain.usecase.FakeGetHistoricalPricesUseCase
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
-import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorImpl
 import dyds.crypto.cecoin.core.utils.state.Fallible
 import dyds.crypto.cecoin.core.utils.state.Loadable
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ChartScreenViewModelTest {
 
     private suspend fun extractFlowSuccess(
@@ -59,14 +60,7 @@ class ChartScreenViewModelTest {
         val fakeTradeUseCase = FakeObserveTradePricesUseCase(exception = tradeException)
         val viewModel = ChartScreenViewModel(
             getHistoricalPricesUseCase = fakeHistorical,
-            controllerFactory = { g, historical, scope ->
-                ChartDataController(
-                    observeTradePricesUseCase = fakeTradeUseCase,
-                    priceAccumulator = PriceAccumulatorImpl(g, historical),
-                    symbol = "BTCUSDT",
-                    scope = scope,
-                )
-            },
+            observeTradePricesUseCase = fakeTradeUseCase,
             symbol = "BTCUSDT",
             historicalPointLimit = historicalPointLimit,
         )
@@ -176,18 +170,12 @@ class ChartScreenViewModelTest {
     @Test
     fun `out of order trade is ignored`() = runTest {
         val fakeTradeUseCase = FakeObserveTradePricesUseCase()
+        val fakeHistorical = FakeGetHistoricalPricesUseCase(prices = listOf(
+            TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
+        ))
         val viewModel = ChartScreenViewModel(
-            getHistoricalPricesUseCase = FakeGetHistoricalPricesUseCase(prices = listOf(
-                TradePrice("BTCUSDT", PricePoint(0L, 50000.0)),
-            )),
-            controllerFactory = { g, historical, scope ->
-                ChartDataController(
-                    observeTradePricesUseCase = fakeTradeUseCase,
-                    priceAccumulator = PriceAccumulatorImpl(g, historical),
-                    symbol = "BTCUSDT",
-                    scope = scope,
-                )
-            },
+            getHistoricalPricesUseCase = fakeHistorical,
+            observeTradePricesUseCase = fakeTradeUseCase,
             symbol = "BTCUSDT",
         )
 
@@ -214,7 +202,7 @@ class ChartScreenViewModelTest {
         viewModel.awaitChartData()
 
         viewModel.load(Granularity.M1)
-        viewModel.awaitChartData()
+        advanceUntilIdle()
 
         val state = viewModel.state.first()
         assertIs<Loadable.Loaded<*>>(state)
@@ -248,10 +236,9 @@ class ChartScreenViewModelTest {
 
         viewModel.load(Granularity.M1)
         viewModel.state.first { it !is Loadable.Loading }
-        val loaded = viewModel.state.value as Loadable.Loaded
-        val success = loaded.value as Fallible.Success
-        val flow: Flow<Fallible<List<PricePoint>>> = success.value
-        val fallible = flow.first { it is Fallible.Failed }
+        val loaded = assertIs<Loadable.Loaded<*>>(viewModel.state.value)
+        val success = assertIs<Fallible.Success<Flow<Fallible<List<PricePoint>>>>>(loaded.value)
+        val fallible = success.value.first { it is Fallible.Failed }
         assertIs<Fallible.Failed>(fallible)
         viewModel.onCleared()
     }

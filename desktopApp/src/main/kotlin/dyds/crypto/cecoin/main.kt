@@ -3,8 +3,8 @@ package dyds.crypto.cecoin
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import dyds.crypto.cecoin.di.CecoinDependencyInjector
-import dyds.crypto.cecoin.utils.error.ErrorClassifier
+import dyds.crypto.cecoin.core.di.CecoinDependencyInjector
+import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
 import java.io.File
 
 fun main() {

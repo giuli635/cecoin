@@ -1,8 +1,8 @@
 package dyds.crypto.cecoin.core.utils.state
 
 import dyds.crypto.cecoin.core.utils.error.AppError
-import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
 import kotlinx.coroutines.CancellationException
+import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
 
 sealed class Loadable<out T> {
     object Loading : Loadable<Nothing>()
@@ -42,10 +42,4 @@ fun <T> Result<T>.toFallible(errorClassifier: ErrorClassifier, message: String):
         onSuccess = { Fallible.Success(it) },
         onFailure = { Fallible.Failed(errorClassifier.classify(it, message)) }
     )
-}
-
-suspend fun <T> loadable(block: suspend () -> Fallible<T>): Loadable<Fallible<T>> = try {
-    Loadable.Loaded(block())
-} catch (_: CancellationException) {
-    Loadable.Cancelled
 }

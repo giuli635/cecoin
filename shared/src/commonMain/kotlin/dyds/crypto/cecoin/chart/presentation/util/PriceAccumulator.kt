@@ -7,6 +7,10 @@ import dyds.crypto.cecoin.chart.presentation.model.Granularity
 interface PriceAccumulator {
     fun accumulate(trade: TradePrice)
     fun snapshot(): List<PricePoint>
+    fun accumulateAndSnapshot(trade: TradePrice): List<PricePoint> {
+        accumulate(trade)
+        return snapshot()
+    }
 }
 
 class PriceAccumulatorImpl(private val granularity: Granularity, historical: List<TradePrice>): PriceAccumulator {

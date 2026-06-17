@@ -29,10 +29,8 @@ import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import dyds.crypto.cecoin.news.presentation.NewsViewModel
-import dyds.crypto.cecoin.chart.presentation.ChartDataController
 import dyds.crypto.cecoin.chart.presentation.ChartScreenViewModel
 import dyds.crypto.cecoin.chart.presentation.GranularityStateHolder
-import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorImpl
 import dyds.crypto.cecoin.search.presentation.CoinSearchViewModel
 
 object CecoinDependencyInjector {
@@ -100,14 +98,7 @@ object CecoinDependencyInjector {
         return viewModel {
             ChartScreenViewModel(
                 getHistoricalPricesUseCase = getHistoricalPricesUseCase,
-                controllerFactory = { granularity, historical, scope ->
-                    ChartDataController(
-                        observeTradePricesUseCase = observeTradePricesUseCase,
-                        priceAccumulator = PriceAccumulatorImpl(granularity, historical),
-                        scope = scope,
-                        symbol = symbol,
-                    )
-                },
+                observeTradePricesUseCase = observeTradePricesUseCase,
                 symbol = symbol,
             )
         }

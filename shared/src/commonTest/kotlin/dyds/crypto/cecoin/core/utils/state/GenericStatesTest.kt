@@ -98,17 +98,5 @@ class GenericStatesTest {
         assertIs<RuntimeException>(generic.exception)
     }
 
-    @Test
-    fun `loadable wraps successful block in Loaded`() = runTest {
-        val result = loadable { Fallible.Success(42) }
-        val loaded = assertIs<Loadable.Loaded<Fallible<Int>>>(result)
-        val fallible = assertIs<Fallible.Success<Int>>(loaded.value)
-        assertEquals(42, fallible.value)
-    }
 
-    @Test
-    fun `loadable returns Cancelled on CancellationException`() = runTest {
-        val result = loadable<Any> { throw CancellationException("cancelled") }
-        assertIs<Loadable.Cancelled>(result)
-    }
 }
