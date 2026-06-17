@@ -261,14 +261,76 @@ class ChartScreenViewModelTest {
     @Test
     fun `live stream stops retrying on CancellationException`() = runTest {
         val (viewModel, _, _) = createViewModel(
-            historicalPrices = listOf(PricePoint(0L, 50000.0)),
+            historicalPrices = listOf(PricePoint(0L, 52000.0)),
             tradeException = CancellationException("Cancelled"),
         )
 
         viewModel.load(Granularity.M1)
         val chartData = viewModel.awaitChartData()
 
-        assertEquals(50000.0, chartData.last().price)
+        assertEquals(52000.0, chartData.last().price)
         viewModel.onCleared()
+    }
+
+    @Test
+    fun `trade updates chartData snapshot after seed`() = runTest {
+        val (viewModel, tradeUseCase, _) = createViewModel(historicalPrices = listOf(
+            PricePoint(0L, 50000.0),
+        ))
+
+        viewModel.load(Granularity.M1)
+        viewModel.awaitChartData()
+
+        tradeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
+
+        val snapshot = viewModel.chartData.first {
+            it is Fallible.Success && it.value.any { p -> p.price == 52000.0 }
+        }
+        assertIs<Fallible.Success<List<PricePoint>>>(snapshot)
+        val data = snapshot.value
+        assertTrue(data.any { it.price == 52000.0 })
+        viewModel.onCleared()
+    }
+
+    @Test
+    fun `cancel stops stream processing`() = runTest {
+        val (viewModel, tradeUseCase, _) = createViewModel()
+
+        viewModel.load(Granularity.M1)
+        viewModel.awaitChartData()
+
+        viewModel.cancel()
+
+        tradeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
+
+        val snapshot = viewModel.chartData.value
+        assertIs<Fallible.Success<List<PricePoint>>>(snapshot)
+        val data = snapshot.value
+        assertTrue(data.none { it.price == 52000.0 })
+        viewModel.onCleared()
+    }
+
+    @Test
+    fun `load cancels previous stream observation`() = runTest {
+        val (viewModel, tradeUseCase, _) = createViewModel(historicalPrices = listOf(
+            PricePoint(0L, 50000.0),
+        ))
+
+        viewModel.load(Granularity.M1)
+        viewModel.awaitChartData()
+
+        viewModel.load(Granularity.M5)
+        viewModel.awaitChartData()
+
+        tradeUseCase.emitted.send(TradePrice("BTCUSDT", PricePoint(60_000L, 52000.0)))
+
+        val snapshot = viewModel.chartData.first {
+            it is Fallible.Success && it.value.any { p -> p.price == 52000.0 }
+        }
+        assertIs<Fallible.Success<List<PricePoint>>>(snapshot)
+        val data = snapshot.value
+        assertTrue(data.any { it.price == 52000.0 })
+        viewModel.onCleared()
+        advanceUntilIdle()
     }
 }
