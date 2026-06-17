@@ -1,7 +1,6 @@
 package dyds.crypto.cecoin.news.presentation
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dyds.crypto.cecoin.news.domain.model.NewsArticle
 import dyds.crypto.cecoin.news.domain.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.core.presentation.utils.AsyncResult
