@@ -36,4 +36,14 @@ class ToggleFavoriteUseCaseTest {
         val result = repo.observeFavorites().first()
         assertEquals(emptySet(), result)
     }
+
+    @Test
+    fun `invoke returns Failed when repository throws`() = runTest {
+        val repo = FakeFavoriteRepository(exception = RuntimeException("repo fail"))
+        val useCase = ToggleFavoriteUseCaseImpl(repo, classifier)
+
+        val result = useCase(fakeBtcSymbol)
+
+        assertIs<Fallible.Failed>(result)
+    }
 }

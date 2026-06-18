@@ -19,6 +19,7 @@ internal class FakeCryptoSymbolRepository(
 
 internal class FakeFavoriteRepository(
     initialFavorites: Set<CryptoSymbol> = emptySet(),
+    var exception: Throwable? = null,
 ) : FavoriteRepository {
     private val favoritesFlow = MutableStateFlow(initialFavorites)
     var toggledSymbol: CryptoSymbol? = null
@@ -26,6 +27,7 @@ internal class FakeFavoriteRepository(
     override fun observeFavorites(): Flow<Set<CryptoSymbol>> = favoritesFlow
 
     override suspend fun toggleFavorite(symbol: CryptoSymbol) {
+        exception?.let { throw it }
         toggledSymbol = symbol
         favoritesFlow.value = if (symbol in favoritesFlow.value) {
             favoritesFlow.value - symbol
