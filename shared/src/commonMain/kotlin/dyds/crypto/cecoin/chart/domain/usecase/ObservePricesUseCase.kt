@@ -3,9 +3,9 @@ package dyds.crypto.cecoin.chart.domain.usecase
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.domain.repository.PriceRepository
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
-import dyds.crypto.cecoin.core.utils.ErrorStrings
-import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
-import dyds.crypto.cecoin.core.utils.state.Fallible
+import dyds.crypto.cecoin.chart.domain.error.ChartErrorMessages
+import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
+import dyds.crypto.cecoin.core.domain.state.Fallible
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -32,7 +32,7 @@ class ObservePricesUseCaseImpl(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                send(Fallible.Failed(errorClassifier.classify(e, ErrorStrings.LIVE_STREAM_FAILED)))
+                send(Fallible.Failed(errorClassifier.classify(e, ChartErrorMessages.LIVE_STREAM_FAILED)))
                 if (++retryCount > maxRetries) break
                 delay(retryDelayMs.milliseconds)
             }
