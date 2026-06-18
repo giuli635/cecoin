@@ -13,8 +13,11 @@ import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.Insets
 import com.patrykandpatrick.vico.compose.common.component.TextComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import dyds.crypto.cecoin.chart.presentation.model.Granularity
+import dyds.crypto.cecoin.chart.presentation.util.dateFormatter
 import dyds.crypto.cecoin.chart.presentation.util.priceFormatter
 import dyds.crypto.cecoin.chart.presentation.util.timeFormatter
+import dyds.crypto.cecoin.core.utils.MILLIS_IN_6_HOURS
 
 @Composable
 private fun startAxisLabel(): TextComponent {
@@ -43,11 +46,11 @@ fun rememberStartAxis() = VerticalAxis.rememberStart(
 )
 
 @Composable
-fun rememberBottomAxis() = HorizontalAxis.rememberBottom(
+fun rememberBottomAxis(granularity: Granularity) = HorizontalAxis.rememberBottom(
     guideline = rememberLineComponent(
         fill = Fill(MaterialTheme.colorScheme.outlineVariant),
         thickness = 0.5.dp,
     ),
-    valueFormatter = timeFormatter(),
+    valueFormatter = if (granularity.millis >= MILLIS_IN_6_HOURS) dateFormatter() else timeFormatter(),
     label = startAxisLabel(),
 )

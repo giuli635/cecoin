@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.presentation.component.GranularitySelector
 import dyds.crypto.cecoin.chart.presentation.component.PriceChart
+import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import dyds.crypto.cecoin.chart.presentation.util.ChartColors
 import dyds.crypto.cecoin.core.presentation.utils.buildAsyncStreamComposable
 import dyds.crypto.cecoin.core.presentation.utils.buildFallibleComposable
@@ -32,7 +33,7 @@ import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
 import dyds.crypto.cecoin.core.utils.format.priceStr
 
 @Composable
-private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) {
+private fun ChartContent(data: List<PricePoint>, granularity: Granularity, modifier: Modifier = Modifier) {
     val lastPrice = data.lastOrNull()?.price
     Column(
         modifier = modifier,
@@ -60,6 +61,7 @@ private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) 
         }
         PriceChart(
             points = data,
+            granularity = granularity,
             modifier = Modifier.padding(4.dp),
         )
     }
@@ -113,7 +115,7 @@ fun ChartScreen(
                 errorClassifier = errorClassifier,
                 inner = buildFallibleComposable(
                     inner = { data: List<PricePoint>, _ ->
-                        ChartContent(data, modifier = Modifier.fillMaxWidth().padding(8.dp))
+                        ChartContent(data, granularity, modifier = Modifier.fillMaxWidth().padding(8.dp))
                     },
                     onCancel = viewModel::cancel,
                     onRetry = { viewModel.load(granularity) },
