@@ -179,9 +179,8 @@ class ChartScreenViewModelTest {
         viewModel.awaitChartData()
 
         viewModel.load(Granularity.M1)
-        advanceUntilIdle()
 
-        val state = viewModel.state.first()
+        val state = viewModel.state.first { it !is Loadable.Loading }
         assertIs<Loadable.Loaded<*>>(state)
         viewModel.onCleared()
     }
