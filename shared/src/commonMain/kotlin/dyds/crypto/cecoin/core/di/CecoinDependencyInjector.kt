@@ -9,6 +9,7 @@ import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.chart.data.datasource.BinanceCoinHistoricalDataSource
 import dyds.crypto.cecoin.chart.data.datasource.BinanceCoinPriceDataSource
 import dyds.crypto.cecoin.chart.data.repository.ChartRepositoryImpl
+import dyds.crypto.cecoin.news.data.datasource.CachedNewsApiDataSource
 import dyds.crypto.cecoin.news.data.datasource.NewsApiRestDataSource
 import dyds.crypto.cecoin.news.data.repository.NewsRepositoryImpl
 import dyds.crypto.cecoin.search.data.datasource.BinanceCoinListDataSource
@@ -51,7 +52,7 @@ object CecoinDependencyInjector {
 
     private val searchRepository = SearchRepositoryImpl(coinListDataSource)
     private val chartRepository = ChartRepositoryImpl(coinPriceSource, coinHistoricalSource)
-    private val newsApiDataSource = NewsApiRestDataSource(httpClient)
+    private val newsApiDataSource = CachedNewsApiDataSource(NewsApiRestDataSource(httpClient))
     private val newsRepository = NewsRepositoryImpl(newsApiDataSource)
 
     private lateinit var priceAccumulatorFactory: PriceAccumulatorFactory
