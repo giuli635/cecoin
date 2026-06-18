@@ -1,28 +1,48 @@
-This is a Kotlin Multiplatform project targeting Desktop (JVM).
+# cecoin
 
-* [/shared](./shared/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./shared/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./shared/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./shared/src/jvmMain/kotlin)
-    folder is the appropriate location.
+Cryptocurrency portfolio tracker built with Kotlin Multiplatform + Compose Desktop.
 
-### Running the apps
+## Architecture
 
-Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
+Clean Architecture + MVVM with 4 layers:
 
-- Desktop app:
-  - Hot reload: `./gradlew :desktopApp:hotRun --auto`
-  - Standard run: `./gradlew :desktopApp:run`
+- **Domain** — use cases, models, repository interfaces, error classification
+- **Data** — repository implementations, API data sources (Binance, NewsAPI)
+- **Presentation** — ViewModels, Compose UI, state management (`Loadable`, `Fallible`)
+- **Core** — shared utilities, formatters, base types
 
-### Running tests
+## Project structure
 
-Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
+```
+cecoin/
+├── desktopApp/          # JVM Desktop entry point
+├── shared/
+│   ├── src/
+│   │   ├── commonMain/  # Shared multiplatform code
+│   │   └── jvmMain/     # JVM-specific implementations
+│   └── build.gradle.kts
+├── informe-v2-17-06.md  # Development progress report (gitignored)
+└── README.md
+```
 
-- Desktop tests: `./gradlew :shared:jvmTest`
+## Features
 
----
+- Real-time price chart with granularity selection (M1, M5, M15, M30, H1, H6, D1)
+- Cryptocurrency search with favorite symbols
+- Crypto news feed with search filtering
+- Favorite symbol management (persisted with DataStore)
+- Dark-themed Compose UI
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## Run
+
+```bash
+./gradlew :desktopApp:run
+```
+
+## Test
+
+```bash
+./gradlew :shared:allTests
+```
+
+161 tests across 22 test files — use cases, repositories, ViewModels, and UI utilities.
