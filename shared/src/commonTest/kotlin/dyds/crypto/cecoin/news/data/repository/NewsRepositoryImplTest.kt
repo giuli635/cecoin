@@ -5,6 +5,7 @@ import dyds.crypto.cecoin.news.domain.model.NewsArticle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class NewsRepositoryImplTest {
@@ -58,5 +59,15 @@ class NewsRepositoryImplTest {
 
         assertEquals(longStr, result.first().title)
         assertEquals(longStr, result.first().description)
+    }
+
+    @Test
+    fun `getCryptoNews propagates source exception`() = runTest {
+        val dataSource = FakeNewsApiDataSource(exception = RuntimeException("source fail"))
+        val repo = NewsRepositoryImpl(dataSource)
+
+        assertFailsWith<RuntimeException> {
+            repo.getCryptoNews()
+        }
     }
 }

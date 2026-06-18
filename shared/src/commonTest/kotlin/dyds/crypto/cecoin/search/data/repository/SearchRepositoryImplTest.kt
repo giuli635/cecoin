@@ -6,6 +6,7 @@ import dyds.crypto.cecoin.search.data.FakeCoinListDataSource
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class SearchRepositoryImplTest {
@@ -29,5 +30,15 @@ class SearchRepositoryImplTest {
         val result = repo.getAvailableSymbols()
 
         assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun `getAvailableSymbols propagates source exception`() = runTest {
+        val listSource = FakeCoinListDataSource(exception = RuntimeException("source fail"))
+        val repo = SearchRepositoryImpl(listSource)
+
+        assertFailsWith<RuntimeException> {
+            repo.getAvailableSymbols()
+        }
     }
 }

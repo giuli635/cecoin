@@ -8,8 +8,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class FakeCoinListDataSource(
     private val symbols: List<CryptoSymbol> = emptyList(),
+    var exception: Throwable? = null,
 ) : CoinListDataSource {
-    override suspend fun fetchSymbols(): List<CryptoSymbol> = symbols
+    override suspend fun fetchSymbols(): List<CryptoSymbol> {
+        exception?.let { throw it }
+        return symbols
+    }
 }
 
 internal class FakeFavoriteDataSource(
