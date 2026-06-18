@@ -6,10 +6,11 @@ import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.chart.domain.error.ChartErrorMessages
 import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
 import dyds.crypto.cecoin.core.domain.state.Fallible
-import kotlinx.coroutines.CancellationException
+import dyds.crypto.cecoin.core.domain.state.runCatchingCancellable
+import dyds.crypto.cecoin.core.domain.state.toFallible
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.flow
 import kotlin.time.Duration.Companion.milliseconds
 
 interface ObservePricesUseCase {
@@ -22,20 +23,18 @@ class ObservePricesUseCaseImpl(
     private val retryDelayMs: Long = 1_000L,
     private val maxRetries: Int = 3,
 ) : ObservePricesUseCase {
-    override fun invoke(symbol: CryptoSymbol): Flow<Fallible<PricePoint>> = channelFlow {
+    override fun invoke(symbol: CryptoSymbol): Flow<Fallible<PricePoint>> = flow {
         var retryCount = 0
         while (retryCount <= maxRetries) {
-            try {
+            runCatchingCancellable {
                 repository.observePrices(symbol).collect { point ->
-                    send(Fallible.Success(point))
+                    emit(Fallible.Success(point))
                 }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                send(Fallible.Failed(errorClassifier.classify(e, ChartErrorMessages.LIVE_STREAM_FAILED)))
-                if (++retryCount > maxRetries) break
-                delay(retryDelayMs.milliseconds)
-            }
+            }.toFallible(errorClassifier, ChartErrorMessages.LIVE_STREAM_FAILED)
+                .onFailure {
+                    emit(Fallible.Failed(it))
+                    if (++retryCount <= maxRetries) delay(retryDelayMs.milliseconds)
+                }
         }
     }
 }
