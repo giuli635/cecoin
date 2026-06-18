@@ -118,6 +118,33 @@ class CoinSearchViewModelTest {
     }
 
     @Test
+    fun `setFilterMode to FAVORITES reacts to dynamic favorites changes`() = runTest {
+        val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(fakeBtcSymbol, fakeEthSymbol))
+        val sharedFavorites = MutableStateFlow(setOf(fakeBtcSymbol))
+        val observeFake = FakeObserveFavoritesUseCase(flow = sharedFavorites)
+        val toggleFake = FakeToggleFavoriteUseCase(favorites = sharedFavorites)
+        val viewModel = createViewModel(symbolsFake = symbolsFake, toggleFake = toggleFake, observeFake = observeFake)
+
+        viewModel.filteredCoins.first { it !is Loadable.Loading }
+        viewModel.setFilterMode(FilterMode.FAVORITES)
+
+        val btcOnly = viewModel.filteredCoins.first {
+            it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf(fakeBtcSymbol)
+        }
+        assertEquals(listOf(fakeBtcSymbol), extractSymbols(btcOnly))
+
+        sharedFavorites.value = setOf(fakeBtcSymbol, fakeEthSymbol)
+
+        val both = viewModel.filteredCoins.first {
+            it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value.let { s ->
+                @Suppress("UNCHECKED_CAST")
+                (s as List<CryptoSymbol>).containsAll(listOf(fakeBtcSymbol, fakeEthSymbol))
+            }
+        }
+        assertEquals(2, extractSymbols(both).size)
+    }
+
+    @Test
     fun `toggleFavorite delegates to use case`() = runTest {
         val sharedFavorites = MutableStateFlow(emptySet<CryptoSymbol>())
         val toggleFake = FakeToggleFavoriteUseCase(favorites = sharedFavorites)
@@ -215,6 +242,31 @@ class CoinSearchViewModelTest {
 
         val cancelled = viewModel.filteredCoins.first { it is Loadable.Cancelled }
         assertIs<Loadable.Cancelled>(cancelled)
+    }
+
+    @Test
+    fun `cancel then retry loads symbols successfully`() = runTest {
+        val symbolsDeferred = CompletableDeferred<List<CryptoSymbol>>()
+        val getSymbols = object : GetAvailableSymbolsUseCase {
+            override suspend fun invoke(): Fallible<List<CryptoSymbol>> =
+                Fallible.Success(symbolsDeferred.await())
+        }
+        val viewModel = CoinSearchViewModel(
+            getAvailableSymbolsUseCase = getSymbols,
+            toggleFavoriteUseCase = FakeToggleFavoriteUseCase(),
+            observeFavoritesUseCase = FakeObserveFavoritesUseCase(),
+        )
+
+        viewModel.filteredCoins.first { it is Loadable.Loading }
+        viewModel.onCancelLoadSymbols()
+
+        symbolsDeferred.complete(listOf(fakeBtcSymbol))
+        viewModel.retryLoadSymbols()
+
+        val result = viewModel.filteredCoins.first {
+            it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf(fakeBtcSymbol)
+        }
+        assertEquals(listOf(fakeBtcSymbol), extractSymbols(result))
     }
 
     @Test

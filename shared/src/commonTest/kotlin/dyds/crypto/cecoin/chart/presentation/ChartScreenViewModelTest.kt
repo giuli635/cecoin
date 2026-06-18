@@ -2,12 +2,14 @@ package dyds.crypto.cecoin.chart.presentation
 
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.domain.usecase.FakeGetHistoricalPricesUseCase
+import dyds.crypto.cecoin.chart.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import dyds.crypto.cecoin.core.domain.state.Fallible
 import dyds.crypto.cecoin.core.domain.state.Loadable
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -200,6 +202,24 @@ class ChartScreenViewModelTest {
         viewModel.load(Granularity.M1)
         viewModel.awaitChartData()
 
+        viewModel.onCleared()
+    }
+
+    @Test
+    fun `onCleared while load is in progress cancels job and does not crash`() = runTest {
+        val historicalUseCase = object : GetHistoricalPricesUseCase {
+            override suspend fun invoke(
+                symbol: CryptoSymbol, interval: String, limit: Int,
+            ): Fallible<List<PricePoint>> = awaitCancellation()
+        }
+        val viewModel = ChartScreenViewModel(
+            getHistoricalPricesUseCase = historicalUseCase,
+            observePricesUseCase = FakeObservePricesUseCase(),
+            symbol = fakeBtcSymbol,
+            priceAccumulatorFactory = fakePriceAccumulatorFactory(),
+        )
+
+        viewModel.load(Granularity.M1)
         viewModel.onCleared()
     }
 

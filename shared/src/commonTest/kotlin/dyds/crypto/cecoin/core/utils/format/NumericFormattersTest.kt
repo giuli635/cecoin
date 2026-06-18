@@ -111,6 +111,11 @@ class NumericFormattersTest {
     }
 
     @Test
+    fun `formatThousands with negative value`() {
+        assertEquals("-1,234", formatThousands(-1234L))
+    }
+
+    @Test
     fun `priceStr with default decimals`() {
         assertEquals("\$1,234.50", priceStr(1234.5))
     }

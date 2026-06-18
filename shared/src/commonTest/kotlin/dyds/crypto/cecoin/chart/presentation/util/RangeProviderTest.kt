@@ -22,6 +22,14 @@ class RangeProviderTest {
     }
 
     @Test
+    fun `computeChartYRange with negative values returns padded range`() {
+        val range = computeChartYRange(-200.0, -100.0)
+
+        assertTrue(range.min < -200.0)
+        assertTrue(range.max > -100.0)
+    }
+
+    @Test
     fun `computeChartXRange with valid range returns padded max`() {
         val range = computeChartXRange(0.0, 3600000.0)
 
