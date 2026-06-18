@@ -83,4 +83,8 @@ class CoinSearchViewModel(
                 .onFailure { error -> _toggleError.value = error }
         }
     }
+
+    fun clearToggleError() {
+        _toggleError.value = null
+    }
 }
