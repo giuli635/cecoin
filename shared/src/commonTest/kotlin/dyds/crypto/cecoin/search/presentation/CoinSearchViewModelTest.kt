@@ -8,6 +8,7 @@ import dyds.crypto.cecoin.search.domain.usecase.FakeGetAvailableSymbolsUseCase
 import dyds.crypto.cecoin.search.domain.usecase.FakeObserveFavoritesUseCase
 import dyds.crypto.cecoin.search.domain.usecase.FakeToggleFavoriteUseCase
 import dyds.crypto.cecoin.search.domain.usecase.GetAvailableSymbolsUseCase
+import dyds.crypto.cecoin.core.domain.error.AppError
 import dyds.crypto.cecoin.core.domain.state.Fallible
 import dyds.crypto.cecoin.core.domain.state.Loadable
 import kotlinx.coroutines.CompletableDeferred
@@ -18,6 +19,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class CoinSearchViewModelTest {
@@ -126,6 +128,39 @@ class CoinSearchViewModelTest {
 
         assertTrue(fakeBtcSymbol in viewModel.favorites.first { fakeBtcSymbol in it })
         assertEquals(fakeBtcSymbol, toggleFake.lastToggled)
+    }
+
+    @Test
+    fun `toggleFavorite sets toggleError to null on success`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.toggleFavorite(fakeBtcSymbol)
+
+        assertNull(viewModel.toggleError.first { it == null })
+    }
+
+    @Test
+    fun `toggleFavorite sets toggleError on failure`() = runTest {
+        val toggleFake = FakeToggleFavoriteUseCase(exception = RuntimeException("fail"))
+        val viewModel = createViewModel(toggleFake = toggleFake)
+
+        viewModel.toggleFavorite(fakeBtcSymbol)
+
+        val error = viewModel.toggleError.first { it != null }
+        assertIs<AppError.GenericError>(error)
+    }
+
+    @Test
+    fun `clearToggleError resets toggleError to null`() = runTest {
+        val toggleFake = FakeToggleFavoriteUseCase(exception = RuntimeException("fail"))
+        val viewModel = createViewModel(toggleFake = toggleFake)
+
+        viewModel.toggleFavorite(fakeBtcSymbol)
+        viewModel.toggleError.first { it != null }
+
+        viewModel.clearToggleError()
+
+        assertNull(viewModel.toggleError.first { it == null })
     }
 
     @Test

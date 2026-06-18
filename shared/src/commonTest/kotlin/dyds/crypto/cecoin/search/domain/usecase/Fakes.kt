@@ -28,10 +28,12 @@ class FakeObserveFavoritesUseCase(
 
 class FakeToggleFavoriteUseCase(
     val favorites: MutableStateFlow<Set<CryptoSymbol>> = MutableStateFlow(emptySet()),
+    var exception: Throwable? = null,
 ) : ToggleFavoriteUseCase {
     var lastToggled: CryptoSymbol? = null
 
     override suspend fun invoke(symbol: CryptoSymbol): Fallible<Unit> {
+        if (exception != null) return Fallible.Failed(AppError.GenericError(exception!!, "fallo"))
         lastToggled = symbol
         favorites.value = if (symbol in favorites.value) {
             favorites.value - symbol

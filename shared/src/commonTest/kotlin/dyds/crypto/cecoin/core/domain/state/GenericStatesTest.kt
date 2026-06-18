@@ -98,5 +98,20 @@ class GenericStatesTest {
         assertIs<RuntimeException>(generic.exception)
     }
 
+    @Test
+    fun `Fallible onFailure on Success does not invoke action`() {
+        var invoked = false
+        val success: Fallible<Int> = Fallible.Success(42)
+        success.onFailure { invoked = true }
+        assertTrue(!invoked)
+    }
 
+    @Test
+    fun `Fallible onFailure on Failed invokes action with error`() {
+        val error = AppError.GenericError(RuntimeException("fail"), "msg")
+        val failed: Fallible<Int> = Fallible.Failed(error)
+        var captured: AppError? = null
+        failed.onFailure { captured = it }
+        assertIs<AppError.GenericError>(captured)
+    }
 }

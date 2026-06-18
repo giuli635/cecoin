@@ -47,4 +47,15 @@ class GetHistoricalPricesUseCaseTest {
 
         assertIs<Fallible.Failed>(result)
     }
+
+    @Test
+    fun `invoke returns empty list when repository returns empty`() = runTest {
+        val repo = FakePriceRepository(historical = emptyList())
+        val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier)
+
+        val result = useCase(fakeBtcSymbol)
+
+        val success = assertIs<Fallible.Success<List<*>>>(result)
+        assertEquals(0, success.value.size)
+    }
 }
