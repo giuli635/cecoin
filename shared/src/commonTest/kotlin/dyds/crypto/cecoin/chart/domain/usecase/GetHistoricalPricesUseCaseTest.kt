@@ -37,4 +37,14 @@ class GetHistoricalPricesUseCaseTest {
         val success = assertIs<Fallible.Success<List<PricePoint>>>(result)
         assertEquals(expected, success.value)
     }
+
+    @Test
+    fun `invoke returns Failed when repository throws`() = runTest {
+        val repo = FakePriceRepository(historicalException = RuntimeException("repo fail"))
+        val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier)
+
+        val result = useCase(fakeBtcSymbol)
+
+        assertIs<Fallible.Failed>(result)
+    }
 }
