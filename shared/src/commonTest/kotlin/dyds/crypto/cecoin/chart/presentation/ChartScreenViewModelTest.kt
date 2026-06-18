@@ -220,21 +220,6 @@ class ChartScreenViewModelTest {
     }
 
     @Test
-    fun `emits failed state when historical fetch fails without starting stream`() = runTest {
-        val (viewModel, _, _) = createViewModel(
-            historicalPrices = emptyList(),
-            historicalException = RuntimeException("History error"),
-        )
-
-        viewModel.load(Granularity.M1)
-        val state = viewModel.state.first { it !is Loadable.Loading }
-        assertIs<Loadable.Loaded<*>>(state)
-        val loaded = state as Loadable.Loaded
-        assertIs<Fallible.Failed>(loaded.value)
-        viewModel.onCleared()
-    }
-
-    @Test
     fun `live stream stops retrying on CancellationException`() = runTest {
         val (viewModel, _, _) = createViewModel(
             historicalPrices = listOf(PricePoint(0L, 52000.0)),

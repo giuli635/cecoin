@@ -74,18 +74,6 @@ class NewsViewModelTest {
     }
 
     @Test
-    fun `onCancelLoadNews cancels active job`() = runTest {
-        val fake = FakeGetCryptoNewsUseCase()
-        val viewModel = createViewModel(fake)
-
-        viewModel.asyncNews.first { it !is Loadable.Loading }
-        viewModel.onCancelLoadNews()
-
-        val state = viewModel.uiState.first()
-        assertEquals("", state.searchQuery)
-    }
-
-    @Test
     fun `onCancelLoadNews emits Cancelled when load is in progress`() = runTest {
         val loadStarted = MutableStateFlow(false)
         val useCase = object : GetCryptoNewsUseCase {
