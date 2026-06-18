@@ -17,7 +17,6 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
-import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import dyds.crypto.cecoin.chart.presentation.util.VicoChartModelBuilder
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -30,7 +29,6 @@ private const val LAST_POINT_VIEWPORT_BIAS = 0.5f
 @Composable
 fun PriceChart(
     points: List<PricePoint>,
-    granularity: Granularity,
     modifier: Modifier = Modifier,
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
@@ -67,7 +65,7 @@ fun PriceChart(
             rememberCartesianChart(
                 rememberChartLayer(),
                 startAxis = rememberStartAxis(),
-                bottomAxis = rememberBottomAxis(granularity),
+                bottomAxis = rememberBottomAxis(),
                 marker = rememberChartMarker(),
                 markerController = rememberChartMarkerController(),
             ),

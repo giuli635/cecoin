@@ -33,7 +33,7 @@ import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
 import dyds.crypto.cecoin.core.utils.format.priceStr
 
 @Composable
-private fun ChartContent(data: List<PricePoint>, granularity: Granularity, modifier: Modifier = Modifier) {
+private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) {
     val lastPrice = data.lastOrNull()?.price
     Column(
         modifier = modifier,
@@ -61,7 +61,6 @@ private fun ChartContent(data: List<PricePoint>, granularity: Granularity, modif
         }
         PriceChart(
             points = data,
-            granularity = granularity,
             modifier = Modifier.padding(4.dp),
         )
     }
@@ -115,7 +114,7 @@ fun ChartScreen(
                 errorClassifier = errorClassifier,
                 inner = buildFallibleComposable(
                     inner = { data: List<PricePoint>, _ ->
-                        ChartContent(data, granularity, modifier = Modifier.fillMaxWidth().padding(8.dp))
+                        ChartContent(data, modifier = Modifier.fillMaxWidth().padding(8.dp))
                     },
                     onCancel = viewModel::cancel,
                     onRetry = { viewModel.load(granularity) },
