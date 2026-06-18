@@ -4,8 +4,8 @@ import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.search.domain.usecase.GetAvailableSymbolsUseCase
 import dyds.crypto.cecoin.search.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.search.domain.usecase.ToggleFavoriteUseCase
-import dyds.crypto.cecoin.core.utils.state.Fallible
-import dyds.crypto.cecoin.core.utils.error.AppError
+import dyds.crypto.cecoin.core.domain.state.Fallible
+import dyds.crypto.cecoin.core.domain.error.AppError
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 

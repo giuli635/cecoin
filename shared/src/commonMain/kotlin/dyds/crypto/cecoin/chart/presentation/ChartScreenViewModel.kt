@@ -7,8 +7,8 @@ import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorFactory
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.presentation.utils.AsyncResult
-import dyds.crypto.cecoin.core.utils.state.Fallible
-import dyds.crypto.cecoin.core.utils.state.Loadable
+import dyds.crypto.cecoin.core.domain.state.Fallible
+import dyds.crypto.cecoin.core.domain.state.Loadable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job

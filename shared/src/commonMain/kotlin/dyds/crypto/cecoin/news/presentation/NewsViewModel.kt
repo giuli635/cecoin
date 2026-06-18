@@ -5,7 +5,7 @@ import dyds.crypto.cecoin.news.domain.model.NewsArticle
 import dyds.crypto.cecoin.news.domain.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.core.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.core.presentation.utils.launchLoadable
-import dyds.crypto.cecoin.core.utils.state.Loadable
+import dyds.crypto.cecoin.core.domain.state.Loadable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

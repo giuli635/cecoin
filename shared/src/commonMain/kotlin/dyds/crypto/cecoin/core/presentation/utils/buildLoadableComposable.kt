@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.core.presentation.buildComposableRenderer
 import dyds.crypto.cecoin.core.utils.CoreStrings
-import dyds.crypto.cecoin.core.utils.state.Loadable
+import dyds.crypto.cecoin.core.domain.state.Loadable
 
 fun <T> buildLoadableComposable(onCancel: () -> Unit, onRetry: () -> Unit, inner: Renderer<T>): Renderer<Loadable<T>> =
     { value, modifier -> when (value) {

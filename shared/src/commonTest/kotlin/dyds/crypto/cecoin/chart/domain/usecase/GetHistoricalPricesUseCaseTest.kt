@@ -4,8 +4,8 @@ import dyds.crypto.cecoin.chart.domain.FakePriceRepository
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
-import dyds.crypto.cecoin.core.utils.error.fakeErrorClassifier
-import dyds.crypto.cecoin.core.utils.state.Fallible
+import dyds.crypto.cecoin.core.domain.error.fakeErrorClassifier
+import dyds.crypto.cecoin.core.domain.state.Fallible
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -5,8 +5,8 @@ import dyds.crypto.cecoin.chart.domain.usecase.ObservePricesUseCase
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulator
 import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorFactory
-import dyds.crypto.cecoin.core.utils.error.AppError
-import dyds.crypto.cecoin.core.utils.state.Fallible
+import dyds.crypto.cecoin.core.domain.error.AppError
+import dyds.crypto.cecoin.core.domain.state.Fallible
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow

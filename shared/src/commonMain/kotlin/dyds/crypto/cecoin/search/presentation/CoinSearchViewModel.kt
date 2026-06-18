@@ -9,7 +9,7 @@ import dyds.crypto.cecoin.search.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.search.presentation.util.filterBy
 import dyds.crypto.cecoin.core.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.core.presentation.utils.launchLoadable
-import dyds.crypto.cecoin.core.utils.state.Loadable
+import dyds.crypto.cecoin.core.domain.state.Loadable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

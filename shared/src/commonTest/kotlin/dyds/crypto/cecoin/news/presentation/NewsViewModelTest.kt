@@ -4,8 +4,8 @@ import dyds.crypto.cecoin.news.domain.model.NewsArticle
 import dyds.crypto.cecoin.news.domain.usecase.FakeGetCryptoNewsUseCase
 import dyds.crypto.cecoin.news.domain.usecase.GetCryptoNewsUseCase
 import kotlinx.coroutines.awaitCancellation
-import dyds.crypto.cecoin.core.utils.state.Fallible
-import dyds.crypto.cecoin.core.utils.state.Loadable
+import dyds.crypto.cecoin.core.domain.state.Fallible
+import dyds.crypto.cecoin.core.domain.state.Loadable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

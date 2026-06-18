@@ -8,8 +8,8 @@ import dyds.crypto.cecoin.search.domain.usecase.FakeGetAvailableSymbolsUseCase
 import dyds.crypto.cecoin.search.domain.usecase.FakeObserveFavoritesUseCase
 import dyds.crypto.cecoin.search.domain.usecase.FakeToggleFavoriteUseCase
 import dyds.crypto.cecoin.search.domain.usecase.GetAvailableSymbolsUseCase
-import dyds.crypto.cecoin.core.utils.state.Fallible
-import dyds.crypto.cecoin.core.utils.state.Loadable
+import dyds.crypto.cecoin.core.domain.state.Fallible
+import dyds.crypto.cecoin.core.domain.state.Loadable
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow

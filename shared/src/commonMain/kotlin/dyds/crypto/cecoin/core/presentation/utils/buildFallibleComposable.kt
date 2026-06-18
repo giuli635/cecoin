@@ -16,8 +16,8 @@ import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.core.presentation.buildComposableRenderer
 import dyds.crypto.cecoin.core.utils.CoreStrings
-import dyds.crypto.cecoin.core.utils.error.AppError
-import dyds.crypto.cecoin.core.utils.state.Fallible
+import dyds.crypto.cecoin.core.domain.error.AppError
+import dyds.crypto.cecoin.core.domain.state.Fallible
 
 fun <T> buildFallibleComposable(
     inner: Renderer<T>,

@@ -1,8 +1,8 @@
-package dyds.crypto.cecoin.core.utils.state
+package dyds.crypto.cecoin.core.domain.state
 
-import dyds.crypto.cecoin.core.utils.error.AppError
+import dyds.crypto.cecoin.core.domain.error.AppError
 import kotlinx.coroutines.CancellationException
-import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
+import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
 
 sealed class Loadable<out T> {
     object Loading : Loadable<Nothing>()

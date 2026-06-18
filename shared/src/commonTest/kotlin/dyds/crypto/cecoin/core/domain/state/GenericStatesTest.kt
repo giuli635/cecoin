@@ -1,7 +1,7 @@
-package dyds.crypto.cecoin.core.utils.state
+package dyds.crypto.cecoin.core.domain.state
 
-import dyds.crypto.cecoin.core.utils.error.AppError
-import dyds.crypto.cecoin.core.utils.error.fakeErrorClassifier
+import dyds.crypto.cecoin.core.domain.error.AppError
+import dyds.crypto.cecoin.core.domain.error.fakeErrorClassifier
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest

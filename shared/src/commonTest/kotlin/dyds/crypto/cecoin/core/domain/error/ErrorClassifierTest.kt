@@ -1,7 +1,7 @@
-package dyds.crypto.cecoin.core.utils.error
+package dyds.crypto.cecoin.core.domain.error
 
-import dyds.crypto.cecoin.core.utils.error.AppError
-import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
+import dyds.crypto.cecoin.core.domain.error.AppError
+import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
 
 import kotlin.test.Test
 import kotlin.test.assertIs

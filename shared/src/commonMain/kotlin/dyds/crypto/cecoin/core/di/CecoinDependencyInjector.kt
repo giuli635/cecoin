@@ -28,7 +28,7 @@ import dyds.crypto.cecoin.search.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.search.domain.usecase.ObserveFavoritesUseCaseImpl
 import dyds.crypto.cecoin.search.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.search.domain.usecase.ToggleFavoriteUseCaseImpl
-import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
+import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import dyds.crypto.cecoin.news.presentation.NewsViewModel

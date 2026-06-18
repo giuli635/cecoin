@@ -1,4 +1,4 @@
-package dyds.crypto.cecoin.core.utils.error
+package dyds.crypto.cecoin.core.domain.error
 
 import kotlinx.coroutines.CancellationException
 

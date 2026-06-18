@@ -2,8 +2,8 @@ package dyds.crypto.cecoin.news.domain.usecase
 
 import dyds.crypto.cecoin.news.domain.FakeNewsRepository
 import dyds.crypto.cecoin.news.domain.model.NewsArticle
-import dyds.crypto.cecoin.core.utils.error.fakeErrorClassifier
-import dyds.crypto.cecoin.core.utils.state.Fallible
+import dyds.crypto.cecoin.core.domain.error.fakeErrorClassifier
+import dyds.crypto.cecoin.core.domain.state.Fallible
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
