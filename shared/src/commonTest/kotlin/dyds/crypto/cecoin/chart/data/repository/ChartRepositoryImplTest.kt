@@ -14,7 +14,6 @@ import kotlin.test.assertFailsWith
 
 class ChartRepositoryImplTest {
     private val btcPricePoint = PricePoint(1000L, 50000.0)
-    private val ethPricePoint = PricePoint(2000L, 3000.0)
 
     @Test
     fun `getHistoricalPrices delegates to historical source with normalized symbol`() = runTest {
