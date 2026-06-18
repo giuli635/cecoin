@@ -20,8 +20,8 @@ import dyds.crypto.cecoin.news.domain.model.NewsArticle
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.news.presentation.component.NewsCard
 import dyds.crypto.cecoin.core.presentation.utils.buildAsyncComposable
-import dyds.crypto.cecoin.core.utils.NewsStrings
-import dyds.crypto.cecoin.core.utils.state.Loadable
+import dyds.crypto.cecoin.news.presentation.NewsStrings
+import dyds.crypto.cecoin.core.domain.state.Loadable
 
 @Composable
 fun NewsScreen(

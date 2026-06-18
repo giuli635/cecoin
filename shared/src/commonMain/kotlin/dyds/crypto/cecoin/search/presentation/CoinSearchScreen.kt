@@ -23,8 +23,8 @@ import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.search.presentation.component.CoinItem
 import dyds.crypto.cecoin.search.presentation.component.FilterDropdown
 import dyds.crypto.cecoin.core.presentation.utils.buildAsyncComposable
-import dyds.crypto.cecoin.core.utils.SearchStrings
-import dyds.crypto.cecoin.core.utils.state.Loadable
+import dyds.crypto.cecoin.search.presentation.SearchStrings
+import dyds.crypto.cecoin.core.domain.state.Loadable
 
 @Composable
 fun CoinSearchScreen(

@@ -10,7 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dyds.crypto.cecoin.core.utils.SearchStrings
+import dyds.crypto.cecoin.search.presentation.SearchStrings
 import dyds.crypto.cecoin.search.presentation.FilterMode
 
 @Composable

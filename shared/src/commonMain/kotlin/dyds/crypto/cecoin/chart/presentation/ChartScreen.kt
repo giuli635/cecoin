@@ -27,8 +27,8 @@ import dyds.crypto.cecoin.chart.presentation.component.PriceChart
 import dyds.crypto.cecoin.chart.presentation.util.ChartColors
 import dyds.crypto.cecoin.core.presentation.utils.buildAsyncStreamComposable
 import dyds.crypto.cecoin.core.presentation.utils.buildFallibleComposable
-import dyds.crypto.cecoin.core.utils.ChartStrings
-import dyds.crypto.cecoin.core.utils.error.ErrorClassifier
+import dyds.crypto.cecoin.chart.presentation.ChartStrings
+import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
 import dyds.crypto.cecoin.core.utils.format.priceStr
 
 @Composable
