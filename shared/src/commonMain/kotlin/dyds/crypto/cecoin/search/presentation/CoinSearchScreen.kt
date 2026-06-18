@@ -35,6 +35,7 @@ fun CoinSearchScreen(
     val uiState by viewModel.uiState.collectAsState()
     val asyncFilteredCoins by viewModel.filteredCoins.collectAsState()
     val favorites by viewModel.favorites.collectAsState()
+    val toggleError by viewModel.toggleError.collectAsState()
 
     Column(
         modifier = modifier
@@ -65,6 +66,14 @@ fun CoinSearchScreen(
             FilterDropdown(
                 currentMode = uiState.filterMode,
                 onModeSelected = viewModel::setFilterMode,
+            )
+        }
+
+        toggleError?.let { error ->
+            Text(
+                text = error.getMessage(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
             )
         }
 

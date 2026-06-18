@@ -24,6 +24,11 @@ sealed class Fallible<out T> {
         is Success -> Success(transform(value))
         is Failed -> this
     }
+
+    inline fun onFailure(action: (AppError) -> Unit): Fallible<T> {
+        if (this is Failed) action(error)
+        return this
+    }
 }
 
 

@@ -9,6 +9,8 @@ import dyds.crypto.cecoin.search.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.search.presentation.util.filterBy
 import dyds.crypto.cecoin.core.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.core.presentation.utils.launchLoadable
+import dyds.crypto.cecoin.core.domain.error.AppError
+import dyds.crypto.cecoin.core.domain.state.Fallible
 import dyds.crypto.cecoin.core.domain.state.Loadable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +30,9 @@ class CoinSearchViewModel(
     val uiState: StateFlow<CoinSearchUiState> = _uiState.asStateFlow()
 
     private val _asyncAvailableSymbols = MutableStateFlow<AsyncResult<List<CryptoSymbol>>>(Loadable.Loading)
+
+    private val _toggleError = MutableStateFlow<AppError?>(null)
+    val toggleError: StateFlow<AppError?> = _toggleError.asStateFlow()
 
     val favorites: StateFlow<Set<CryptoSymbol>> = observeFavoritesUseCase()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptySet())
@@ -73,7 +78,9 @@ class CoinSearchViewModel(
 
     fun toggleFavorite(symbol: CryptoSymbol) {
         viewModelScope.launch {
+            _toggleError.value = null
             toggleFavoriteUseCase(symbol)
+                .onFailure { error -> _toggleError.value = error }
         }
     }
 }

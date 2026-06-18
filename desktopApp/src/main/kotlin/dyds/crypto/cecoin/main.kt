@@ -15,7 +15,9 @@ fun main() {
 
     val errorClassifier = object : ErrorClassifier() {
         override fun isNetworkError(exception: Throwable): Boolean =
-            exception is java.io.IOException ||
+            exception.javaClass.name.startsWith("java.net.") ||
+                exception.javaClass.name.startsWith("javax.net.") ||
+                exception.javaClass.name.startsWith("io.ktor.client.network.") ||
                 exception.javaClass.name.contains("UnresolvedAddressException") ||
                 exception.javaClass.name.contains("NoRouteToHostException") ||
                 exception.message?.contains("No route to host") == true ||
