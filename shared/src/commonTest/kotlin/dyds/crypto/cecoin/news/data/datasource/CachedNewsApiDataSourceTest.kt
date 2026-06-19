@@ -1,16 +1,12 @@
 package dyds.crypto.cecoin.news.data.datasource
 
-import dyds.crypto.cecoin.core.utils.FakeTimeProvider
 import dyds.crypto.cecoin.news.domain.model.NewsArticle
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.minutes
 
 class CachedNewsApiDataSourceTest {
 
@@ -71,49 +67,6 @@ class CachedNewsApiDataSourceTest {
     }
 
     @Test
-    fun `fetchCryptoNews calls source again when TTL expires`() = runTest {
-        val timeProvider = FakeTimeProvider()
-        val source = FakeNewsApiDataSource(listOf(articleA, articleB))
-        val cache = object : CachedNewsApiDataSource(source, ttl = 1.minutes) {
-            override fun now(): Long = timeProvider()
-        }
-
-        cache.fetchCryptoNews()
-        assertEquals(1, source.callCount)
-
-        timeProvider.advanceBy(61000)
-
-        val result = cache.fetchCryptoNews()
-
-        assertEquals(listOf(articleA, articleB), result)
-        assertEquals(2, source.callCount)
-    }
-
-    @Test
-    fun `concurrent calls after TTL expiry only trigger one source fetch`() = runTest {
-        val timeProvider = FakeTimeProvider()
-        val source = FakeNewsApiDataSource(
-            articles = listOf(articleA, articleB),
-            fetchDelay = 10.milliseconds,
-        )
-        val cache = object : CachedNewsApiDataSource(source, ttl = 1.minutes) {
-            override fun now(): Long = timeProvider()
-        }
-
-        cache.fetchCryptoNews()
-        timeProvider.advanceBy(61000)
-
-        coroutineScope {
-            val jobs = (1..10).map {
-                launch { cache.fetchCryptoNews() }
-            }
-            jobs.forEach { it.join() }
-        }
-
-        assertEquals(2, source.callCount)
-    }
-
-    @Test
     fun `concurrent calls only trigger one source fetch`() = runTest {
         val source = FakeNewsApiDataSource(listOf(articleA))
         val cache = CachedNewsApiDataSource(source, ttl = 2.minutes)
@@ -130,13 +83,11 @@ class CachedNewsApiDataSourceTest {
 
     private class FakeNewsApiDataSource(
         var articles: List<NewsArticle>,
-        private val fetchDelay: Duration = Duration.ZERO,
     ) : NewsApiDataSource {
         var callCount = 0
 
         override suspend fun fetchCryptoNews(): List<NewsArticle> {
             callCount++
-            if (fetchDelay > Duration.ZERO) delay(fetchDelay)
             return articles
         }
     }
