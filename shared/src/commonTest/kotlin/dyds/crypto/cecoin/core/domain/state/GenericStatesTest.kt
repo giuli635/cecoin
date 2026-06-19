@@ -2,7 +2,7 @@ package dyds.crypto.cecoin.core.domain.state
 
 import dyds.crypto.cecoin.core.domain.error.AppError
 import dyds.crypto.cecoin.core.domain.error.fakeErrorClassifier
-import java.io.IOException
+
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -82,7 +82,7 @@ class GenericStatesTest {
     @Test
     fun `toFallible with network error returns NetworkError`() = runTest {
         val classifier = fakeErrorClassifier(isNetworkError = true)
-        val result = Result.failure<Int>(IOException("no network"))
+        val result = Result.failure<Int>(RuntimeException("no network"))
         val fallible = result.toFallible(classifier, "net msg")
         val failed = assertIs<Fallible.Failed>(fallible)
         assertIs<AppError.NetworkError>(failed.error)

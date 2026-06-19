@@ -23,6 +23,7 @@ kotlin {
             implementation(libs.androidx.navigation.compose)
 
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
 
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.websockets)

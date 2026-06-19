@@ -3,16 +3,15 @@ package dyds.crypto.cecoin.chart.presentation.util
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import dyds.crypto.cecoin.core.utils.format.pad
 import dyds.crypto.cecoin.core.utils.format.priceStr
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 fun priceFormatter(): CartesianValueFormatter =
     CartesianValueFormatter { _, value, _ -> priceStr(value) }
 
 fun dateFormatter(): CartesianValueFormatter = CartesianValueFormatter { _, value, _ ->
-    val zoned = java.time.Instant.ofEpochMilli(value.toLong())
-        .atZone(java.time.ZoneId.systemDefault())
-    val day = zoned.dayOfMonth.pad(2)
-    val mon = zoned.monthValue.pad(2)
-    val h = zoned.hour.pad(2)
-    val m = zoned.minute.pad(2)
-    "$day/$mon $h:$m"
+    val instant = Instant.fromEpochMilliseconds(value.toLong())
+    val local = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+    "${local.dayOfMonth.pad(2)}/${local.monthNumber.pad(2)} ${local.hour.pad(2)}:${local.minute.pad(2)}"
 }

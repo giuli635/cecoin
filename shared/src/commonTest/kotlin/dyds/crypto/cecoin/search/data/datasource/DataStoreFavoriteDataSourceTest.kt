@@ -1,23 +1,14 @@
 package dyds.crypto.cecoin.search.data.datasource
 
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import java.io.File
-import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DataStoreFavoriteDataSourceTest {
-    private var tempFile: File? = null
-
-    @AfterTest
-    fun cleanup() {
-        tempFile?.delete()
-    }
 
     @Test
     fun `initial favorites are empty`() = runTest {
@@ -70,10 +61,7 @@ class DataStoreFavoriteDataSourceTest {
     }
 
     private fun createSource(): DataStoreFavoriteDataSource {
-        val file = File.createTempFile("favorites_test", ".preferences_pb")
-        file.delete()
-        tempFile = file
-        val dataStore = PreferenceDataStoreFactory.create { file }
+        val dataStore = createTestDataStore()
         return DataStoreFavoriteDataSource(dataStore)
     }
 }
