@@ -7,10 +7,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class FakeCoinListDataSource(
-    private val symbols: List<CryptoSymbol> = emptyList(),
+    var symbols: List<CryptoSymbol> = emptyList(),
     var exception: Throwable? = null,
 ) : CoinListDataSource {
+    var callCount = 0
+
     override suspend fun fetchSymbols(): List<CryptoSymbol> {
+        callCount++
         exception?.let { throw it }
         return symbols
     }
