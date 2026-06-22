@@ -28,7 +28,9 @@ import dyds.crypto.cecoin.search.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.search.domain.usecase.ObserveFavoritesUseCaseImpl
 import dyds.crypto.cecoin.search.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.search.domain.usecase.ToggleFavoriteUseCaseImpl
+import dyds.crypto.cecoin.core.data.caching.CachedDataSource
 import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
+import kotlin.time.Duration.Companion.minutes
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import dyds.crypto.cecoin.news.presentation.NewsViewModel
@@ -48,10 +50,19 @@ object CecoinDependencyInjector {
     private val coinHistoricalSource = BinanceCoinHistoricalDataSource(httpClient)
     private val coinListDataSource = BinanceCoinListDataSource(httpClient)
 
-    private val searchRepository = SearchRepositoryImpl(coinListDataSource)
-    private val chartRepository = ChartRepositoryImpl(coinPriceSource, coinHistoricalSource)
+    private val coinListCache = CachedDataSource(
+        fetchBlock = coinListDataSource::fetchSymbols,
+        cacheTtl = 5.minutes,
+    )
     private val newsApiDataSource = NewsApiRestDataSource(httpClient)
-    private val newsRepository = NewsRepositoryImpl(newsApiDataSource)
+    private val newsCache = CachedDataSource(
+        fetchBlock = newsApiDataSource::fetchCryptoNews,
+        cacheTtl = 2.minutes,
+    )
+
+    private val searchRepository = SearchRepositoryImpl(coinListDataSource, coinListCache)
+    private val chartRepository = ChartRepositoryImpl(coinPriceSource, coinHistoricalSource)
+    private val newsRepository = NewsRepositoryImpl(newsApiDataSource, newsCache)
 
     private lateinit var priceAccumulatorFactory: PriceAccumulatorFactory
     private lateinit var observePricesUseCase: ObservePricesUseCaseImpl

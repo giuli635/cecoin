@@ -1,5 +1,6 @@
 package dyds.crypto.cecoin.search.data.repository
 
+import dyds.crypto.cecoin.core.data.caching.CachedDataSource
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import dyds.crypto.cecoin.core.utils.fakeEthSymbol
@@ -19,7 +20,7 @@ class SearchRepositoryImplTest {
     @Test
     fun `getAvailableSymbols delegates to list data source on first call`() = runTest {
         val listSource = FakeCoinListDataSource(listOf(btcSymbol))
-        val repo = SearchRepositoryImpl(listSource, cacheTtl = 5.minutes)
+        val repo = SearchRepositoryImpl(listSource, CachedDataSource(listSource::fetchSymbols, 5.minutes))
 
         val result = repo.getAvailableSymbols()
 
@@ -30,7 +31,7 @@ class SearchRepositoryImplTest {
     @Test
     fun `getAvailableSymbols returns cached data without calling source on second call`() = runTest {
         val listSource = FakeCoinListDataSource(listOf(btcSymbol, fakeEthSymbol))
-        val repo = SearchRepositoryImpl(listSource, cacheTtl = 5.minutes)
+        val repo = SearchRepositoryImpl(listSource, CachedDataSource(listSource::fetchSymbols, 5.minutes))
 
         repo.getAvailableSymbols()
         val result = repo.getAvailableSymbols()
@@ -42,7 +43,7 @@ class SearchRepositoryImplTest {
     @Test
     fun `getAvailableSymbols calls source again when cache is invalidated`() = runTest {
         val listSource = FakeCoinListDataSource(listOf(btcSymbol))
-        val repo = SearchRepositoryImpl(listSource, cacheTtl = 5.minutes)
+        val repo = SearchRepositoryImpl(listSource, CachedDataSource(listSource::fetchSymbols, 5.minutes))
 
         repo.getAvailableSymbols()
         assertEquals(1, listSource.callCount)
@@ -58,7 +59,7 @@ class SearchRepositoryImplTest {
         val initial = listOf(btcSymbol)
         val updated = listOf(fakeEthSymbol)
         val listSource = FakeCoinListDataSource(initial)
-        val repo = SearchRepositoryImpl(listSource, cacheTtl = 5.minutes)
+        val repo = SearchRepositoryImpl(listSource, CachedDataSource(listSource::fetchSymbols, 5.minutes))
 
         repo.getAvailableSymbols()
         listSource.symbols = updated
@@ -72,7 +73,7 @@ class SearchRepositoryImplTest {
     @Test
     fun `concurrent calls only trigger one source fetch`() = runTest {
         val listSource = FakeCoinListDataSource(listOf(btcSymbol))
-        val repo = SearchRepositoryImpl(listSource, cacheTtl = 5.minutes)
+        val repo = SearchRepositoryImpl(listSource, CachedDataSource(listSource::fetchSymbols, 5.minutes))
 
         coroutineScope {
             val jobs = (1..10).map {
@@ -87,7 +88,7 @@ class SearchRepositoryImplTest {
     @Test
     fun `getAvailableSymbols returns empty list when source returns empty`() = runTest {
         val listSource = FakeCoinListDataSource(emptyList())
-        val repo = SearchRepositoryImpl(listSource, cacheTtl = 5.minutes)
+        val repo = SearchRepositoryImpl(listSource, CachedDataSource(listSource::fetchSymbols, 5.minutes))
 
         val result = repo.getAvailableSymbols()
 
@@ -97,7 +98,7 @@ class SearchRepositoryImplTest {
     @Test
     fun `getAvailableSymbols propagates source exception`() = runTest {
         val listSource = FakeCoinListDataSource(exception = RuntimeException("source fail"))
-        val repo = SearchRepositoryImpl(listSource, cacheTtl = 5.minutes)
+        val repo = SearchRepositoryImpl(listSource, CachedDataSource(listSource::fetchSymbols, 5.minutes))
 
         assertFailsWith<RuntimeException> {
             repo.getAvailableSymbols()
