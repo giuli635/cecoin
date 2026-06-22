@@ -1,10 +1,10 @@
 package dyds.crypto.cecoin.chart.presentation
 
+import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.chart.domain.usecase.ObservePricesUseCase
 import dyds.crypto.cecoin.chart.presentation.model.ChartData
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
-import dyds.crypto.cecoin.chart.presentation.util.PriceAccumulatorFactory
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.core.domain.state.Fallible
@@ -25,7 +25,6 @@ class ChartScreenViewModel(
     private val observePricesUseCase: ObservePricesUseCase,
     val symbol: CryptoSymbol,
     private val historicalPointLimit: Int = DEFAULT_HISTORICAL_LIMIT,
-    private val priceAccumulatorFactory: PriceAccumulatorFactory,
 ) : ViewModel() {
     private val _chartData = MutableStateFlow<ChartData>(Fallible.Success(emptyList()))
     val chartData: StateFlow<ChartData> = _chartData.asStateFlow()
@@ -34,6 +33,7 @@ class ChartScreenViewModel(
     val state: StateFlow<AsyncResult<Flow<ChartData>>> = _state.asStateFlow()
 
     private var loadJob: Job? = null
+    private var accumulatedPoints = mutableListOf<PricePoint>()
 
     fun cancel() {
         loadJob?.cancel()
@@ -46,15 +46,30 @@ class ChartScreenViewModel(
             _state.value = Loadable.Loading
             when (val result = getHistoricalPricesUseCase(symbol, g.interval, historicalPointLimit)) {
                 is Fallible.Success -> {
-                    val accumulator = priceAccumulatorFactory(g, result.value)
-                    _chartData.value = Fallible.Success(accumulator.snapshot())
+                    accumulatedPoints = result.value.toMutableList()
+                    _chartData.value = Fallible.Success(accumulatedPoints.toList())
                     _state.value = Loadable.Loaded(Fallible.Success(_chartData.asStateFlow()))
                     observePricesUseCase(symbol).collect { f ->
-                        _chartData.value = f.map { accumulator.accumulateAndSnapshot(it) }
+                        _chartData.value = f.map { point ->
+                            accumulate(point, g)
+                            accumulatedPoints.toList()
+                        }
                     }
                 }
                 is Fallible.Failed -> _state.value = Loadable.Loaded(result)
             }
+        }
+    }
+
+    private fun accumulate(point: PricePoint, granularity: Granularity) {
+        val timestampBucket = (point.timestamp / granularity.millis) * granularity.millis
+        val bucketed = PricePoint(timestampBucket, point.price)
+        val last = accumulatedPoints.lastOrNull()
+        if (last != null && last.timestamp == bucketed.timestamp) {
+            accumulatedPoints[accumulatedPoints.lastIndex] = last.copy(price = point.price)
+        } else {
+            if (last != null && bucketed.timestamp < last.timestamp) return
+            accumulatedPoints.add(bucketed)
         }
     }
 

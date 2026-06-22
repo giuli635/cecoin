@@ -66,7 +66,6 @@ class ChartScreenViewModelTest {
             observePricesUseCase = fakeTradeUseCase,
             symbol = fakeBtcSymbol,
             historicalPointLimit = historicalPointLimit,
-            priceAccumulatorFactory = fakePriceAccumulatorFactory(),
         )
         return VMScope(viewModel, fakeTradeUseCase, fakeHistorical)
     }
@@ -216,7 +215,6 @@ class ChartScreenViewModelTest {
             getHistoricalPricesUseCase = historicalUseCase,
             observePricesUseCase = FakeObservePricesUseCase(),
             symbol = fakeBtcSymbol,
-            priceAccumulatorFactory = fakePriceAccumulatorFactory(),
         )
 
         viewModel.load(Granularity.M1)
@@ -313,5 +311,65 @@ class ChartScreenViewModelTest {
         assertTrue(data.any { it.price == 52000.0 })
         viewModel.onCleared()
         advanceUntilIdle()
+    }
+
+    @Test
+    fun `live price in same granularity bucket replaces existing price`() = runTest {
+        val (viewModel, tradeUseCase, _) = createViewModel(historicalPrices = listOf(
+            PricePoint(0L, 50000.0),
+        ))
+
+        viewModel.load(Granularity.M1)
+        viewModel.awaitChartData()
+
+        tradeUseCase.emitted.send(PricePoint(30_000L, 52000.0))
+
+        val snapshot = viewModel.chartData.first {
+            it is Fallible.Success && it.value.any { p -> p.price == 52000.0 }
+        }
+        val data = assertIs<Fallible.Success<List<PricePoint>>>(snapshot).value
+        assertEquals(1, data.size)
+        assertEquals(52000.0, data.last().price)
+        viewModel.onCleared()
+    }
+
+    @Test
+    fun `live price with out-of-order timestamp is ignored`() = runTest {
+        val (viewModel, tradeUseCase, _) = createViewModel(historicalPrices = listOf(
+            PricePoint(60_000L, 52000.0),
+        ))
+
+        viewModel.load(Granularity.M1)
+        viewModel.awaitChartData()
+
+        tradeUseCase.emitted.send(PricePoint(30_000L, 51000.0))
+
+        val snapshot = viewModel.chartData.first {
+            it is Fallible.Success && it.value.none { p -> p.price == 51000.0 }
+        }
+        val data = assertIs<Fallible.Success<List<PricePoint>>>(snapshot).value
+        assertEquals(1, data.size)
+        assertEquals(52000.0, data.last().price)
+        viewModel.onCleared()
+    }
+
+    @Test
+    fun `live price in new bucket is appended`() = runTest {
+        val (viewModel, tradeUseCase, _) = createViewModel(historicalPrices = listOf(
+            PricePoint(0L, 50000.0),
+        ))
+
+        viewModel.load(Granularity.M1)
+        viewModel.awaitChartData()
+
+        tradeUseCase.emitted.send(PricePoint(60_000L, 52000.0))
+
+        val snapshot = viewModel.chartData.first {
+            it is Fallible.Success && it.value.any { p -> p.price == 52000.0 }
+        }
+        val data = assertIs<Fallible.Success<List<PricePoint>>>(snapshot).value
+        assertEquals(2, data.size)
+        assertEquals(52000.0, data.last().price)
+        viewModel.onCleared()
     }
 }
