@@ -1,4 +1,4 @@
-    package dyds.crypto.cecoin.chart.data.repository
+package dyds.crypto.cecoin.chart.data.repository
 
 import dyds.crypto.cecoin.chart.data.datasource.CoinHistoricalDataSource
 import dyds.crypto.cecoin.chart.data.datasource.CoinPriceDataSource
