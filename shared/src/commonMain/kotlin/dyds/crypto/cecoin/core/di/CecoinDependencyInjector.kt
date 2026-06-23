@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.Preferences
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.chart.data.datasource.BinanceCoinHistoricalDataSource
 import dyds.crypto.cecoin.chart.data.datasource.BinanceCoinPriceDataSource
-import dyds.crypto.cecoin.chart.data.repository.ChartRepositoryImpl
+import dyds.crypto.cecoin.chart.data.repository.PriceRepositoryImpl
 import dyds.crypto.cecoin.news.data.datasource.NewsApiRestDataSource
 import dyds.crypto.cecoin.news.data.repository.NewsRepositoryImpl
 import dyds.crypto.cecoin.search.data.datasource.BinanceCoinListDataSource
@@ -59,7 +59,7 @@ object CecoinDependencyInjector {
     )
 
     private val searchRepository = SearchRepositoryImpl(coinListDataSource, coinListCache)
-    private val chartRepository = ChartRepositoryImpl(coinPriceSource, coinHistoricalSource)
+    private val chartRepository = PriceRepositoryImpl(coinPriceSource, coinHistoricalSource)
     private val newsRepository = NewsRepositoryImpl(newsApiDataSource, newsCache)
 
     private lateinit var observePricesUseCase: ObservePricesUseCaseImpl

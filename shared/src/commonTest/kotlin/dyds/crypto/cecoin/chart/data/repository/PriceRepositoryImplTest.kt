@@ -14,13 +14,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-class ChartRepositoryImplTest {
+class PriceRepositoryImplTest {
     private val btcPricePoint = PricePoint(1000L, 50000.0)
 
     @Test
     fun `getHistoricalPrices delegates to historical source with normalized symbol`() = runTest {
         val historicalSource = FakeCoinHistoricalSource(listOf(btcPricePoint))
-        val repo = ChartRepositoryImpl(FakeCoinPriceSource(), historicalSource)
+        val repo = PriceRepositoryImpl(FakeCoinPriceSource(), historicalSource)
 
         val result = repo.getHistoricalPrices(CryptoSymbol("  btcusdt  "), "1m", 200)
 
@@ -31,7 +31,7 @@ class ChartRepositoryImplTest {
     @Test
     fun `observePrices delegates to price source with normalized symbol`() = runTest {
         val priceSource = FakeCoinPriceSource(flowOf(btcPricePoint))
-        val repo = ChartRepositoryImpl(priceSource, FakeCoinHistoricalSource())
+        val repo = PriceRepositoryImpl(priceSource, FakeCoinHistoricalSource())
 
         val result = repo.observePrices(CryptoSymbol("  ETHUSDT  ")).first()
 
@@ -42,7 +42,7 @@ class ChartRepositoryImplTest {
     @Test
     fun `getHistoricalPrices uses DefaultSymbol for blank input`() = runTest {
         val historicalSource = FakeCoinHistoricalSource(listOf(btcPricePoint))
-        val repo = ChartRepositoryImpl(FakeCoinPriceSource(), historicalSource)
+        val repo = PriceRepositoryImpl(FakeCoinPriceSource(), historicalSource)
 
         repo.getHistoricalPrices(CryptoSymbol("   "), "1m", 200)
 
@@ -52,7 +52,7 @@ class ChartRepositoryImplTest {
     @Test
     fun `observePrices uses DefaultSymbol for blank input`() = runTest {
         val priceSource = FakeCoinPriceSource(flowOf(btcPricePoint))
-        val repo = ChartRepositoryImpl(priceSource, FakeCoinHistoricalSource())
+        val repo = PriceRepositoryImpl(priceSource, FakeCoinHistoricalSource())
 
         repo.observePrices(CryptoSymbol("   "))
 
@@ -62,7 +62,7 @@ class ChartRepositoryImplTest {
     @Test
     fun `getHistoricalPrices propagates source exception`() = runTest {
         val historicalSource = FakeCoinHistoricalSource(exception = RuntimeException("source fail"))
-        val repo = ChartRepositoryImpl(FakeCoinPriceSource(), historicalSource)
+        val repo = PriceRepositoryImpl(FakeCoinPriceSource(), historicalSource)
 
         assertFailsWith<RuntimeException> {
             repo.getHistoricalPrices(fakeBtcSymbol, "1m", 200)
@@ -72,7 +72,7 @@ class ChartRepositoryImplTest {
     @Test
     fun `observePrices propagates source exception`() = runTest {
         val throwingSource = FakeCoinPriceSource(flow { throw RuntimeException("ws fail") })
-        val repo = ChartRepositoryImpl(throwingSource, FakeCoinHistoricalSource())
+        val repo = PriceRepositoryImpl(throwingSource, FakeCoinHistoricalSource())
 
         assertFailsWith<RuntimeException> {
             repo.observePrices(fakeBtcSymbol).first()
@@ -82,7 +82,7 @@ class ChartRepositoryImplTest {
     @Test
     fun `getHistoricalPrices uses default interval when not specified`() = runTest {
         val historicalSource = FakeCoinHistoricalSource(listOf(btcPricePoint))
-        val repo = ChartRepositoryImpl(FakeCoinPriceSource(), historicalSource)
+        val repo = PriceRepositoryImpl(FakeCoinPriceSource(), historicalSource)
 
         repo.getHistoricalPrices(fakeBtcSymbol)
 
@@ -93,7 +93,7 @@ class ChartRepositoryImplTest {
     fun `historical and price sources work independently`() = runTest {
         val historicalSource = FakeCoinHistoricalSource(listOf(btcPricePoint))
         val priceSource = FakeCoinPriceSource(flowOf(btcPricePoint))
-        val repo = ChartRepositoryImpl(priceSource, historicalSource)
+        val repo = PriceRepositoryImpl(priceSource, historicalSource)
 
         val historical = repo.getHistoricalPrices(fakeBtcSymbol)
         assertTrue(historical.isNotEmpty())

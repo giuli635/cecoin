@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 private val DefaultSymbol = CryptoSymbol("BTCUSDT")
 
-class ChartRepositoryImpl(
+class PriceRepositoryImpl(
     private val coinPriceSource: CoinPriceDataSource,
     private val coinHistoricalSource: CoinHistoricalDataSource,
 ) : PriceRepository {

@@ -17,7 +17,7 @@ class ChartRepositoryBrokerTest {
     fun `historical and price sources work independently through repository`() = runTest {
         val historicalSource = FakeCoinHistoricalSource(listOf(PricePoint(1000L, 50000.0)))
         val priceSource = FakeCoinPriceSource(flowOf(PricePoint(1000L, 50000.0)))
-        val repo = ChartRepositoryImpl(priceSource, historicalSource)
+        val repo = PriceRepositoryImpl(priceSource, historicalSource)
 
         val historical = repo.getHistoricalPrices(fakeBtcSymbol)
         assertTrue(historical.isNotEmpty())
@@ -30,7 +30,7 @@ class ChartRepositoryBrokerTest {
     fun `symbol normalization applies to both sources`() = runTest {
         val historicalSource = FakeCoinHistoricalSource(listOf(PricePoint(1000L, 50000.0)))
         val priceSource = FakeCoinPriceSource(flowOf(PricePoint(1000L, 50000.0)))
-        val repo = ChartRepositoryImpl(priceSource, historicalSource)
+        val repo = PriceRepositoryImpl(priceSource, historicalSource)
 
         val historical = repo.getHistoricalPrices(CryptoSymbol("  btcusdt  "))
         assertTrue(historical.isNotEmpty())
