@@ -18,7 +18,7 @@ class GetHistoricalPricesUseCaseTest {
     fun `invoke delegates to repository with correct params`() = runTest {
         val expected = listOf(PricePoint(1000L, 50000.0))
         val repo = FakePriceRepository(historical = expected)
-        val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier)
+        val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier, lazyMessage = { "test" })
 
         val result = useCase(fakeBtcSymbol, "5m", 100)
 
@@ -30,7 +30,7 @@ class GetHistoricalPricesUseCaseTest {
     fun `invoke uses default interval and limit`() = runTest {
         val expected = listOf(PricePoint(2000L, 3000.0))
         val repo = FakePriceRepository(historical = expected)
-        val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier)
+        val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier, lazyMessage = { "test" })
 
         val result = useCase(CryptoSymbol("ETHUSDT"))
 
@@ -51,7 +51,7 @@ class GetHistoricalPricesUseCaseTest {
     @Test
     fun `invoke returns empty list when repository returns empty`() = runTest {
         val repo = FakePriceRepository(historical = emptyList())
-        val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier)
+        val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier, lazyMessage = { "test" })
 
         val result = useCase(fakeBtcSymbol)
 

@@ -1,6 +1,5 @@
 package dyds.crypto.cecoin.chart.domain.usecase
 
-import cecoin.shared.generated.resources.*
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.domain.repository.PriceRepository
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
@@ -11,7 +10,6 @@ import dyds.crypto.cecoin.core.domain.state.toFallible
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.jetbrains.compose.resources.getString
 import kotlin.time.Duration.Companion.milliseconds
 
 interface ObservePricesUseCase {
@@ -23,7 +21,7 @@ class ObservePricesUseCaseImpl(
     private val errorClassifier: ErrorClassifier,
     private val retryDelayMs: Long = 1_000L,
     private val maxRetries: Int = 3,
-    private val lazyMessage: suspend () -> String = { getString(Res.string.error_live_stream_failed) },
+    private val lazyMessage: suspend () -> String,
 ) : ObservePricesUseCase {
     override fun invoke(symbol: CryptoSymbol): Flow<Fallible<PricePoint>> = flow {
         var retryCount = 0
