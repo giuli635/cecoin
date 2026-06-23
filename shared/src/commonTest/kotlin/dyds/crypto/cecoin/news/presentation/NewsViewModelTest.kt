@@ -3,9 +3,9 @@ package dyds.crypto.cecoin.news.presentation
 import dyds.crypto.cecoin.news.domain.model.NewsArticle
 import dyds.crypto.cecoin.news.domain.usecase.FakeGetCryptoNewsUseCase
 import dyds.crypto.cecoin.news.domain.usecase.GetCryptoNewsUseCase
-import kotlinx.coroutines.awaitCancellation
 import dyds.crypto.cecoin.core.domain.state.Fallible
 import dyds.crypto.cecoin.core.domain.state.Loadable
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -16,13 +16,20 @@ import kotlin.test.assertIs
 class NewsViewModelTest {
 
     @Test
-    fun `init loads news and emits success`() = runTest {
+    fun `initial state is Loading before loadNews is called`() = runTest {
+        val viewModel = createViewModel()
+        assertEquals(Loadable.Loading, viewModel.asyncNews.first())
+    }
+
+    @Test
+    fun `loadNews emits success`() = runTest {
         val expected = listOf(
             NewsArticle("Title", "Desc", "url", null, "Source", "2024-01-01"),
         )
         val fake = FakeGetCryptoNewsUseCase(articles = expected)
         val viewModel = createViewModel(fake)
 
+        viewModel.loadNews()
         val result = viewModel.asyncNews.first { it !is Loadable.Loading }
 
         val loaded = assertIs<Loadable.Loaded<Fallible<List<NewsArticle>>>>(result)
@@ -35,6 +42,7 @@ class NewsViewModelTest {
         val fake = FakeGetCryptoNewsUseCase(exception = RuntimeException("API error"))
         val viewModel = createViewModel(fake)
 
+        viewModel.loadNews()
         val result = viewModel.asyncNews.first { it !is Loadable.Loading }
 
         assertIs<Loadable.Loaded<*>>(result)
@@ -58,6 +66,7 @@ class NewsViewModelTest {
         val fake = FakeGetCryptoNewsUseCase(exception = RuntimeException("fail"))
         val viewModel = createViewModel(fake)
 
+        viewModel.loadNews()
         viewModel.asyncNews.first { it !is Loadable.Loading }
 
         fake.exception = null
@@ -84,6 +93,7 @@ class NewsViewModelTest {
         }
         val viewModel = NewsViewModel(useCase)
 
+        viewModel.loadNews()
         loadStarted.first { it }
 
         viewModel.onCancelLoadNews()
@@ -97,12 +107,23 @@ class NewsViewModelTest {
         val fake = FakeGetCryptoNewsUseCase()
         val viewModel = createViewModel(fake)
 
+        viewModel.loadNews()
         viewModel.asyncNews.first { it !is Loadable.Loading }
         viewModel.onCancelLoadNews()
         viewModel.onCancelLoadNews()
 
         val state = viewModel.uiState.first()
         assertEquals("", state.searchQuery)
+    }
+
+    @Test
+    fun `onCancelLoadNews after load completed does not crash`() = runTest {
+        val fake = FakeGetCryptoNewsUseCase()
+        val viewModel = createViewModel(fake)
+
+        viewModel.loadNews()
+        viewModel.asyncNews.first { it !is Loadable.Loading }
+        viewModel.onCancelLoadNews()
     }
 
     private fun createViewModel(fake: FakeGetCryptoNewsUseCase = FakeGetCryptoNewsUseCase()): NewsViewModel {

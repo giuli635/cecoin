@@ -40,7 +40,7 @@ class ToggleFavoriteUseCaseTest {
     @Test
     fun `invoke returns Failed when repository throws`() = runTest {
         val repo = FakeFavoriteRepository(exception = RuntimeException("repo fail"))
-        val useCase = ToggleFavoriteUseCaseImpl(repo, classifier)
+        val useCase = ToggleFavoriteUseCaseImpl(repo, classifier, lazyMessage = { "repo fail" })
 
         val result = useCase(fakeBtcSymbol)
 

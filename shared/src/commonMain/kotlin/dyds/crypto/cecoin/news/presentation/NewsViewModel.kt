@@ -22,10 +22,6 @@ class NewsViewModel(
 
     private var loadNewsJob: Job? = null
 
-    init {
-        loadNews()
-    }
-
     fun loadNews() {
         loadNewsJob?.cancel()
         loadNewsJob = launchLoadable(_asyncNews) {

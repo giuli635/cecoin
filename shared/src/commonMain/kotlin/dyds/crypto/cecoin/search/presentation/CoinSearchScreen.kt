@@ -46,6 +46,10 @@ fun CoinSearchScreen(
     val favorites by viewModel.favorites.collectAsState()
     val toggleError by viewModel.toggleError.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.loadSymbols()
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()

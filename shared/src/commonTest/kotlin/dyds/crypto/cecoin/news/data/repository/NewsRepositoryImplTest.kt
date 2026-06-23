@@ -131,4 +131,15 @@ class NewsRepositoryImplTest {
             repo.getCryptoNews()
         }
     }
+
+    @Test
+    fun `invalidateCache on empty cache does not crash`() = runTest {
+        val dataSource = FakeNewsApiDataSource(listOf(articleA))
+        val repo = NewsRepositoryImpl(dataSource, CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
+
+        repo.invalidateCache()
+        val result = repo.getCryptoNews()
+
+        assertTrue(result.isNotEmpty())
+    }
 }

@@ -41,7 +41,7 @@ class GetHistoricalPricesUseCaseTest {
     @Test
     fun `invoke returns Failed when repository throws`() = runTest {
         val repo = FakePriceRepository(historicalException = RuntimeException("repo fail"))
-        val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier)
+        val useCase = GetHistoricalPricesUseCaseImpl(repo, classifier, lazyMessage = { "repo fail" })
 
         val result = useCase(fakeBtcSymbol)
 

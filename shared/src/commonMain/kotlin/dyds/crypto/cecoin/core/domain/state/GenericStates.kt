@@ -42,9 +42,12 @@ suspend inline fun <T> runCatchingCancellable(crossinline block: suspend () -> T
     }
 }
 
-fun <T> Result<T>.toFallible(errorClassifier: ErrorClassifier, message: String): Fallible<T> {
+suspend fun <T> Result<T>.toFallible(
+    errorClassifier: ErrorClassifier,
+    lazyMessage: suspend () -> String,
+): Fallible<T> {
     return fold(
         onSuccess = { Fallible.Success(it) },
-        onFailure = { Fallible.Failed(errorClassifier.classify(it, message)) }
+        onFailure = { Fallible.Failed(errorClassifier.classify(it, lazyMessage())) }
     )
 }

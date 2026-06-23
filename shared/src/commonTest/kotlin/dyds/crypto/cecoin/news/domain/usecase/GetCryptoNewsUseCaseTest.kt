@@ -40,7 +40,7 @@ class GetCryptoNewsUseCaseTest {
     @Test
     fun `invoke returns Failed when repository throws`() = runTest {
         val repo = FakeNewsRepository(exception = RuntimeException("repo fail"))
-        val useCase = GetCryptoNewsUseCaseImpl(repo, classifier)
+        val useCase = GetCryptoNewsUseCaseImpl(repo, classifier, lazyMessage = { "repo fail" })
 
         val result = useCase()
 

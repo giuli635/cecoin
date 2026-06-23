@@ -9,8 +9,8 @@ class AppErrorTest {
     @Test
     fun `NetworkError holds Dynamic UiText`() {
         val error = AppError.NetworkError(UiText.Dynamic("msg"))
-        assertIs<UiText.Dynamic>(error.uiText)
-        assertEquals("msg", (error.uiText as UiText.Dynamic).value)
+        val uiText = assertIs<UiText.Dynamic>(error.uiText)
+        assertEquals("msg", uiText.value)
     }
 
     @Test

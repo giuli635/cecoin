@@ -372,4 +372,22 @@ class ChartScreenViewModelTest {
         assertEquals(52000.0, data.last().price)
         viewModel.onCleared()
     }
+
+    @Test
+    fun `cancel when no active load does not crash`() {
+        val (viewModel, _, _) = createViewModel()
+        viewModel.cancel()
+    }
+
+    @Test
+    fun `load with absent symbol does not crash`() = runTest {
+        val unknownSymbol = CryptoSymbol("NONEXISTENT")
+        val viewModel = ChartScreenViewModel(
+            getHistoricalPricesUseCase = FakeGetHistoricalPricesUseCase(),
+            observePricesUseCase = FakeObservePricesUseCase(),
+            symbol = unknownSymbol,
+        )
+        viewModel.load(Granularity.M1)
+        viewModel.onCleared()
+    }
 }

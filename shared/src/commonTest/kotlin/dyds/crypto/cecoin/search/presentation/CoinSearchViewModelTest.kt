@@ -25,13 +25,14 @@ import kotlin.test.assertTrue
 class CoinSearchViewModelTest {
 
     @Test
-    fun `init loads symbols and emits success`() = runTest {
+    fun `loadSymbols emits success`() = runTest {
         val symbolsFake = FakeGetAvailableSymbolsUseCase(listOf(
             fakeBtcSymbol,
             fakeEthSymbol,
         ))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
 
+        viewModel.loadSymbols()
         val result = viewModel.filteredCoins.first { it !is Loadable.Loading }
 
         val loaded = assertIs<Loadable.Loaded<Fallible<List<CryptoSymbol>>>>(result)
@@ -47,6 +48,7 @@ class CoinSearchViewModelTest {
         val symbolsFake = FakeGetAvailableSymbolsUseCase(exception = RuntimeException("API error"))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
 
+        viewModel.loadSymbols()
         val result = viewModel.filteredCoins.first { it !is Loadable.Loading }
 
         assertIs<Loadable.Loaded<*>>(result)
@@ -73,6 +75,7 @@ class CoinSearchViewModelTest {
         ))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
 
+        viewModel.loadSymbols()
         viewModel.filteredCoins.first { it !is Loadable.Loading }
 
         viewModel.onSearchQueryChange("btc")
@@ -91,6 +94,7 @@ class CoinSearchViewModelTest {
         val observeFake = FakeObserveFavoritesUseCase(initial = setOf(fakeEthSymbol))
         val viewModel = createViewModel(symbolsFake = symbolsFake, observeFake = observeFake)
 
+        viewModel.loadSymbols()
         viewModel.filteredCoins.first { it !is Loadable.Loading }
         viewModel.setFilterMode(FilterMode.FAVORITES)
 
@@ -107,6 +111,7 @@ class CoinSearchViewModelTest {
         ))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
 
+        viewModel.loadSymbols()
         viewModel.filteredCoins.first { it !is Loadable.Loading }
         viewModel.setFilterMode(FilterMode.FAVORITES)
         viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == emptyList<CryptoSymbol>() }
@@ -125,6 +130,7 @@ class CoinSearchViewModelTest {
         val toggleFake = FakeToggleFavoriteUseCase(favorites = sharedFavorites)
         val viewModel = createViewModel(symbolsFake = symbolsFake, toggleFake = toggleFake, observeFake = observeFake)
 
+        viewModel.loadSymbols()
         viewModel.filteredCoins.first { it !is Loadable.Loading }
         viewModel.setFilterMode(FilterMode.FAVORITES)
 
@@ -216,6 +222,7 @@ class CoinSearchViewModelTest {
         val initial = viewModel.filteredCoins.first()
         assertIs<Loadable.Loading>(initial)
 
+        viewModel.loadSymbols()
         symbolsDeferred.complete(listOf(fakeBtcSymbol))
 
         val loaded = viewModel.filteredCoins.first { it !is Loadable.Loading }
@@ -237,6 +244,7 @@ class CoinSearchViewModelTest {
             observeFavoritesUseCase = FakeObserveFavoritesUseCase(),
         )
 
+        viewModel.loadSymbols()
         loadStarted.first { it }
         viewModel.onCancelLoadSymbols()
 
@@ -257,6 +265,7 @@ class CoinSearchViewModelTest {
             observeFavoritesUseCase = FakeObserveFavoritesUseCase(),
         )
 
+        viewModel.loadSymbols()
         viewModel.filteredCoins.first { it is Loadable.Loading }
         viewModel.onCancelLoadSymbols()
 
@@ -274,6 +283,7 @@ class CoinSearchViewModelTest {
         val symbolsFake = FakeGetAvailableSymbolsUseCase(exception = RuntimeException("fail"))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
 
+        viewModel.loadSymbols()
         viewModel.filteredCoins.first { it !is Loadable.Loading }
 
         symbolsFake.exception = null
@@ -284,6 +294,31 @@ class CoinSearchViewModelTest {
         val result = viewModel.filteredCoins.first { it is Loadable.Loaded && it.value is Fallible.Success && (it.value as Fallible.Success<*>).value == listOf(fakeBtcSymbol) }
         val symbols = extractSymbols(result)
         assertEquals(listOf(fakeBtcSymbol), symbols)
+    }
+
+    @Test
+    fun `setFilterMode ALL when already ALL does not change state`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.setFilterMode(FilterMode.ALL)
+        val state1 = viewModel.uiState.first()
+        viewModel.setFilterMode(FilterMode.ALL)
+        val state2 = viewModel.uiState.first()
+        assertEquals(state1, state2)
+    }
+
+    @Test
+    fun `clearToggleError when no error exists does not crash`() {
+        val viewModel = createViewModel()
+        viewModel.clearToggleError()
+    }
+
+    @Test
+    fun `onSearchQueryChange with empty string shows all coins`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.onSearchQueryChange("btc")
+        viewModel.onSearchQueryChange("")
+        val state = viewModel.uiState.first()
+        assertEquals("", state.searchQuery)
     }
 
     private fun createViewModel(

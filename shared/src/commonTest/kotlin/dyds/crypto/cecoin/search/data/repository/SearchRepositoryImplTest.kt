@@ -104,4 +104,15 @@ class SearchRepositoryImplTest {
             repo.getAvailableSymbols()
         }
     }
+
+    @Test
+    fun `invalidateCache on empty cache does not crash`() = runTest {
+        val listSource = FakeCoinListDataSource(listOf(btcSymbol))
+        val repo = SearchRepositoryImpl(listSource, CachedDataSource(listSource::fetchSymbols, 5.minutes))
+
+        repo.invalidateCache()
+        val result = repo.getAvailableSymbols()
+
+        assertEquals(listOf(btcSymbol), result)
+    }
 }

@@ -75,7 +75,7 @@ class GenericStatesTest {
     @Test
     fun `toFallible on success returns Success`() = runTest {
         val result = Result.success(42)
-        val fallible = result.toFallible(fakeErrorClassifier(), "test")
+        val fallible = result.toFallible(fakeErrorClassifier()) { "test" }
         val success = assertIs<Fallible.Success<Int>>(fallible)
         assertEquals(42, success.value)
     }
@@ -84,7 +84,7 @@ class GenericStatesTest {
     fun `toFallible with network error returns NetworkError`() = runTest {
         val classifier = fakeErrorClassifier(isNetworkError = true)
         val result = Result.failure<Int>(RuntimeException("no network"))
-        val fallible = result.toFallible(classifier, "net msg")
+        val fallible = result.toFallible(classifier) { "net msg" }
         val failed = assertIs<Fallible.Failed>(fallible)
         assertIs<AppError.NetworkError>(failed.error)
     }
@@ -93,7 +93,7 @@ class GenericStatesTest {
     fun `toFallible with generic error returns GenericError`() = runTest {
         val classifier = fakeErrorClassifier(isNetworkError = false)
         val result = Result.failure<Int>(RuntimeException("bad"))
-        val fallible = result.toFallible(classifier, "gen msg")
+        val fallible = result.toFallible(classifier) { "gen msg" }
         val failed = assertIs<Fallible.Failed>(fallible)
         val generic = assertIs<AppError.GenericError>(failed.error)
         assertIs<RuntimeException>(generic.exception)

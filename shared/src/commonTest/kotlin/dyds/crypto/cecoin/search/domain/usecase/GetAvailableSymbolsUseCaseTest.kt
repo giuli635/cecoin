@@ -39,7 +39,7 @@ class GetAvailableSymbolsUseCaseTest {
     @Test
     fun `invoke returns Failed when repository throws`() = runTest {
         val repo = FakeCryptoSymbolRepository(exception = RuntimeException("repo fail"))
-        val useCase = GetAvailableSymbolsUseCaseImpl(repo, classifier)
+        val useCase = GetAvailableSymbolsUseCaseImpl(repo, classifier, lazyMessage = { "repo fail" })
 
         val result = useCase()
 

@@ -2,10 +2,14 @@ package dyds.crypto.cecoin.search.data.datasource
 
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
+import dyds.crypto.cecoin.core.utils.fakeEthSymbol
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class DataStoreFavoriteDataSourceTest {
@@ -58,6 +62,27 @@ class DataStoreFavoriteDataSourceTest {
         source.toggle(CryptoSymbol(""))
         val result = source.favorites.first()
         assertEquals(setOf(CryptoSymbol("")), result)
+    }
+
+    @Test
+    fun `concurrent toggles do not lose data`() = runTest {
+        val source = createSource()
+        coroutineScope {
+            launch { source.toggle(fakeBtcSymbol) }
+            launch { source.toggle(fakeEthSymbol) }
+        }
+        val favs = source.favorites.first()
+        assertEquals(setOf(fakeBtcSymbol, fakeEthSymbol), favs)
+    }
+
+    @Test
+    fun `rapid toggling same symbol results in final state being toggled off`() = runTest {
+        val source = createSource()
+        repeat(4) {
+            source.toggle(fakeBtcSymbol)
+        }
+        val favs = source.favorites.first()
+        assertFalse(favs.contains(fakeBtcSymbol))
     }
 
     private fun createSource(): DataStoreFavoriteDataSource {

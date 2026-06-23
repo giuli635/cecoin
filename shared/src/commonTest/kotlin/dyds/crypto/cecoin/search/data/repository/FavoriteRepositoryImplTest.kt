@@ -4,10 +4,13 @@ import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import dyds.crypto.cecoin.core.utils.fakeEthSymbol
 import dyds.crypto.cecoin.search.data.FakeFavoriteDataSource
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class FavoriteRepositoryImplTest {
     private fun createRepo(initial: Set<CryptoSymbol> = emptySet()): FavoriteRepositoryImpl =
@@ -59,5 +62,30 @@ class FavoriteRepositoryImplTest {
 
         val result = repo.observeFavorites().first()
         assertEquals(setOf(CryptoSymbol("")), result)
+    }
+
+    @Test
+    fun `concurrent toggles do not cause data loss`() = runTest {
+        val repo = createRepo()
+        val set = fakeBtcSymbol
+        val other = fakeEthSymbol
+
+        coroutineScope {
+            launch { repo.toggleFavorite(set) }
+            launch { repo.toggleFavorite(other) }
+        }
+
+        val favs = repo.observeFavorites().first()
+        assertEquals(setOf(set, other), favs)
+    }
+
+    @Test
+    fun `toggleFavorite on non-existent symbol adds it`() = runTest {
+        val repo = createRepo()
+
+        repo.toggleFavorite(fakeBtcSymbol)
+
+        val favs = repo.observeFavorites().first()
+        assertTrue(favs.contains(fakeBtcSymbol))
     }
 }

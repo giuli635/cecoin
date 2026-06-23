@@ -17,9 +17,10 @@ interface GetHistoricalPricesUseCase {
 class GetHistoricalPricesUseCaseImpl(
     private val repository: PriceRepository,
     private val errorClassifier: ErrorClassifier,
+    private val lazyMessage: suspend () -> String = { getString(Res.string.error_historical_data) },
 ) : GetHistoricalPricesUseCase {
     override suspend operator fun invoke(symbol: CryptoSymbol, interval: String, limit: Int): Fallible<List<PricePoint>> {
         return runCatchingCancellable { repository.getHistoricalPrices(symbol, interval, limit) }
-            .toFallible(errorClassifier, getString(Res.string.error_historical_data))
+            .toFallible(errorClassifier, lazyMessage)
     }
 }

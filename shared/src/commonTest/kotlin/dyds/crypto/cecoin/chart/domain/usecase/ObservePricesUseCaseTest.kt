@@ -56,7 +56,7 @@ class ObservePricesUseCaseTest {
     @Test
     fun `invoke exhausts retries and stops`() = runTest {
         val repo = FakePriceRepository(tradeFlow = flow { throw RuntimeException("stream fail") })
-        val useCase = ObservePricesUseCaseImpl(repo, classifier, retryDelayMs = 1L, maxRetries = 3)
+        val useCase = ObservePricesUseCaseImpl(repo, classifier, retryDelayMs = 1L, maxRetries = 3, lazyMessage = { "stream fail" })
 
         val results = useCase(fakeBtcSymbol).toList()
 

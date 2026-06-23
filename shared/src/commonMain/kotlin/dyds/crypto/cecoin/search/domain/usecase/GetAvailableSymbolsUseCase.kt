@@ -16,9 +16,10 @@ interface GetAvailableSymbolsUseCase {
 class GetAvailableSymbolsUseCaseImpl(
     private val repository: CryptoSymbolRepository,
     private val errorClassifier: ErrorClassifier,
+    private val lazyMessage: suspend () -> String = { getString(Res.string.error_load_symbols) },
 ) : GetAvailableSymbolsUseCase {
     override suspend operator fun invoke(): Fallible<List<CryptoSymbol>> {
         return runCatchingCancellable { repository.getAvailableSymbols() }
-            .toFallible(errorClassifier, getString(Res.string.error_load_symbols))
+            .toFallible(errorClassifier, lazyMessage)
     }
 }

@@ -6,11 +6,13 @@ import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class ChartRepositoryImplTest {
     private val btcPricePoint = PricePoint(1000L, 50000.0)
@@ -65,5 +67,38 @@ class ChartRepositoryImplTest {
         assertFailsWith<RuntimeException> {
             repo.getHistoricalPrices(fakeBtcSymbol, "1m", 200)
         }
+    }
+
+    @Test
+    fun `observePrices propagates source exception`() = runTest {
+        val throwingSource = FakeCoinPriceSource(flow { throw RuntimeException("ws fail") })
+        val repo = ChartRepositoryImpl(throwingSource, FakeCoinHistoricalSource())
+
+        assertFailsWith<RuntimeException> {
+            repo.observePrices(fakeBtcSymbol).first()
+        }
+    }
+
+    @Test
+    fun `getHistoricalPrices uses default interval when not specified`() = runTest {
+        val historicalSource = FakeCoinHistoricalSource(listOf(btcPricePoint))
+        val repo = ChartRepositoryImpl(FakeCoinPriceSource(), historicalSource)
+
+        repo.getHistoricalPrices(fakeBtcSymbol)
+
+        assertEquals("1m", historicalSource.lastInterval)
+    }
+
+    @Test
+    fun `historical and price sources work independently`() = runTest {
+        val historicalSource = FakeCoinHistoricalSource(listOf(btcPricePoint))
+        val priceSource = FakeCoinPriceSource(flowOf(btcPricePoint))
+        val repo = ChartRepositoryImpl(priceSource, historicalSource)
+
+        val historical = repo.getHistoricalPrices(fakeBtcSymbol)
+        assertTrue(historical.isNotEmpty())
+
+        val price = repo.observePrices(fakeBtcSymbol).first()
+        assertEquals(btcPricePoint, price)
     }
 }
