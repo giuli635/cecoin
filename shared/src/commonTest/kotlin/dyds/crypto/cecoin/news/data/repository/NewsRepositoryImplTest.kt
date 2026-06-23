@@ -20,7 +20,7 @@ class NewsRepositoryImplTest {
     @Test
     fun `getCryptoNews delegates to data source on first call`() = runTest {
         val dataSource = FakeNewsApiDataSource(listOf(articleA))
-        val repo = NewsRepositoryImpl(dataSource, CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
+        val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
 
         val result = repo.getCryptoNews()
 
@@ -31,7 +31,7 @@ class NewsRepositoryImplTest {
     @Test
     fun `getCryptoNews returns cached data without calling source on second call`() = runTest {
         val dataSource = FakeNewsApiDataSource(listOf(articleA, articleB))
-        val repo = NewsRepositoryImpl(dataSource, CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
+        val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
 
         repo.getCryptoNews()
         val result = repo.getCryptoNews()
@@ -43,7 +43,7 @@ class NewsRepositoryImplTest {
     @Test
     fun `getCryptoNews calls source again when cache is invalidated`() = runTest {
         val dataSource = FakeNewsApiDataSource(listOf(articleA))
-        val repo = NewsRepositoryImpl(dataSource, CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
+        val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
 
         repo.getCryptoNews()
         assertEquals(1, dataSource.callCount)
@@ -57,7 +57,7 @@ class NewsRepositoryImplTest {
     @Test
     fun `getCryptoNews returns latest data after invalidation`() = runTest {
         val dataSource = FakeNewsApiDataSource(listOf(articleA))
-        val repo = NewsRepositoryImpl(dataSource, CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
+        val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
 
         repo.getCryptoNews()
         dataSource.articles = listOf(articleB)
@@ -71,7 +71,7 @@ class NewsRepositoryImplTest {
     @Test
     fun `concurrent calls only trigger one source fetch`() = runTest {
         val dataSource = FakeNewsApiDataSource(listOf(articleA))
-        val repo = NewsRepositoryImpl(dataSource, CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
+        val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
 
         coroutineScope {
             val jobs = (1..10).map {
@@ -86,7 +86,7 @@ class NewsRepositoryImplTest {
     @Test
     fun `getCryptoNews returns empty list when data source returns empty`() = runTest {
         val dataSource = FakeNewsApiDataSource()
-        val repo = NewsRepositoryImpl(dataSource, CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
+        val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
 
         val result = repo.getCryptoNews()
 
@@ -100,7 +100,7 @@ class NewsRepositoryImplTest {
             NewsArticle(" ", " ", " ", null, " ", " "),
         )
         val dataSource = FakeNewsApiDataSource(articles)
-        val repo = NewsRepositoryImpl(dataSource, CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
+        val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
 
         val result = repo.getCryptoNews()
 
@@ -114,7 +114,7 @@ class NewsRepositoryImplTest {
             NewsArticle(longStr, longStr, longStr, null, longStr, longStr),
         )
         val dataSource = FakeNewsApiDataSource(articles)
-        val repo = NewsRepositoryImpl(dataSource, CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
+        val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
 
         val result = repo.getCryptoNews()
 
@@ -125,7 +125,7 @@ class NewsRepositoryImplTest {
     @Test
     fun `getCryptoNews propagates source exception`() = runTest {
         val dataSource = FakeNewsApiDataSource(exception = RuntimeException("source fail"))
-        val repo = NewsRepositoryImpl(dataSource, CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
+        val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
 
         assertFailsWith<RuntimeException> {
             repo.getCryptoNews()
@@ -135,7 +135,7 @@ class NewsRepositoryImplTest {
     @Test
     fun `invalidateCache on empty cache does not crash`() = runTest {
         val dataSource = FakeNewsApiDataSource(listOf(articleA))
-        val repo = NewsRepositoryImpl(dataSource, CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
+        val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
 
         repo.invalidateCache()
         val result = repo.getCryptoNews()

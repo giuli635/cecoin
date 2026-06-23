@@ -60,9 +60,9 @@ object CecoinDependencyInjector {
         cacheTtl = 2.minutes,
     )
 
-    private val searchRepository = SearchRepositoryImpl(coinListDataSource, coinListCache)
+    private val searchRepository = SearchRepositoryImpl(coinListCache)
     private val chartRepository = PriceRepositoryImpl(coinPriceSource, coinHistoricalSource)
-    private val newsRepository = NewsRepositoryImpl(newsApiDataSource, newsCache)
+    private val newsRepository = NewsRepositoryImpl(newsCache)
 
     private lateinit var observePricesUseCase: ObservePricesUseCaseImpl
     private lateinit var getAvailableSymbolsUseCase: GetAvailableSymbolsUseCase
