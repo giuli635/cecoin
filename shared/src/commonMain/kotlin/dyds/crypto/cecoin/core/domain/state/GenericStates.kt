@@ -1,8 +1,8 @@
 package dyds.crypto.cecoin.core.domain.state
 
 import dyds.crypto.cecoin.core.domain.error.AppError
-import kotlinx.coroutines.CancellationException
 import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
+import kotlinx.coroutines.CancellationException
 
 sealed class Loadable<out T> {
     object Loading : Loadable<Nothing>()
@@ -43,10 +43,10 @@ suspend inline fun <T> runCatchingCancellable(crossinline block: suspend () -> T
 
 suspend fun <T> Result<T>.toFallible(
     errorClassifier: ErrorClassifier,
-    lazyMessage: suspend () -> String,
+    context: String,
 ): Fallible<T> {
     return fold(
         onSuccess = { Fallible.Success(it) },
-        onFailure = { Fallible.Failed(errorClassifier.classify(it, lazyMessage())) }
+        onFailure = { Fallible.Failed(errorClassifier.classify(it, context)) }
     )
 }

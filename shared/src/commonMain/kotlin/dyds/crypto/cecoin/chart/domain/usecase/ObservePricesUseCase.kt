@@ -21,7 +21,7 @@ class ObservePricesUseCaseImpl(
     private val errorClassifier: ErrorClassifier,
     private val retryDelayMs: Long = 1_000L,
     private val maxRetries: Int = 3,
-    private val lazyMessage: suspend () -> String,
+    private val contextKey: String,
 ) : ObservePricesUseCase {
     override fun invoke(symbol: CryptoSymbol): Flow<Fallible<PricePoint>> = flow {
         var retryCount = 0
@@ -30,7 +30,7 @@ class ObservePricesUseCaseImpl(
                 repository.observePrices(symbol).collect { point ->
                     emit(Fallible.Success(point))
                 }
-            }.toFallible(errorClassifier, lazyMessage)
+            }.toFallible(errorClassifier, contextKey)
                 .onFailure {
                     emit(Fallible.Failed(it))
                     if (++retryCount <= maxRetries) delay(retryDelayMs.milliseconds)

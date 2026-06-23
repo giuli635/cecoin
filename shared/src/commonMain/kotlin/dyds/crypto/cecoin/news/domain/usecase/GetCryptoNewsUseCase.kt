@@ -14,10 +14,10 @@ interface GetCryptoNewsUseCase {
 class GetCryptoNewsUseCaseImpl(
     private val repository: NewsRepository,
     private val errorClassifier: ErrorClassifier,
-    private val lazyMessage: suspend () -> String,
+    private val contextKey: String,
 ) : GetCryptoNewsUseCase {
     override suspend operator fun invoke(): Fallible<List<NewsArticle>> {
         return runCatchingCancellable { repository.getCryptoNews() }
-            .toFallible(errorClassifier, lazyMessage)
+            .toFallible(errorClassifier, contextKey)
     }
 }

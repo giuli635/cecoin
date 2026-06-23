@@ -44,7 +44,7 @@ private fun ErrorContent(error: AppError, modifier: Modifier, onCancel: () -> Un
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = error.uiText.resolve(),
+                    text = error.toDisplayString(),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.height(16.dp))

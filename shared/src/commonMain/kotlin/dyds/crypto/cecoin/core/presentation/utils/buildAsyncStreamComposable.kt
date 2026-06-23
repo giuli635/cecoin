@@ -2,9 +2,6 @@ package dyds.crypto.cecoin.core.presentation.utils
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
-import cecoin.shared.generated.resources.Res
-import cecoin.shared.generated.resources.stream_data_failed
-import cecoin.shared.generated.resources.stream_timeout
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
 import dyds.crypto.cecoin.core.domain.state.Fallible
@@ -13,7 +10,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val DEFAULT_STREAM_TIMEOUT_MS = 30_000L
@@ -43,7 +39,7 @@ fun <T> buildAsyncStreamComposable(
                         }
                     } catch (e: Exception) {
                         value = Loadable.Loaded(Fallible.Failed(
-                            errorClassifier.classify(e, getString(Res.string.stream_data_failed))
+                            errorClassifier.classify(e, "stream_data_failed")
                         ))
                     }
                 }
@@ -55,7 +51,7 @@ fun <T> buildAsyncStreamComposable(
                     value = Loadable.Loaded(Fallible.Failed(
                         errorClassifier.classify(
                             RuntimeException("Timeout"),
-                            getString(Res.string.stream_timeout)
+                            "stream_timeout"
                         )
                     ))
                 }

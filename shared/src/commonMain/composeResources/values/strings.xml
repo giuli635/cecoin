@@ -33,13 +33,17 @@
     <string name="search_filter_favorites">Favoritas</string>
 
     <!-- Error messages -->
-    <string name="error_historical_data">Error al cargar datos históricos</string>
-    <string name="error_live_stream_failed">La transmisión en vivo falló</string>
-    <string name="error_load_news">Error al cargar noticias</string>
-    <string name="error_load_symbols">Error al cargar símbolos</string>
-    <string name="error_toggle_favorite">Error al cambiar favorito</string>
     <string name="error_network_template">%1$s: Sin conexión a internet. Revisa tu Wi-Fi o datos móviles.</string>
+    <string name="error_cancelled_template">%1$s</string>
+    <string name="error_with_message_template">%1$s: %2$s</string>
     <string name="error_unknown_template">%1$s: Error desconocido (%2$s)</string>
+
+    <!-- Error context strings -->
+    <string name="context_load_history">Error al cargar datos históricos</string>
+    <string name="context_live_stream">La transmisión en vivo falló</string>
+    <string name="context_load_news">Error al cargar noticias</string>
+    <string name="context_load_symbols">Error al cargar símbolos</string>
+    <string name="context_toggle_favorite">Error al cambiar favorito</string>
 
     <!-- App -->
     <string name="app_window_title">cecoin</string>

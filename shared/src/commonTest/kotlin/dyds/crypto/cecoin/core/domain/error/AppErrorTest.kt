@@ -7,27 +7,27 @@ import kotlin.test.assertEquals
 
 class AppErrorTest {
     @Test
-    fun `NetworkError holds Dynamic UiText`() {
-        val error = AppError.NetworkError(UiText.Dynamic("msg"))
-        val uiText = assertIs<UiText.Dynamic>(error.uiText)
-        assertEquals("msg", uiText.value)
+    fun `NetworkError has error_network key and context as arg`() {
+        val error = AppError.NetworkError("test_context")
+        assertEquals("error_network", error.errorKey)
+        assertEquals("test_context", error.args[0])
     }
 
     @Test
-    fun `GenericError with CancellationException holds Dynamic`() {
-        val error = AppError.GenericError(
-            CancellationException("cancel"),
-            UiText.Dynamic("Error"),
-        )
-        assertIs<UiText.Dynamic>(error.uiText)
+    fun `GenericError with CancellationException has error_cancelled key`() {
+        val error = AppError.GenericError(CancellationException(), "ctx")
+        assertEquals("error_cancelled", error.errorKey)
     }
 
     @Test
-    fun `GenericError with exception message holds Dynamic`() {
-        val error = AppError.GenericError(
-            RuntimeException("algo salió mal"),
-            UiText.Dynamic("Error: algo salió mal"),
-        )
-        assertEquals("Error: algo salió mal", (error.uiText as UiText.Dynamic).value)
+    fun `GenericError with exception message has error_with_message key`() {
+        val error = AppError.GenericError(RuntimeException("msg"), "ctx")
+        assertEquals("error_with_message", error.errorKey)
+    }
+
+    @Test
+    fun `GenericError with no message has error_unknown key`() {
+        val error = AppError.GenericError(RuntimeException(), "ctx")
+        assertEquals("error_unknown", error.errorKey)
     }
 }

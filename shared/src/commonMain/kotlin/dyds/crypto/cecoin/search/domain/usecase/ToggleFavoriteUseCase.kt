@@ -14,10 +14,10 @@ interface ToggleFavoriteUseCase {
 class ToggleFavoriteUseCaseImpl(
     private val repository: FavoriteRepository,
     private val errorClassifier: ErrorClassifier,
-    private val lazyMessage: suspend () -> String,
+    private val contextKey: String,
 ) : ToggleFavoriteUseCase {
     override suspend operator fun invoke(symbol: CryptoSymbol): Fallible<Unit> {
         return runCatchingCancellable { repository.toggleFavorite(symbol) }
-            .toFallible(errorClassifier, lazyMessage)
+            .toFallible(errorClassifier, contextKey)
     }
 }

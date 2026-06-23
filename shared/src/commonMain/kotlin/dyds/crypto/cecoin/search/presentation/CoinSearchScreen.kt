@@ -32,7 +32,7 @@ import cecoin.shared.generated.resources.search_screen_title
 import dyds.crypto.cecoin.search.presentation.component.FilterDropdown
 import dyds.crypto.cecoin.core.presentation.utils.buildAsyncComposable
 import dyds.crypto.cecoin.core.domain.state.Loadable
-import dyds.crypto.cecoin.core.presentation.utils.resolve
+import dyds.crypto.cecoin.core.presentation.utils.toDisplayString
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -91,7 +91,7 @@ fun CoinSearchScreen(
                 viewModel.clearToggleError()
             }
             Text(
-                text = error.uiText.resolve(),
+                text = error.toDisplayString(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )

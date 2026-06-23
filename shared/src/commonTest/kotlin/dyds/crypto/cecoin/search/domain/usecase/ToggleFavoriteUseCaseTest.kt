@@ -16,7 +16,7 @@ class ToggleFavoriteUseCaseTest {
     @Test
     fun `invoke delegates toggle to repository`() = runTest {
         val repo = FakeFavoriteRepository()
-        val useCase = ToggleFavoriteUseCaseImpl(repo, classifier, lazyMessage = { "test" })
+        val useCase = ToggleFavoriteUseCaseImpl(repo, classifier, "test")
 
         val result = useCase(fakeBtcSymbol)
 
@@ -27,7 +27,7 @@ class ToggleFavoriteUseCaseTest {
     @Test
     fun `double toggle restores original state`() = runTest {
         val repo = FakeFavoriteRepository()
-        val useCase = ToggleFavoriteUseCaseImpl(repo, classifier, lazyMessage = { "test" })
+        val useCase = ToggleFavoriteUseCaseImpl(repo, classifier, "test")
 
         useCase(fakeBtcSymbol)
         useCase(fakeBtcSymbol)
@@ -39,7 +39,7 @@ class ToggleFavoriteUseCaseTest {
     @Test
     fun `invoke returns Failed when repository throws`() = runTest {
         val repo = FakeFavoriteRepository(exception = RuntimeException("repo fail"))
-        val useCase = ToggleFavoriteUseCaseImpl(repo, classifier, lazyMessage = { "repo fail" })
+        val useCase = ToggleFavoriteUseCaseImpl(repo, classifier, "repo fail")
 
         val result = useCase(fakeBtcSymbol)
 

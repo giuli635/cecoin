@@ -1,7 +1,6 @@
 package dyds.crypto.cecoin.core.domain.state
 
 import dyds.crypto.cecoin.core.domain.error.AppError
-import dyds.crypto.cecoin.core.domain.error.UiText
 import dyds.crypto.cecoin.core.domain.error.fakeErrorClassifier
 
 import kotlinx.coroutines.CancellationException
@@ -44,7 +43,7 @@ class GenericStatesTest {
 
     @Test
     fun `Fallible map on Failed returns same error`() {
-        val error = AppError.GenericError(RuntimeException("fail"), UiText.Dynamic("msg"))
+        val error = AppError.GenericError(RuntimeException("fail"), "msg")
         val failed: Fallible<Int> = Fallible.Failed(error)
         val result = failed.map { it * 2 }
         val failedResult = assertIs<Fallible.Failed>(result)
@@ -75,7 +74,7 @@ class GenericStatesTest {
     @Test
     fun `toFallible on success returns Success`() = runTest {
         val result = Result.success(42)
-        val fallible = result.toFallible(fakeErrorClassifier()) { "test" }
+        val fallible = result.toFallible(fakeErrorClassifier(), "test")
         val success = assertIs<Fallible.Success<Int>>(fallible)
         assertEquals(42, success.value)
     }
@@ -84,7 +83,7 @@ class GenericStatesTest {
     fun `toFallible with network error returns NetworkError`() = runTest {
         val classifier = fakeErrorClassifier(isNetworkError = true)
         val result = Result.failure<Int>(RuntimeException("no network"))
-        val fallible = result.toFallible(classifier) { "net msg" }
+        val fallible = result.toFallible(classifier, "net msg")
         val failed = assertIs<Fallible.Failed>(fallible)
         assertIs<AppError.NetworkError>(failed.error)
     }
@@ -93,7 +92,7 @@ class GenericStatesTest {
     fun `toFallible with generic error returns GenericError`() = runTest {
         val classifier = fakeErrorClassifier(isNetworkError = false)
         val result = Result.failure<Int>(RuntimeException("bad"))
-        val fallible = result.toFallible(classifier) { "gen msg" }
+        val fallible = result.toFallible(classifier, "gen msg")
         val failed = assertIs<Fallible.Failed>(fallible)
         val generic = assertIs<AppError.GenericError>(failed.error)
         assertIs<RuntimeException>(generic.exception)
@@ -109,7 +108,7 @@ class GenericStatesTest {
 
     @Test
     fun `Fallible onFailure on Failed invokes action with error`() {
-        val error = AppError.GenericError(RuntimeException("fail"), UiText.Dynamic("msg"))
+        val error = AppError.GenericError(RuntimeException("fail"), "msg")
         val failed: Fallible<Int> = Fallible.Failed(error)
         var captured: AppError? = null
         failed.onFailure { captured = it }

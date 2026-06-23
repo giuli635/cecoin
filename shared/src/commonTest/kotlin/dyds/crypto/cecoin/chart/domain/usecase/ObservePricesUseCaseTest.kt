@@ -27,7 +27,7 @@ class ObservePricesUseCaseTest {
     fun `invoke returns flow from repository`() = runTest {
         val expected = PricePoint(1000L, 50000.0)
         val repo = FakePriceRepository(tradeFlow = flowOf(expected))
-        val useCase = ObservePricesUseCaseImpl(repo, classifier, lazyMessage = { "test" })
+        val useCase = ObservePricesUseCaseImpl(repo, classifier, contextKey = "test")
 
         val result = useCase(fakeBtcSymbol)
 
@@ -41,7 +41,7 @@ class ObservePricesUseCaseTest {
         val p1 = PricePoint(1000L, 50000.0)
         val p2 = PricePoint(2000L, 51000.0)
         val repo = FakePriceRepository(tradeFlow = flow { emit(p1); emit(p2) })
-        val useCase = ObservePricesUseCaseImpl(repo, classifier, lazyMessage = { "test" })
+        val useCase = ObservePricesUseCaseImpl(repo, classifier, contextKey = "test")
 
         val results = useCase(fakeBtcSymbol).take(2).toList()
 
@@ -55,7 +55,7 @@ class ObservePricesUseCaseTest {
     @Test
     fun `invoke exhausts retries and stops`() = runTest {
         val repo = FakePriceRepository(tradeFlow = flow { throw RuntimeException("stream fail") })
-        val useCase = ObservePricesUseCaseImpl(repo, classifier, retryDelayMs = 1L, maxRetries = 3, lazyMessage = { "stream fail" })
+        val useCase = ObservePricesUseCaseImpl(repo, classifier, retryDelayMs = 1L, maxRetries = 3, contextKey = "stream fail")
 
         val results = useCase(fakeBtcSymbol).toList()
 
@@ -66,7 +66,7 @@ class ObservePricesUseCaseTest {
     @Test
     fun `invoke emits nothing when repository flow never emits`() = runTest {
         val repo = FakePriceRepository(tradeFlow = flow { delay(Long.MAX_VALUE.milliseconds) })
-        val useCase = ObservePricesUseCaseImpl(repo, classifier, lazyMessage = { "test" })
+        val useCase = ObservePricesUseCaseImpl(repo, classifier, contextKey = "test")
 
         val result = withTimeoutOrNull(100.milliseconds) {
             useCase(fakeBtcSymbol).firstOrNull()
@@ -88,7 +88,7 @@ class ObservePricesUseCaseTest {
                 emit(PricePoint(3000L, 52000.0))
             }
         })
-        val useCase = ObservePricesUseCaseImpl(repo, classifier, retryDelayMs = 1L, maxRetries = 3, lazyMessage = { "test" })
+        val useCase = ObservePricesUseCaseImpl(repo, classifier, retryDelayMs = 1L, maxRetries = 3, contextKey = "test")
 
         val results = useCase(fakeBtcSymbol).take(4).toList()
 
@@ -106,7 +106,7 @@ class ObservePricesUseCaseTest {
     fun `invoke handles many emissions without accumulation issues`() = runTest {
         val points = (1..100).map { PricePoint(it.toLong(), 50000.0 + it) }
         val repo = FakePriceRepository(tradeFlow = flow { points.forEach { emit(it) } })
-        val useCase = ObservePricesUseCaseImpl(repo, classifier, lazyMessage = { "test" })
+        val useCase = ObservePricesUseCaseImpl(repo, classifier, contextKey = "test")
 
         val results = useCase(fakeBtcSymbol).take(100).toList()
 
