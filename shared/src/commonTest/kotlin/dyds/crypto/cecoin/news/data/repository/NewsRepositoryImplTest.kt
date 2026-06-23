@@ -14,8 +14,8 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
 
 class NewsRepositoryImplTest {
-    private val articleA = NewsArticle("Title A", "Desc", "url", null, "Source", "2024-01-01")
-    private val articleB = NewsArticle("Title B", "Desc", "url", null, "Source", "2024-01-02")
+    private val articleA = NewsArticle("Title A", "Desc", "url", "Source", "2024-01-01")
+    private val articleB = NewsArticle("Title B", "Desc", "url", "Source", "2024-01-02")
 
     @Test
     fun `getCryptoNews delegates to data source on first call`() = runTest {
@@ -96,8 +96,8 @@ class NewsRepositoryImplTest {
     @Test
     fun `getCryptoNews handles articles with empty fields`() = runTest {
         val articles = listOf(
-            NewsArticle("", "", "", null, "", ""),
-            NewsArticle(" ", " ", " ", null, " ", " "),
+            NewsArticle("", "", "", "", ""),
+            NewsArticle(" ", " ", " ", " ", " "),
         )
         val dataSource = FakeNewsApiDataSource(articles)
         val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))
@@ -111,7 +111,7 @@ class NewsRepositoryImplTest {
     fun `getCryptoNews handles articles with very long strings`() = runTest {
         val longStr = "A".repeat(10_000)
         val articles = listOf(
-            NewsArticle(longStr, longStr, longStr, null, longStr, longStr),
+            NewsArticle(longStr, longStr, longStr, longStr, longStr),
         )
         val dataSource = FakeNewsApiDataSource(articles)
         val repo = NewsRepositoryImpl(CachedDataSource(dataSource::fetchCryptoNews, 2.minutes))

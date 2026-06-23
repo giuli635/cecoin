@@ -49,7 +49,6 @@ class NewsApiRestDataSource(
                 title = (obj["title"] as? JsonPrimitive)?.content.orEmpty(),
                 description = (obj["description"] as? JsonPrimitive)?.content.orEmpty(),
                 url = (obj["url"] as? JsonPrimitive)?.content.orEmpty(),
-                urlToImage = (obj["urlToImage"] as? JsonPrimitive)?.content,
                 sourceName = (source?.get("name") as? JsonPrimitive)?.content.orEmpty(),
                 publishedAt = (obj["publishedAt"] as? JsonPrimitive)?.content.orEmpty(),
             )

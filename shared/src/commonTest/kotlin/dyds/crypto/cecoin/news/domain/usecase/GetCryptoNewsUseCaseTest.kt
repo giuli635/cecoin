@@ -15,7 +15,7 @@ class GetCryptoNewsUseCaseTest {
     @Test
     fun `invoke returns articles from repository`() = runTest {
         val expected = listOf(
-            NewsArticle("Title", "Desc", "url", null, "Source", "2024-01-01"),
+            NewsArticle("Title", "Desc", "url", "Source", "2024-01-01"),
         )
         val repo = FakeNewsRepository(articles = expected)
         val useCase = GetCryptoNewsUseCaseImpl(repo, classifier, "test")
