@@ -36,6 +36,8 @@ import dyds.crypto.cecoin.core.presentation.utils.resolve
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.milliseconds
 
+private const val TOGGLE_ERROR_CLEAR_DELAY_MS = 4000L
+
 @Composable
 fun CoinSearchScreen(
     modifier: Modifier = Modifier,
@@ -85,7 +87,7 @@ fun CoinSearchScreen(
 
         toggleError?.let { error ->
             LaunchedEffect(toggleError) {
-                delay(4000.milliseconds)
+                delay(TOGGLE_ERROR_CLEAR_DELAY_MS.milliseconds)
                 viewModel.clearToggleError()
             }
             Text(

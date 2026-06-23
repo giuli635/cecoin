@@ -24,6 +24,9 @@ private const val DEFAULT_Y_RANGE_GAP = 1.0
 private const val Y_PADDING_FACTOR = 0.06
 private const val X_PADDING_FACTOR = 0.05
 private const val DEFAULT_X_RANGE_MS = 60_000.0
+private const val TEN_MINUTES = 10
+private const val THIRTY_MINUTES = 30
+private const val SIX_HOURS = 6
 
 fun computeChartYRange(dataMin: Double, dataMax: Double): ChartRange {
     if (dataMax <= dataMin) return ChartRange(dataMin - DEFAULT_Y_RANGE_GAP, dataMax + DEFAULT_Y_RANGE_GAP)
@@ -87,10 +90,10 @@ private fun niceTimeStep(rangeMs: Double): Double {
     val rangeSec = rangeMs / MILLIS_IN_SECOND
     return when {
         rangeSec < SECONDS_IN_MINUTE -> MILLIS_IN_MINUTE
-        rangeSec < SECONDS_IN_MINUTE * 10 -> MILLIS_IN_5_MIN
-        rangeSec < SECONDS_IN_MINUTE * 30 -> MILLIS_IN_15_MIN
+        rangeSec < SECONDS_IN_MINUTE * TEN_MINUTES -> MILLIS_IN_5_MIN
+        rangeSec < SECONDS_IN_MINUTE * THIRTY_MINUTES -> MILLIS_IN_15_MIN
         rangeSec < SECONDS_IN_HOUR -> MILLIS_IN_30_MIN
-        rangeSec < SECONDS_IN_HOUR * 6 -> MILLIS_IN_1_HOUR
+        rangeSec < SECONDS_IN_HOUR * SIX_HOURS -> MILLIS_IN_1_HOUR
         rangeSec < SECONDS_IN_HOUR * HOURS_IN_DAY -> MILLIS_IN_6_HOURS
         else -> MILLIS_IN_1_DAY
     }.toDouble()

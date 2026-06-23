@@ -16,11 +16,13 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import kotlin.time.Duration.Companion.milliseconds
 
+private const val DEFAULT_STREAM_TIMEOUT_MS = 30_000L
+
 fun <T> buildAsyncStreamComposable(
     onCancel: () -> Unit,
     onRetry: () -> Unit,
     errorClassifier: ErrorClassifier,
-    timeoutMs: Long = 30_000L,
+    timeoutMs: Long = DEFAULT_STREAM_TIMEOUT_MS,
     inner: Renderer<T>,
 ): Renderer<AsyncResult<Flow<T>>> =
     buildAsyncComposable(

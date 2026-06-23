@@ -3,7 +3,7 @@ package dyds.crypto.cecoin.chart.presentation.util
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import dyds.crypto.cecoin.core.utils.format.pad
 import dyds.crypto.cecoin.core.utils.format.priceStr
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.number

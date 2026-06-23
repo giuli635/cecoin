@@ -21,7 +21,6 @@ import dyds.crypto.cecoin.core.domain.error.AppError
 import dyds.crypto.cecoin.core.domain.state.Fallible
 import org.jetbrains.compose.resources.stringResource
 
-
 fun <T> buildFallibleComposable(
     inner: Renderer<T>,
     onCancel: () -> Unit,

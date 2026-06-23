@@ -114,6 +114,78 @@ class NewsViewModelTest {
     }
 
     @Test
+    fun `filteredNews initial state is Loading`() = runTest {
+        val viewModel = createViewModel()
+        assertEquals(Loadable.Loading, viewModel.filteredNews.first())
+    }
+
+    @Test
+    fun `filteredNews returns all articles when searchQuery is empty`() = runTest {
+        val articles = listOf(
+            NewsArticle("Bitcoin News", "Desc1", "url1", null, "Source1", "2024-01-01"),
+            NewsArticle("Ethereum News", "Desc2", "url2", null, "Source2", "2024-01-01"),
+        )
+        val fake = FakeGetCryptoNewsUseCase(articles = articles)
+        val viewModel = createViewModel(fake)
+
+        viewModel.loadNews()
+        viewModel.asyncNews.first { it !is Loadable.Loading }
+
+        val result = viewModel.filteredNews.first { it is Loadable.Loaded }
+        val loaded = assertIs<Loadable.Loaded<Fallible<List<NewsArticle>>>>(result)
+        val success = assertIs<Fallible.Success<List<NewsArticle>>>(loaded.value)
+        assertEquals(articles, success.value)
+    }
+
+    @Test
+    fun `filteredNews filters by searchQuery case insensitive`() = runTest {
+        val articles = listOf(
+            NewsArticle("Bitcoin Update", "Desc1", "url1", null, "Source1", "2024-01-01"),
+            NewsArticle("Ethereum Update", "Desc2", "url2", null, "Source2", "2024-01-01"),
+            NewsArticle("btc news", "Desc3", "url3", null, "Source3", "2024-01-01"),
+        )
+        val fake = FakeGetCryptoNewsUseCase(articles = articles)
+        val viewModel = createViewModel(fake)
+
+        viewModel.loadNews()
+        viewModel.asyncNews.first { it !is Loadable.Loading }
+
+        viewModel.onSearchQueryChange("bitcoin")
+
+        val result = viewModel.filteredNews.first { it is Loadable.Loaded }
+        val loaded = assertIs<Loadable.Loaded<Fallible<List<NewsArticle>>>>(result)
+        val success = assertIs<Fallible.Success<List<NewsArticle>>>(loaded.value)
+        assertEquals(1, success.value.size)
+        assertEquals("Bitcoin Update", success.value[0].title)
+    }
+
+    @Test
+    fun `filteredNews updates when searchQuery changes without reload`() = runTest {
+        val articles = listOf(
+            NewsArticle("Bitcoin News", "Desc1", "url1", null, "Source1", "2024-01-01"),
+            NewsArticle("Ethereum News", "Desc2", "url2", null, "Source2", "2024-01-01"),
+        )
+        val fake = FakeGetCryptoNewsUseCase(articles = articles)
+        val viewModel = createViewModel(fake)
+
+        viewModel.loadNews()
+        viewModel.asyncNews.first { it !is Loadable.Loading }
+
+        val allResult = viewModel.filteredNews.first { it is Loadable.Loaded }
+        val allLoaded = assertIs<Loadable.Loaded<Fallible<List<NewsArticle>>>>(allResult)
+        val allSuccess = assertIs<Fallible.Success<List<NewsArticle>>>(allLoaded.value)
+        assertEquals(2, allSuccess.value.size)
+
+        viewModel.onSearchQueryChange("ETH")
+
+        val filteredResult = viewModel.filteredNews.first { it is Loadable.Loaded }
+        val filteredLoaded = assertIs<Loadable.Loaded<Fallible<List<NewsArticle>>>>(filteredResult)
+        val filteredSuccess = assertIs<Fallible.Success<List<NewsArticle>>>(filteredLoaded.value)
+        assertEquals(1, filteredSuccess.value.size)
+        assertEquals("Ethereum News", filteredSuccess.value[0].title)
+    }
+
+    @Test
     fun `onCancelLoadNews does nothing when no active job`() = runTest {
         val fake = FakeGetCryptoNewsUseCase()
         val viewModel = createViewModel(fake)

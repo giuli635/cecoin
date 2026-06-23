@@ -47,6 +47,7 @@ class CoinSearchViewModel(
     private var loadSymbolsJob: Job? = null
 
     fun loadSymbols() {
+        _toggleError.value = null
         loadSymbolsJob?.cancel()
         loadSymbolsJob = launchLoadable(_asyncAvailableSymbols) {
             getAvailableSymbolsUseCase()

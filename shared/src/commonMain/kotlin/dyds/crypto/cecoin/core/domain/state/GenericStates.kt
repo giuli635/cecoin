@@ -31,7 +31,6 @@ sealed class Fallible<out T> {
     }
 }
 
-
 suspend inline fun <T> runCatchingCancellable(crossinline block: suspend () -> T): Result<T> {
     return try {
         Result.success(block())

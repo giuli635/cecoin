@@ -34,6 +34,8 @@ import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
 import org.jetbrains.compose.resources.stringResource
 import dyds.crypto.cecoin.core.utils.format.priceStr
 
+private const val SURFACE_ALPHA = 0.3f
+
 @Composable
 private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) {
     val lastPrice = data.lastOrNull()?.price
@@ -107,7 +109,7 @@ fun ChartScreen(
 
         Surface(
             shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = SURFACE_ALPHA),
             modifier = Modifier.fillMaxWidth(),
         ) {
             buildAsyncStreamComposable(

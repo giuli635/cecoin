@@ -35,7 +35,7 @@ fun NewsScreen(
     viewModel: NewsViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val asyncNews by viewModel.asyncNews.collectAsState()
+    val filteredNews by viewModel.filteredNews.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadNews()
@@ -59,34 +59,31 @@ fun NewsScreen(
             label = { Text(stringResource(Res.string.news_search_label)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            enabled = asyncNews !is Loadable.Loading,
+            enabled = filteredNews !is Loadable.Loading,
         )
 
         buildAsyncComposable(
             viewModel::onCancelLoadNews,
             viewModel::retryLoadNews,
             newsListRenderer(uiState.searchQuery),
-        )(asyncNews, Modifier.fillMaxSize())
+        )(filteredNews, Modifier.fillMaxSize())
     }
 }
 
 private fun newsListRenderer(
     searchQuery: String,
 ): Renderer<List<NewsArticle>> = { articles, modifier ->
-    val filtered = if (searchQuery.isEmpty()) articles
-    else articles.filter { it.title.contains(searchQuery, ignoreCase = true) }
-
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(filtered) { article ->
+        items(articles) { article ->
             NewsCard(
                 article = article,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-        if (filtered.isEmpty()) {
+        if (articles.isEmpty()) {
             item {
                 val message = if (searchQuery.isNotEmpty()) "${stringResource(Res.string.news_no_news_found_prefix)}$searchQuery'"
                 else stringResource(Res.string.news_no_news_available)
