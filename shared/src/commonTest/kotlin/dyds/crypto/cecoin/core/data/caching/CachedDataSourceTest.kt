@@ -1,6 +1,7 @@
 package dyds.crypto.cecoin.core.data.caching
 
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -98,7 +99,7 @@ class CachedDataSourceTest {
             val jobs = (1..10).map {
                 launch { source.get() }
             }
-            jobs.forEach { it.join() }
+            jobs.joinAll()
         }
 
         assertEquals(1, callCount)

@@ -10,7 +10,6 @@ import dyds.crypto.cecoin.search.presentation.util.filterBy
 import dyds.crypto.cecoin.core.presentation.utils.AsyncResult
 import dyds.crypto.cecoin.core.presentation.utils.launchLoadable
 import dyds.crypto.cecoin.core.domain.error.AppError
-import dyds.crypto.cecoin.core.domain.state.Fallible
 import dyds.crypto.cecoin.core.domain.state.Loadable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

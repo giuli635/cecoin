@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.presentation.component.GranularitySelector
 import dyds.crypto.cecoin.chart.presentation.component.PriceChart
-import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import dyds.crypto.cecoin.chart.presentation.util.ChartColors
 import cecoin.shared.generated.resources.Res
 import cecoin.shared.generated.resources.chart_screen_back

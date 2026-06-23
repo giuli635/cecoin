@@ -1,6 +1,5 @@
 package dyds.crypto.cecoin.chart.presentation
 
-import dyds.crypto.cecoin.chart.presentation.GranularityStateHolder
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import kotlin.test.Test
 import kotlin.test.assertEquals

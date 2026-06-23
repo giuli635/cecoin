@@ -1,11 +1,11 @@
 package dyds.crypto.cecoin.search.data.repository
 
 import dyds.crypto.cecoin.core.data.caching.CachedDataSource
-import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import dyds.crypto.cecoin.core.utils.fakeEthSymbol
 import dyds.crypto.cecoin.search.data.FakeCoinListDataSource
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -79,7 +79,7 @@ class SearchRepositoryImplTest {
             val jobs = (1..10).map {
                 launch { repo.getAvailableSymbols() }
             }
-            jobs.forEach { it.join() }
+            jobs.joinAll()
         }
 
         assertEquals(1, listSource.callCount)

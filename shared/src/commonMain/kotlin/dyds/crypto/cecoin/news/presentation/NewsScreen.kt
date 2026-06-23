@@ -65,14 +65,13 @@ fun NewsScreen(
         buildAsyncComposable(
             viewModel::onCancelLoadNews,
             viewModel::retryLoadNews,
-            newsListRenderer(uiState.searchQuery, viewModel),
+            newsListRenderer(uiState.searchQuery),
         )(asyncNews, Modifier.fillMaxSize())
     }
 }
 
 private fun newsListRenderer(
     searchQuery: String,
-    viewModel: NewsViewModel,
 ): Renderer<List<NewsArticle>> = { articles, modifier ->
     val filtered = if (searchQuery.isEmpty()) articles
     else articles.filter { it.title.contains(searchQuery, ignoreCase = true) }

@@ -1,6 +1,5 @@
 package dyds.crypto.cecoin.search.domain.usecase
 
-import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import dyds.crypto.cecoin.core.utils.fakeEthSymbol
 import dyds.crypto.cecoin.search.domain.FakeFavoriteRepository

@@ -44,9 +44,6 @@ class ChartScreenViewModelTest {
             flowPredicate = { it is Fallible.Success && it.value.any { p -> p.price == price } },
         )
 
-    private suspend fun waitForPriceStillVisible(viewModel: ChartScreenViewModel): List<PricePoint> =
-        extractFlowSuccess({ viewModel.state.first() })
-
     private data class VMScope(
         val viewModel: ChartScreenViewModel,
         val tradeUseCase: FakeObservePricesUseCase,

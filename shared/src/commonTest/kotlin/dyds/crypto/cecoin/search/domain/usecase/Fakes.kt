@@ -1,9 +1,6 @@
 package dyds.crypto.cecoin.search.domain.usecase
 
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
-import dyds.crypto.cecoin.search.domain.usecase.GetAvailableSymbolsUseCase
-import dyds.crypto.cecoin.search.domain.usecase.ObserveFavoritesUseCase
-import dyds.crypto.cecoin.search.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.core.domain.state.Fallible
 import dyds.crypto.cecoin.core.domain.error.AppError
 import dyds.crypto.cecoin.core.domain.error.UiText

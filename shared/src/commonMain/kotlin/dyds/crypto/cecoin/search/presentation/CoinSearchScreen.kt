@@ -34,6 +34,7 @@ import dyds.crypto.cecoin.core.presentation.utils.buildAsyncComposable
 import dyds.crypto.cecoin.core.domain.state.Loadable
 import dyds.crypto.cecoin.core.presentation.utils.resolve
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun CoinSearchScreen(
@@ -84,7 +85,7 @@ fun CoinSearchScreen(
 
         toggleError?.let { error ->
             LaunchedEffect(toggleError) {
-                delay(4000)
+                delay(4000.milliseconds)
                 viewModel.clearToggleError()
             }
             Text(

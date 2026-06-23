@@ -18,7 +18,6 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
 import dyds.crypto.cecoin.chart.presentation.util.VicoChartModelBuilder
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.milliseconds
@@ -47,9 +46,7 @@ fun PriceChart(
                 if (isNewDataset) {
                     val maxValueBeforeNewModel = scrollState.maxValue
                     withTimeoutOrNull(SCROLL_LAYOUT_TIMEOUT_MS.milliseconds) {
-                        snapshotFlow { scrollState.maxValue }
-                            .filter { it > 0f && it != maxValueBeforeNewModel }
-                            .first()
+                        snapshotFlow { scrollState.maxValue }.first { it > 0f && it != maxValueBeforeNewModel }
                     }
                     scrollState.scroll(
                         Scroll.Absolute.x(

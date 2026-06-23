@@ -117,36 +117,36 @@ class NumericFormattersTest {
 
     @Test
     fun `priceStr with default decimals`() {
-        assertEquals("\$1,234.50", priceStr(1234.5))
+        assertEquals($$"$1,234.50", priceStr(1234.5))
     }
 
     @Test
     fun `priceStr with custom decimals`() {
-        assertEquals("\$1,234.5670", priceStr(1234.567, 4))
+        assertEquals($$"$1,234.5670", priceStr(1234.567, 4))
     }
 
     @Test
     fun `priceStr with zero`() {
-        assertEquals("\$0.00", priceStr(0.0))
+        assertEquals($$"$0.00", priceStr(0.0))
     }
 
     @Test
     fun `priceStr with value less than one`() {
-        assertEquals("\$0.50", priceStr(0.5))
+        assertEquals($$"$0.50", priceStr(0.5))
     }
 
     @Test
     fun `priceStr with negative value`() {
-        assertEquals("-\$100.00", priceStr(-100.0))
+        assertEquals($$"-$100.00", priceStr(-100.0))
     }
 
     @Test
     fun `priceStr with very large value`() {
-        assertEquals("\$1,000,000.00", priceStr(1000000.0))
+        assertEquals("$1,000,000.00", priceStr(1000000.0))
     }
 
     @Test
     fun `priceStr with zero decimals`() {
-        assertEquals("\$1,234.0", priceStr(1234.0, 1))
+        assertEquals("$1,234.0", priceStr(1234.0, 1))
     }
 }

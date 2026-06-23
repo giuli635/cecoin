@@ -2,7 +2,6 @@ package dyds.crypto.cecoin.chart.domain.usecase
 
 import dyds.crypto.cecoin.chart.domain.FakePriceRepository
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
-import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.utils.fakeBtcSymbol
 import dyds.crypto.cecoin.core.domain.error.fakeErrorClassifier
 import dyds.crypto.cecoin.core.domain.state.Fallible
@@ -66,7 +65,7 @@ class ObservePricesUseCaseTest {
 
     @Test
     fun `invoke emits nothing when repository flow never emits`() = runTest {
-        val repo = FakePriceRepository(tradeFlow = flow { delay(Long.MAX_VALUE) })
+        val repo = FakePriceRepository(tradeFlow = flow { delay(Long.MAX_VALUE.milliseconds) })
         val useCase = ObservePricesUseCaseImpl(repo, classifier, lazyMessage = { "test" })
 
         val result = withTimeoutOrNull(100.milliseconds) {

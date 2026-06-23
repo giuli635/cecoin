@@ -4,13 +4,13 @@ import dyds.crypto.cecoin.core.data.caching.CachedDataSource
 import dyds.crypto.cecoin.news.data.FakeNewsApiDataSource
 import dyds.crypto.cecoin.news.domain.model.NewsArticle
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 class NewsRepositoryImplTest {
@@ -77,7 +77,7 @@ class NewsRepositoryImplTest {
             val jobs = (1..10).map {
                 launch { repo.getCryptoNews() }
             }
-            jobs.forEach { it.join() }
+            jobs.joinAll()
         }
 
         assertEquals(1, dataSource.callCount)

@@ -1,7 +1,6 @@
 package dyds.crypto.cecoin.news.domain.usecase
 
 import dyds.crypto.cecoin.news.domain.model.NewsArticle
-import dyds.crypto.cecoin.news.domain.usecase.GetCryptoNewsUseCase
 import dyds.crypto.cecoin.core.domain.state.Fallible
 import dyds.crypto.cecoin.core.domain.error.AppError
 import dyds.crypto.cecoin.core.domain.error.UiText
