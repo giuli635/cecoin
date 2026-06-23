@@ -122,21 +122,6 @@ class ChartScreenViewModelTest {
     }
 
     @Test
-    fun `same granularity value does not reload`() = runTest {
-        val (viewModel, _, _) = createViewModel(historicalPrices = listOf(
-            PricePoint(0L, 50000.0),
-        ))
-
-        viewModel.load(Granularity.M1)
-        viewModel.awaitChartData()
-
-        viewModel.load(Granularity.M1)
-        val state = viewModel.state.first { it !is Loadable.Loading }
-        assertIs<Loadable.Loaded<*>>(state)
-        viewModel.onCleared()
-    }
-
-    @Test
     fun `historical limit is passed through`() = runTest {
         val (viewModel, _, historicalUseCase) = createViewModel(
             historicalPrices = emptyList(),

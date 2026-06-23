@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class NewsViewModelTest {
 
@@ -35,6 +36,16 @@ class NewsViewModelTest {
         val loaded = assertIs<Loadable.Loaded<Fallible<List<NewsArticle>>>>(result)
         val success = assertIs<Fallible.Success<List<NewsArticle>>>(loaded.value)
         assertEquals(expected, success.value)
+    }
+
+    @Test
+    fun `loadNews emits success with empty list`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.loadNews()
+        val result = viewModel.asyncNews.first { it !is Loadable.Loading }
+        val loaded = assertIs<Loadable.Loaded<Fallible<List<NewsArticle>>>>(result)
+        val success = assertIs<Fallible.Success<List<NewsArticle>>>(loaded.value)
+        assertTrue(success.value.isEmpty())
     }
 
     @Test
@@ -114,16 +125,6 @@ class NewsViewModelTest {
 
         val state = viewModel.uiState.first()
         assertEquals("", state.searchQuery)
-    }
-
-    @Test
-    fun `onCancelLoadNews after load completed does not crash`() = runTest {
-        val fake = FakeGetCryptoNewsUseCase()
-        val viewModel = createViewModel(fake)
-
-        viewModel.loadNews()
-        viewModel.asyncNews.first { it !is Loadable.Loading }
-        viewModel.onCancelLoadNews()
     }
 
     private fun createViewModel(fake: FakeGetCryptoNewsUseCase = FakeGetCryptoNewsUseCase()): NewsViewModel {

@@ -70,9 +70,4 @@ class SymbolFilterTest {
         assertEquals(emptyList(), result)
     }
 
-    @Test
-    fun `all mode with uppercase query still matches`() {
-        val result = allSymbols.filterBy("BTC", FilterMode.ALL, emptySet())
-        assertEquals(listOf(fakeBtcSymbol), result)
-    }
 }

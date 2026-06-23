@@ -20,7 +20,7 @@ class GranularityStateHolderTest {
     }
 
     @Test
-    fun `set same value does not emit`() {
+    fun `set same value keeps current value`() {
         val holder = GranularityStateHolder()
         holder.set(Granularity.M1)
         assertEquals(Granularity.M1, holder.granularity.value)

@@ -76,6 +76,33 @@ class ObservePricesUseCaseTest {
     }
 
     @Test
+    fun `invoke emits success then failed then success on retry`() = runTest {
+        var attempt = 0
+        val repo = FakePriceRepository(tradeFlow = flow {
+            attempt++
+            if (attempt == 1) {
+                emit(PricePoint(1000L, 50000.0))
+                emit(PricePoint(2000L, 51000.0))
+                throw RuntimeException("stream fail")
+            } else {
+                emit(PricePoint(3000L, 52000.0))
+            }
+        })
+        val useCase = ObservePricesUseCaseImpl(repo, classifier, retryDelayMs = 1L, maxRetries = 3, lazyMessage = { "test" })
+
+        val results = useCase(fakeBtcSymbol).take(4).toList()
+
+        assertEquals(4, results.size)
+        val s1 = assertIs<Fallible.Success<PricePoint>>(results[0])
+        assertEquals(50000.0, s1.value.price)
+        val s2 = assertIs<Fallible.Success<PricePoint>>(results[1])
+        assertEquals(51000.0, s2.value.price)
+        assertIs<Fallible.Failed>(results[2])
+        val s3 = assertIs<Fallible.Success<PricePoint>>(results[3])
+        assertEquals(52000.0, s3.value.price)
+    }
+
+    @Test
     fun `invoke handles many emissions without accumulation issues`() = runTest {
         val points = (1..100).map { PricePoint(it.toLong(), 50000.0 + it) }
         val repo = FakePriceRepository(tradeFlow = flow { points.forEach { emit(it) } })

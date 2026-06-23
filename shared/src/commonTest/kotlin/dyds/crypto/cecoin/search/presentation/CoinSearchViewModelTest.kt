@@ -44,6 +44,16 @@ class CoinSearchViewModelTest {
     }
 
     @Test
+    fun `loadSymbols emits success with empty list`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.loadSymbols()
+        val result = viewModel.filteredCoins.first { it !is Loadable.Loading }
+        val loaded = assertIs<Loadable.Loaded<Fallible<List<CryptoSymbol>>>>(result)
+        val success = assertIs<Fallible.Success<List<CryptoSymbol>>>(loaded.value)
+        assertTrue(success.value.isEmpty())
+    }
+
+    @Test
     fun `loadSymbols emits failed when usecase fails`() = runTest {
         val symbolsFake = FakeGetAvailableSymbolsUseCase(exception = RuntimeException("API error"))
         val viewModel = createViewModel(symbolsFake = symbolsFake)
