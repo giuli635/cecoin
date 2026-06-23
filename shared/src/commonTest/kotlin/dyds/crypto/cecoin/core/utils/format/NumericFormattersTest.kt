@@ -57,7 +57,7 @@ class NumericFormattersTest {
 
     @Test
     fun `formatDecimals with negative non-integer`() {
-        assertEquals("-5.-29", formatDecimals(-5.3, 2))
+        assertEquals("-5.30", formatDecimals(-5.3, 2))
     }
 
     @Test
@@ -137,7 +137,7 @@ class NumericFormattersTest {
 
     @Test
     fun `priceStr with negative value`() {
-        assertEquals("\$-,100.00", priceStr(-100.0))
+        assertEquals("-\$100.00", priceStr(-100.0))
     }
 
     @Test

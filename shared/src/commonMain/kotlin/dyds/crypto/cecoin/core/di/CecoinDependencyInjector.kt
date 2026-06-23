@@ -31,6 +31,8 @@ import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
 import kotlin.time.Duration.Companion.minutes
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
+import cecoin.shared.generated.resources.*
+import org.jetbrains.compose.resources.getString
 import dyds.crypto.cecoin.news.presentation.NewsViewModel
 import dyds.crypto.cecoin.chart.presentation.ChartScreenViewModel
 import dyds.crypto.cecoin.chart.presentation.GranularityStateHolder
@@ -75,11 +77,26 @@ object CecoinDependencyInjector {
         errorClassifier = classifier
         favoriteSource = DataStoreFavoriteDataSource(dataStore)
         favoriteRepository = FavoriteRepositoryImpl(favoriteSource)
-        observePricesUseCase = ObservePricesUseCaseImpl(chartRepository, classifier)
-        getAvailableSymbolsUseCase = GetAvailableSymbolsUseCaseImpl(searchRepository, classifier)
-        getHistoricalPricesUseCase = GetHistoricalPricesUseCaseImpl(chartRepository, classifier)
-        getCryptoNewsUseCase = GetCryptoNewsUseCaseImpl(newsRepository, classifier)
-        toggleFavoriteUseCase = ToggleFavoriteUseCaseImpl(favoriteRepository, classifier)
+        observePricesUseCase = ObservePricesUseCaseImpl(
+            chartRepository, classifier,
+            lazyMessage = { getString(Res.string.error_live_stream_failed) },
+        )
+        getAvailableSymbolsUseCase = GetAvailableSymbolsUseCaseImpl(
+            searchRepository, classifier,
+            lazyMessage = { getString(Res.string.error_load_symbols) },
+        )
+        getHistoricalPricesUseCase = GetHistoricalPricesUseCaseImpl(
+            chartRepository, classifier,
+            lazyMessage = { getString(Res.string.error_historical_data) },
+        )
+        getCryptoNewsUseCase = GetCryptoNewsUseCaseImpl(
+            newsRepository, classifier,
+            lazyMessage = { getString(Res.string.error_load_news) },
+        )
+        toggleFavoriteUseCase = ToggleFavoriteUseCaseImpl(
+            favoriteRepository, classifier,
+            lazyMessage = { getString(Res.string.error_toggle_favorite) },
+        )
         observeFavoritesUseCase = ObserveFavoritesUseCaseImpl(favoriteRepository)
     }
 
