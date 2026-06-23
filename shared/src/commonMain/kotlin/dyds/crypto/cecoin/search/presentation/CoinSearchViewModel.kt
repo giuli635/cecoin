@@ -59,9 +59,12 @@ class CoinSearchViewModel(
     }
 
     fun onCancelLoadSymbols() {
-        loadSymbolsJob?.cancel()
-        _asyncAvailableSymbols.value = Loadable.Cancelled
-        loadSymbolsJob = null
+        val job = loadSymbolsJob
+        if (job?.isActive == true) {
+            job.cancel()
+            _asyncAvailableSymbols.value = Loadable.Cancelled
+            loadSymbolsJob = null
+        }
     }
 
     fun onSearchQueryChange(query: String) {

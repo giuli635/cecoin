@@ -210,10 +210,25 @@ class CoinSearchViewModelTest {
     fun `onCancelLoadSymbols does nothing when no active job`() = runTest {
         val viewModel = createViewModel()
 
+        val initial = viewModel.filteredCoins.first()
+
         viewModel.onCancelLoadSymbols()
 
-        val state = viewModel.uiState.first()
-        assertEquals("", state.searchQuery)
+        val state = viewModel.filteredCoins.first()
+        assertEquals(initial, state)
+    }
+
+    @Test
+    fun `onCancelLoadSymbols does nothing when job already completed`() = runTest {
+        val symbolsFake = FakeGetAvailableSymbolsUseCase()
+        val viewModel = createViewModel(symbolsFake = symbolsFake)
+
+        viewModel.loadSymbols()
+        val loaded = viewModel.filteredCoins.first { it !is Loadable.Loading }
+
+        viewModel.onCancelLoadSymbols()
+
+        assertEquals(loaded, viewModel.filteredCoins.first())
     }
 
     @Test

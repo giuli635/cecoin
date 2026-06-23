@@ -47,9 +47,12 @@ class NewsViewModel(
     }
 
     fun onCancelLoadNews() {
-        loadNewsJob?.cancel()
-        _asyncNews.value = Loadable.Cancelled
-        loadNewsJob = null
+        val job = loadNewsJob
+        if (job?.isActive == true) {
+            job.cancel()
+            _asyncNews.value = Loadable.Cancelled
+            loadNewsJob = null
+        }
     }
 
     fun onSearchQueryChange(query: String) {
