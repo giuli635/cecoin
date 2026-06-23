@@ -67,7 +67,7 @@ class NumericFormattersTest {
 
     @Test
     fun `formatDecimals with floating point rounding`() {
-        formatDecimals(0.1 + 0.2, 2)
+        assertEquals("0.30", formatDecimals(0.1 + 0.2, 2))
     }
 
     @Test

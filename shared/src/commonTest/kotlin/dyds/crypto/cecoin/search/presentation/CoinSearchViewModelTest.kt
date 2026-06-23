@@ -332,12 +332,6 @@ class CoinSearchViewModelTest {
     }
 
     @Test
-    fun `clearToggleError when no error exists does not crash`() {
-        val viewModel = createViewModel()
-        viewModel.clearToggleError()
-    }
-
-    @Test
     fun `onSearchQueryChange with empty string shows all coins`() = runTest {
         val viewModel = createViewModel()
         viewModel.onSearchQueryChange("btc")

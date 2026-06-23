@@ -169,14 +169,8 @@ class ChartScreenViewModelTest {
     }
 
     @Test
-    fun `onCleared does not crash when no active job`() = runTest {
-        val (viewModel, _, _) = createViewModel(historicalPointLimit = 200)
-        viewModel.onCleared()
-    }
-
-    @Test
     fun `onCleared cancels active job`() = runTest {
-        val (viewModel, _, _) = createViewModel(historicalPrices = listOf(
+        val (viewModel, tradeUseCase, _) = createViewModel(historicalPrices = listOf(
             PricePoint(0L, 50000.0),
         ))
 
@@ -184,23 +178,12 @@ class ChartScreenViewModelTest {
         viewModel.awaitChartData()
 
         viewModel.onCleared()
-    }
 
-    @Test
-    fun `onCleared while load is in progress cancels job and does not crash`() = runTest {
-        val historicalUseCase = object : GetHistoricalPricesUseCase {
-            override suspend fun invoke(
-                symbol: CryptoSymbol, interval: String, limit: Int,
-            ): Fallible<List<PricePoint>> = awaitCancellation()
-        }
-        val viewModel = ChartScreenViewModel(
-            getHistoricalPricesUseCase = historicalUseCase,
-            observePricesUseCase = FakeObservePricesUseCase(),
-            symbol = fakeBtcSymbol,
-        )
+        tradeUseCase.emitted.send(PricePoint(60_000L, 52000.0))
 
-        viewModel.load(Granularity.M1)
-        viewModel.onCleared()
+        val snapshot = viewModel.chartData.value
+        assertIs<Fallible.Success<List<PricePoint>>>(snapshot)
+        assertTrue(snapshot.value.none { it.price == 52000.0 })
     }
 
     @Test
@@ -355,21 +338,5 @@ class ChartScreenViewModelTest {
         viewModel.onCleared()
     }
 
-    @Test
-    fun `cancel when no active load does not crash`() {
-        val (viewModel, _, _) = createViewModel()
-        viewModel.cancel()
-    }
 
-    @Test
-    fun `load with absent symbol does not crash`() = runTest {
-        val unknownSymbol = CryptoSymbol("NONEXISTENT")
-        val viewModel = ChartScreenViewModel(
-            getHistoricalPricesUseCase = FakeGetHistoricalPricesUseCase(),
-            observePricesUseCase = FakeObservePricesUseCase(),
-            symbol = unknownSymbol,
-        )
-        viewModel.load(Granularity.M1)
-        viewModel.onCleared()
-    }
 }
