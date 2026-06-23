@@ -17,7 +17,7 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import dyds.crypto.cecoin.chart.domain.model.PricePoint
-import dyds.crypto.cecoin.chart.presentation.util.VicoChartModelBuilder
+import dyds.crypto.cecoin.chart.presentation.util.ChartModelBuilder
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.milliseconds
@@ -31,7 +31,7 @@ fun PriceChart(
     modifier: Modifier = Modifier,
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
-    val chartModelBuilder = remember { VicoChartModelBuilder() }
+    val chartModelBuilder = remember { ChartModelBuilder() }
     val activeDatasetFirstTimestamp = remember { mutableStateOf<Long?>(null) }
 
     Box(modifier = modifier.height(CHART_HEIGHT_DP.dp)) {
