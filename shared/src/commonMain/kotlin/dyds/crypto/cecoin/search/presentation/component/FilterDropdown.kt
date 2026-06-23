@@ -10,8 +10,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dyds.crypto.cecoin.search.presentation.SearchStrings
+import cecoin.shared.generated.resources.Res
+import cecoin.shared.generated.resources.search_filter_all
+import cecoin.shared.generated.resources.search_filter_favorites
 import dyds.crypto.cecoin.search.presentation.FilterMode
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FilterDropdown(
@@ -24,8 +27,8 @@ fun FilterDropdown(
         OutlinedButton(onClick = { expanded = true }) {
             Text(
                 text = when (currentMode) {
-                    FilterMode.ALL -> SearchStrings.ALL_COINS
-                    FilterMode.FAVORITES -> SearchStrings.FAVORITES
+                    FilterMode.ALL -> stringResource(Res.string.search_filter_all)
+                    FilterMode.FAVORITES -> stringResource(Res.string.search_filter_favorites)
                 },
             )
         }
@@ -35,14 +38,14 @@ fun FilterDropdown(
             onDismissRequest = { expanded = false },
         ) {
             DropdownMenuItem(
-                text = { Text(SearchStrings.ALL_COINS) },
+                text = { Text(stringResource(Res.string.search_filter_all)) },
                 onClick = {
                     onModeSelected(FilterMode.ALL)
                     expanded = false
                 },
             )
             DropdownMenuItem(
-                text = { Text(SearchStrings.FAVORITES) },
+                text = { Text(stringResource(Res.string.search_filter_favorites)) },
                 onClick = {
                     onModeSelected(FilterMode.FAVORITES)
                     expanded = false

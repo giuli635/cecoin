@@ -10,6 +10,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import cecoin.shared.generated.resources.Res
+import cecoin.shared.generated.resources.tab_search
+import cecoin.shared.generated.resources.tab_news
 import dyds.crypto.cecoin.core.di.CecoinDependencyInjector
 import dyds.crypto.cecoin.core.di.CecoinDependencyInjector.getCoinDetailsViewModel
 import dyds.crypto.cecoin.core.di.CecoinDependencyInjector.getGranularityStateHolder
@@ -18,19 +21,18 @@ import dyds.crypto.cecoin.core.di.CecoinDependencyInjector.getSearchViewModel
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.chart.presentation.ChartScreen
 import dyds.crypto.cecoin.core.presentation.component.TabHeader
-import dyds.crypto.cecoin.core.utils.CoreStrings
 import dyds.crypto.cecoin.news.presentation.NewsScreen
 import dyds.crypto.cecoin.search.presentation.CoinSearchScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
 object Home : Tab {
-    override val label = CoreStrings.TAB_SEARCH
+    override val labelRes = Res.string.tab_search
 }
 
 @Serializable
 object News : Tab {
-    override val label = CoreStrings.TAB_NEWS
+    override val labelRes = Res.string.tab_news
 }
 
 @Serializable

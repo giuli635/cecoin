@@ -17,11 +17,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.news.domain.model.NewsArticle
+import cecoin.shared.generated.resources.Res
+import cecoin.shared.generated.resources.news_no_news_available
+import cecoin.shared.generated.resources.news_no_news_found_prefix
+import cecoin.shared.generated.resources.news_screen_title
+import cecoin.shared.generated.resources.news_search_label
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.news.presentation.component.NewsCard
 import dyds.crypto.cecoin.core.presentation.utils.buildAsyncComposable
-import dyds.crypto.cecoin.news.presentation.NewsStrings
 import dyds.crypto.cecoin.core.domain.state.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun NewsScreen(
@@ -38,7 +43,7 @@ fun NewsScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            text = NewsStrings.TITLE,
+            text = stringResource(Res.string.news_screen_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
         )
@@ -46,7 +51,7 @@ fun NewsScreen(
         OutlinedTextField(
             value = uiState.searchQuery,
             onValueChange = viewModel::onSearchQueryChange,
-            label = { Text(NewsStrings.SEARCH_LABEL) },
+            label = { Text(stringResource(Res.string.news_search_label)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             enabled = asyncNews !is Loadable.Loading,
@@ -79,8 +84,8 @@ private fun newsListRenderer(
         }
         if (filtered.isEmpty()) {
             item {
-                val message = if (searchQuery.isNotEmpty()) "${NewsStrings.NO_NEWS_FOUND}$searchQuery'"
-                else NewsStrings.NO_NEWS_AVAILABLE
+                val message = if (searchQuery.isNotEmpty()) "${stringResource(Res.string.news_no_news_found_prefix)}$searchQuery'"
+                else stringResource(Res.string.news_no_news_available)
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodyMedium,

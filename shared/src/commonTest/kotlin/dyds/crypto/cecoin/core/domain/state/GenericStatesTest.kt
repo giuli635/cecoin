@@ -1,6 +1,7 @@
 package dyds.crypto.cecoin.core.domain.state
 
 import dyds.crypto.cecoin.core.domain.error.AppError
+import dyds.crypto.cecoin.core.domain.error.UiText
 import dyds.crypto.cecoin.core.domain.error.fakeErrorClassifier
 
 import kotlinx.coroutines.CancellationException
@@ -43,7 +44,7 @@ class GenericStatesTest {
 
     @Test
     fun `Fallible map on Failed returns same error`() {
-        val error = AppError.GenericError(RuntimeException("fail"), "msg")
+        val error = AppError.GenericError(RuntimeException("fail"), UiText.Dynamic("msg"))
         val failed: Fallible<Int> = Fallible.Failed(error)
         val result = failed.map { it * 2 }
         val failedResult = assertIs<Fallible.Failed>(result)
@@ -108,7 +109,7 @@ class GenericStatesTest {
 
     @Test
     fun `Fallible onFailure on Failed invokes action with error`() {
-        val error = AppError.GenericError(RuntimeException("fail"), "msg")
+        val error = AppError.GenericError(RuntimeException("fail"), UiText.Dynamic("msg"))
         val failed: Fallible<Int> = Fallible.Failed(error)
         var captured: AppError? = null
         failed.onFailure { captured = it }

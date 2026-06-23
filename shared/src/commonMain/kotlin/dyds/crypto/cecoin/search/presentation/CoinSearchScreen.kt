@@ -23,10 +23,17 @@ import androidx.compose.ui.unit.dp
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.search.presentation.component.CoinItem
+import cecoin.shared.generated.resources.Res
+import cecoin.shared.generated.resources.search_available_coins
+import cecoin.shared.generated.resources.search_field_label
+import cecoin.shared.generated.resources.search_no_coins_available
+import cecoin.shared.generated.resources.search_no_coins_found_prefix
+import cecoin.shared.generated.resources.search_screen_title
 import dyds.crypto.cecoin.search.presentation.component.FilterDropdown
 import dyds.crypto.cecoin.core.presentation.utils.buildAsyncComposable
-import dyds.crypto.cecoin.search.presentation.SearchStrings
 import dyds.crypto.cecoin.core.domain.state.Loadable
+import dyds.crypto.cecoin.core.presentation.utils.resolve
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun CoinSearchScreen(
@@ -46,7 +53,7 @@ fun CoinSearchScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            text = SearchStrings.TITLE,
+            text = stringResource(Res.string.search_screen_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
         )
@@ -59,7 +66,7 @@ fun CoinSearchScreen(
             OutlinedTextField(
                 value = uiState.searchQuery,
                 onValueChange = viewModel::onSearchQueryChange,
-                label = { Text(SearchStrings.SEARCH_LABEL) },
+                label = { Text(stringResource(Res.string.search_field_label)) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
                 enabled = asyncFilteredCoins !is Loadable.Loading,
@@ -77,14 +84,14 @@ fun CoinSearchScreen(
                 viewModel.clearToggleError()
             }
             Text(
-                text = error.getMessage(),
+                text = error.uiText.resolve(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )
         }
 
         Text(
-            text = SearchStrings.AVAILABLE_COINS,
+            text = stringResource(Res.string.search_available_coins),
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
         )
@@ -121,7 +128,7 @@ private fun coinsListRenderer(
         if (coins.isEmpty() && searchQuery.isNotEmpty()) {
             item {
                 Text(
-                    text = "${SearchStrings.NO_COINS_FOUND}$searchQuery'",
+                    text = "${stringResource(Res.string.search_no_coins_found_prefix)}$searchQuery'",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp),
                 )
@@ -129,7 +136,7 @@ private fun coinsListRenderer(
         } else if (coins.isEmpty()) {
             item {
                 Text(
-                    text = SearchStrings.NO_COINS_AVAILABLE,
+                    text = stringResource(Res.string.search_no_coins_available),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp),
                 )

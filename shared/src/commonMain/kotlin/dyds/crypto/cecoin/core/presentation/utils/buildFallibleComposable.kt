@@ -13,11 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cecoin.shared.generated.resources.Res
+import cecoin.shared.generated.resources.core_retry
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.core.presentation.buildComposableRenderer
-import dyds.crypto.cecoin.core.utils.CoreStrings
 import dyds.crypto.cecoin.core.domain.error.AppError
 import dyds.crypto.cecoin.core.domain.state.Fallible
+import org.jetbrains.compose.resources.stringResource
+
 
 fun <T> buildFallibleComposable(
     inner: Renderer<T>,
@@ -42,12 +45,12 @@ private fun ErrorContent(error: AppError, modifier: Modifier, onCancel: () -> Un
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = error.getMessage(),
+                    text = error.uiText.resolve(),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onRetry) {
-                    Text(text = CoreStrings.RETRY)
+                    Text(text = stringResource(Res.string.core_retry))
                 }
             }
         },

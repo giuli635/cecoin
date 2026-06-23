@@ -1,29 +1,15 @@
 package dyds.crypto.cecoin.core.domain.error
 
-import kotlinx.coroutines.CancellationException
+import org.jetbrains.compose.resources.StringResource
+
+sealed class UiText {
+    data class Dynamic(val value: String) : UiText()
+    class Resource(val resource: StringResource, vararg val args: Any) : UiText()
+}
 
 sealed class AppError {
-    abstract fun getMessage(): String
+    abstract val uiText: UiText
 
-    data class NetworkError(val userMessage: String) : AppError() {
-        override fun getMessage(): String =
-            "$userMessage: Sin conexión a internet. Revisa tu Wi-Fi o datos móviles."
-    }
-
-    data class GenericError(val exception: Throwable, val userMessage: String) : AppError() {
-        override fun getMessage(): String = buildString {
-            append(userMessage)
-            val detail = getUserFriendlyDetail(exception)
-            if (detail != null) {
-                append(": ")
-                append(detail)
-            }
-        }
-
-        private fun getUserFriendlyDetail(e: Throwable): String? = when {
-            e is CancellationException -> null
-            e.message != null -> e.message
-            else -> "Error desconocido (${e.javaClass.simpleName})"
-        }
-    }
+    data class NetworkError(override val uiText: UiText) : AppError()
+    data class GenericError(val exception: Throwable, override val uiText: UiText) : AppError()
 }

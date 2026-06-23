@@ -5,6 +5,7 @@ import dyds.crypto.cecoin.chart.domain.usecase.GetHistoricalPricesUseCase
 import dyds.crypto.cecoin.core.domain.model.CryptoSymbol
 import dyds.crypto.cecoin.core.domain.state.Fallible
 import dyds.crypto.cecoin.core.domain.error.AppError
+import dyds.crypto.cecoin.core.domain.error.UiText
 
 class FakeGetHistoricalPricesUseCase(
     var prices: List<PricePoint> = emptyList(),
@@ -18,7 +19,7 @@ class FakeGetHistoricalPricesUseCase(
         lastSymbol = symbol
         lastInterval = interval
         lastLimit = limit
-        if (exception != null) return Fallible.Failed(AppError.GenericError(exception!!, "fallo"))
+        if (exception != null) return Fallible.Failed(AppError.GenericError(exception!!, UiText.Dynamic("fallo")))
         return Fallible.Success(prices)
     }
 }

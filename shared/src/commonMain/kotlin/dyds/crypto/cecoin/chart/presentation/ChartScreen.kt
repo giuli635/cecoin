@@ -26,10 +26,13 @@ import dyds.crypto.cecoin.chart.presentation.component.GranularitySelector
 import dyds.crypto.cecoin.chart.presentation.component.PriceChart
 import dyds.crypto.cecoin.chart.presentation.model.Granularity
 import dyds.crypto.cecoin.chart.presentation.util.ChartColors
+import cecoin.shared.generated.resources.Res
+import cecoin.shared.generated.resources.chart_screen_back
+import cecoin.shared.generated.resources.chart_screen_usd
 import dyds.crypto.cecoin.core.presentation.utils.buildAsyncStreamComposable
 import dyds.crypto.cecoin.core.presentation.utils.buildFallibleComposable
-import dyds.crypto.cecoin.chart.presentation.ChartStrings
 import dyds.crypto.cecoin.core.domain.error.ErrorClassifier
+import org.jetbrains.compose.resources.stringResource
 import dyds.crypto.cecoin.core.utils.format.priceStr
 
 @Composable
@@ -52,7 +55,7 @@ private fun ChartContent(data: List<PricePoint>, modifier: Modifier = Modifier) 
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = ChartStrings.USD,
+                    text = stringResource(Res.string.chart_screen_usd),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 4.dp),
@@ -95,7 +98,7 @@ fun ChartScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
-            Button(onClick = onBack) { Text(ChartStrings.BACK) }
+            Button(onClick = onBack) { Text(stringResource(Res.string.chart_screen_back)) }
         }
 
         GranularitySelector(

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Chart screen -->
+    <string name="chart_screen_back">Atrás</string>
+    <string name="chart_screen_usd">USD</string>
+
+    <!-- Core UI -->
+    <string name="core_cancel">Cancelar</string>
+    <string name="core_retry">Reintentar</string>
+    <string name="core_cancelled_message">Carga cancelada</string>
+
+    <!-- Tab labels -->
+    <string name="tab_search">Buscar</string>
+    <string name="tab_news">Noticias</string>
+
+    <!-- Stream -->
+    <string name="stream_data_failed">La transmisión de datos falló</string>
+    <string name="stream_timeout">La transmisión de datos no respondió. Intente nuevamente.</string>
+
+    <!-- News screen -->
+    <string name="news_screen_title">Noticias Crypto</string>
+    <string name="news_search_label">Filtrar noticias...</string>
+    <string name="news_no_news_found_prefix">No se encontraron noticias con \'</string>
+    <string name="news_no_news_available">No hay noticias disponibles</string>
+
+    <!-- Search screen -->
+    <string name="search_screen_title">Buscar Criptos</string>
+    <string name="search_field_label">Buscar símbolo (ej: BTC, ETH)</string>
+    <string name="search_available_coins">Criptos disponibles</string>
+    <string name="search_no_coins_found_prefix">No se encontraron criptos con \'</string>
+    <string name="search_no_coins_available">No hay criptomonedas disponibles</string>
+    <string name="search_filter_all">Todas</string>
+    <string name="search_filter_favorites">Favoritas</string>
+
+    <!-- Error messages -->
+    <string name="error_historical_data">Error al cargar datos históricos</string>
+    <string name="error_live_stream_failed">La transmisión en vivo falló</string>
+    <string name="error_load_news">Error al cargar noticias</string>
+    <string name="error_load_symbols">Error al cargar símbolos</string>
+    <string name="error_toggle_favorite">Error al cambiar favorito</string>
+    <string name="error_network_template">%1$s: Sin conexión a internet. Revisa tu Wi-Fi o datos móviles.</string>
+    <string name="error_unknown_template">%1$s: Error desconocido (%2$s)</string>
+
+    <!-- App -->
+    <string name="app_window_title">cecoin</string>
+</resources>

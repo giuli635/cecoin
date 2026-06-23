@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun TabHeader(
@@ -33,7 +34,7 @@ fun TabHeader(
         tabs.forEach { tab ->
             TextButton(onClick = { onTabSelected(tab) }) {
                 Text(
-                    text = tab.label,
+                    text = stringResource(tab.labelRes),
                     fontWeight = if (tab == selectedTab) FontWeight.Bold else FontWeight.Normal,
                     color = if (tab == selectedTab) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurfaceVariant,

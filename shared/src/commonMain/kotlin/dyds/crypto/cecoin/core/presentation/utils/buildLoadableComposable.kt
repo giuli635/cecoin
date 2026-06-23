@@ -13,10 +13,13 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cecoin.shared.generated.resources.Res
+import cecoin.shared.generated.resources.core_cancelled_message
+import cecoin.shared.generated.resources.core_retry
 import dyds.crypto.cecoin.core.presentation.Renderer
 import dyds.crypto.cecoin.core.presentation.buildComposableRenderer
-import dyds.crypto.cecoin.core.utils.CoreStrings
 import dyds.crypto.cecoin.core.domain.state.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 fun <T> buildLoadableComposable(onCancel: () -> Unit, onRetry: () -> Unit, inner: Renderer<T>): Renderer<Loadable<T>> =
     { value, modifier -> when (value) {
@@ -41,12 +44,12 @@ fun <T> buildLoadableComposable(onCancel: () -> Unit, onRetry: () -> Unit, inner
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = CoreStrings.CANCELLED_MESSAGE,
+                        text = stringResource(Res.string.core_cancelled_message),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedButton(onClick = onRetry) {
-                        Text(text = CoreStrings.RETRY)
+                        Text(text = stringResource(Res.string.core_retry))
                     }
                 }
             }

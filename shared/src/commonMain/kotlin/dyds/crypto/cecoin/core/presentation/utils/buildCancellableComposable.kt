@@ -9,8 +9,10 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cecoin.shared.generated.resources.Res
+import cecoin.shared.generated.resources.core_cancel
 import dyds.crypto.cecoin.core.presentation.Renderer
-import dyds.crypto.cecoin.core.utils.CoreStrings
+import org.jetbrains.compose.resources.stringResource
 
 fun <T> buildCancellableComposable(onCancel: () -> Unit, inner: Renderer<T>): Renderer<T> =
     { value, modifier ->
@@ -24,7 +26,7 @@ fun <T> buildCancellableComposable(onCancel: () -> Unit, inner: Renderer<T>): Re
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedButton(onClick = onCancel) {
-                Text(text = CoreStrings.CANCEL)
+                Text(text = stringResource(Res.string.core_cancel))
             }
         }
     }

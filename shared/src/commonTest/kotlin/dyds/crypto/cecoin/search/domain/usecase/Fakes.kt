@@ -6,6 +6,7 @@ import dyds.crypto.cecoin.search.domain.usecase.ObserveFavoritesUseCase
 import dyds.crypto.cecoin.search.domain.usecase.ToggleFavoriteUseCase
 import dyds.crypto.cecoin.core.domain.state.Fallible
 import dyds.crypto.cecoin.core.domain.error.AppError
+import dyds.crypto.cecoin.core.domain.error.UiText
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -14,7 +15,7 @@ class FakeGetAvailableSymbolsUseCase(
     var exception: Throwable? = null,
 ) : GetAvailableSymbolsUseCase {
     override suspend fun invoke(): Fallible<List<CryptoSymbol>> {
-        if (exception != null) return Fallible.Failed(AppError.GenericError(exception!!, "fallo"))
+        if (exception != null) return Fallible.Failed(AppError.GenericError(exception!!, UiText.Dynamic("fallo")))
         return Fallible.Success(symbols)
     }
 }
@@ -33,7 +34,7 @@ class FakeToggleFavoriteUseCase(
     var lastToggled: CryptoSymbol? = null
 
     override suspend fun invoke(symbol: CryptoSymbol): Fallible<Unit> {
-        if (exception != null) return Fallible.Failed(AppError.GenericError(exception!!, "fallo"))
+        if (exception != null) return Fallible.Failed(AppError.GenericError(exception!!, UiText.Dynamic("fallo")))
         lastToggled = symbol
         favorites.value = if (symbol in favorites.value) {
             favorites.value - symbol
