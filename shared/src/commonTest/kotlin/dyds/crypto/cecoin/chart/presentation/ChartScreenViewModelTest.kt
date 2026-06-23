@@ -245,6 +245,8 @@ class ChartScreenViewModelTest {
 
         viewModel.cancel()
 
+        assertIs<Loadable.Cancelled>(viewModel.state.value)
+
         tradeUseCase.emitted.send(PricePoint(60_000L, 52000.0))
 
         val snapshot = viewModel.chartData.value
