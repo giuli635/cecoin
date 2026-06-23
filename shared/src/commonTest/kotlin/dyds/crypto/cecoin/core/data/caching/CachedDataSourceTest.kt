@@ -1,5 +1,6 @@
 package dyds.crypto.cecoin.core.data.caching
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -9,6 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.nanoseconds
 
 class CachedDataSourceTest {
 
@@ -127,6 +129,53 @@ class CachedDataSourceTest {
         assertFailsWith<RuntimeException> {
             source.get()
         }
+    }
+
+    @Test
+    fun `get re-fetches when TTL expires`() = runTest {
+        var callCount = 0
+        val source = CachedDataSource(
+            fetchBlock = {
+                callCount++
+                listOf("a")
+            },
+            cacheTtl = 0.nanoseconds,
+        )
+
+        source.get()
+        source.get()
+
+        assertEquals(2, callCount)
+    }
+
+    @Test
+    fun `second check inside mutex returns cached value from concurrent caller`() = runTest {
+        var callCount = 0
+        var secondResult: List<String>? = null
+        val fetchStarted = CompletableDeferred<Unit>()
+        val releaseFetch = CompletableDeferred<Unit>()
+        val source = CachedDataSource(
+            fetchBlock = {
+                fetchStarted.complete(Unit)
+                releaseFetch.await()
+                callCount++
+                listOf("a")
+            },
+            cacheTtl = 5.minutes,
+        )
+
+        val first = launch { source.get() }
+        fetchStarted.await()
+
+        val second = launch { secondResult = source.get() }
+
+        releaseFetch.complete(Unit)
+
+        first.join()
+        second.join()
+
+        assertEquals(1, callCount)
+        assertEquals(listOf("a"), secondResult)
     }
 
     @Test

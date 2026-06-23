@@ -12,36 +12,29 @@ class CachedDataSource<T>(
 ) {
 
     @Volatile
-    private var cachedValue: List<T>? = null
-
-    @Volatile
-    private var lastFetchTimeMark: TimeMark? = null
+    private var cacheEntry: CacheEntry<T>? = null
 
     private val mutex = Mutex()
 
     suspend fun get(): List<T> {
-        cachedValue?.let { value ->
-            lastFetchTimeMark?.let { mark ->
-                if (mark.elapsedNow() < cacheTtl) return value
-            }
+        cacheEntry?.let { entry ->
+            if (entry.timeMark.elapsedNow() < cacheTtl) return entry.value
         }
 
         return mutex.withLock {
-            cachedValue?.let { value ->
-                lastFetchTimeMark?.let { mark ->
-                    if (mark.elapsedNow() < cacheTtl) return@withLock value
-                }
+            cacheEntry?.let { entry ->
+                if (entry.timeMark.elapsedNow() < cacheTtl) return@withLock entry.value
             }
 
             val fresh = fetchBlock()
-            cachedValue = fresh
-            lastFetchTimeMark = TimeSource.Monotonic.markNow()
+            cacheEntry = CacheEntry(fresh, TimeSource.Monotonic.markNow())
             fresh
         }
     }
 
     fun invalidate() {
-        lastFetchTimeMark = null
-        cachedValue = null
+        cacheEntry = null
     }
+
+    private data class CacheEntry<T>(val value: List<T>, val timeMark: TimeMark)
 }
