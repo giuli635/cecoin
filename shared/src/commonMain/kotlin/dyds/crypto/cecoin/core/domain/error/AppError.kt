@@ -15,11 +15,13 @@ sealed class AppError {
     ) : AppError() {
         override val errorKey get() = when {
             exception is kotlinx.coroutines.CancellationException -> "error_cancelled"
+            exception::class.qualifiedName?.contains("HttpRequestTimeoutException") == true -> "error_timeout"
             exception.message != null -> "error_with_message"
             else -> "error_unknown"
         }
         override val args get() = when (errorKey) {
             "error_cancelled" -> arrayOf(context)
+            "error_timeout" -> arrayOf(context)
             "error_with_message" -> arrayOf(context, exception.message!!)
             else -> arrayOf(context, exception.javaClass.simpleName)
         }

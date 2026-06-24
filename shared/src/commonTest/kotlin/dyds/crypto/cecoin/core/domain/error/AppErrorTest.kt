@@ -5,12 +5,20 @@ import kotlin.test.Test
 import kotlin.test.assertIs
 import kotlin.test.assertEquals
 
+private class HttpRequestTimeoutException(message: String) : Exception(message)
+
 class AppErrorTest {
     @Test
     fun `NetworkError has error_network key and context as arg`() {
         val error = AppError.NetworkError("test_context")
         assertEquals("error_network", error.errorKey)
         assertEquals("test_context", error.args[0])
+    }
+
+    @Test
+    fun `GenericError with HttpRequestTimeoutException has error_timeout key`() {
+        val error = AppError.GenericError(HttpRequestTimeoutException("timeout"), "ctx")
+        assertEquals("error_timeout", error.errorKey)
     }
 
     @Test

@@ -9,6 +9,7 @@ import org.jetbrains.compose.resources.stringResource
 private val errorTemplates: Map<String, StringResource> = mapOf(
     "error_network" to Res.string.error_network_template,
     "error_cancelled" to Res.string.error_cancelled_template,
+    "error_timeout" to Res.string.error_timeout_template,
     "error_with_message" to Res.string.error_with_message_template,
     "error_unknown" to Res.string.error_unknown_template,
 )

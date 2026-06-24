@@ -35,6 +35,7 @@
     <!-- Error messages -->
     <string name="error_network_template">%1$s: Sin conexión a internet. Revisa tu Wi-Fi o datos móviles.</string>
     <string name="error_cancelled_template">%1$s</string>
+    <string name="error_timeout_template">%1$s: Se agotó el tiempo de espera.</string>
     <string name="error_with_message_template">%1$s: %2$s</string>
     <string name="error_unknown_template">%1$s: Error desconocido (%2$s)</string>
 

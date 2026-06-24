@@ -237,6 +237,34 @@ class ChartScreenViewModelTest {
     }
 
     @Test
+    fun `cancel with no prior load does not throw`() = runTest {
+        val (viewModel, _, _) = createViewModel()
+
+        viewModel.cancel()
+
+        assertEquals(Loadable.Cancelled, viewModel.state.value)
+        viewModel.onCleared()
+    }
+
+    @Test
+    fun `live price appends when accumulatedPoints is empty`() = runTest {
+        val (viewModel, tradeUseCase, _) = createViewModel()
+
+        viewModel.load(Granularity.M1)
+        viewModel.awaitChartData()
+
+        tradeUseCase.emitted.send(PricePoint(60_000L, 52000.0))
+
+        val snapshot = viewModel.chartData.first {
+            it is Fallible.Success && it.value.any { p -> p.price == 52000.0 }
+        }
+        val data = assertIs<Fallible.Success<List<PricePoint>>>(snapshot).value
+        assertEquals(1, data.size)
+        assertEquals(52000.0, data.last().price)
+        viewModel.onCleared()
+    }
+
+    @Test
     fun `cancel stops stream processing`() = runTest {
         val (viewModel, tradeUseCase, _) = createViewModel()
 
