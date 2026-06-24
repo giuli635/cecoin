@@ -178,7 +178,10 @@ class NewsViewModelTest {
 
         viewModel.onSearchQueryChange("ETH")
 
-        val filteredResult = viewModel.filteredNews.first { it is Loadable.Loaded }
+        val filteredResult = viewModel.filteredNews.first {
+            it is Loadable.Loaded && 
+            (it.value as? Fallible.Success)?.value?.size == 1
+        }
         val filteredLoaded = assertIs<Loadable.Loaded<Fallible<List<NewsArticle>>>>(filteredResult)
         val filteredSuccess = assertIs<Fallible.Success<List<NewsArticle>>>(filteredLoaded.value)
         assertEquals(1, filteredSuccess.value.size)
